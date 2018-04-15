@@ -1,12 +1,14 @@
 """
     polrgwas()
 
-# Keyword arguments
-
-- `plinkfile::AbstractString`: Plink file names without extension.
+# Position arguments
 
 - `covarfile::AbstractString`: covariate file. One column should be the
 ordered categorical phenotype coded as integers starting from 1.
+
+- `plinkfile::AbstractString`: Plink file names without extension.
+
+# Keyword arguments
 
 - `outptfile::AbstractString`: output file prefix. Two output files
 `prefix.nullmodel.txt` and `prefix.scoretest.txt` will be written.
@@ -19,9 +21,12 @@ when `CSV.read(covarfile)` has parsing errors.
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
 or `CloglogLink()`
 """
-function polrgwas(formula;
-    plinkfile::AbstractString = nothing,
-    covarfile::AbstractString = nothing,
+function polrgwas(
+    # position arguments
+    formula,
+    covarfile::AbstractString=nothing,
+    plinkfile::AbstractString = nothing;
+    # keyword arguments
     covartype::Vector{DataType} = nothing,
     outptfile::AbstractString = "polrgwas",
     test::Symbol = :score,

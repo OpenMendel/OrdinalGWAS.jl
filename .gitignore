@@ -5,5 +5,7 @@
 *.jl.mem
 deps/deps.jl
 
+*.ipynb_checkpoints
+
 *.nullmodel.txt
 *.scoretest.txt
