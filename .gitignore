@@ -4,3 +4,6 @@
 *.jl.*.cov
 *.jl.mem
 deps/deps.jl
+
+*.nullmodel.txt
+*.scoretest.txt
