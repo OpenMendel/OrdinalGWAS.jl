@@ -42,7 +42,7 @@ end
 `prefix.nullmodel.txt` and `prefix.scoretest.txt` will be written.  
 - `covartype::Vector{DataType}`: type information for `covarfile`. This is useful
 when `CSV.read(covarfile)` has parsing errors.  
-- `test::Symbol`: `:score` or `:LRT`.
+- `test::Symbol`: `:score` (default) or `:LRT`.
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
 or `CloglogLink()`
 - `colinds::Union{Nothing, AbstractVector{<:Integer}}`: SNP indices.
@@ -83,16 +83,42 @@ function polrgwas(
     # carry out score test
     genomat = SnpArrays.SnpArray(plkfile * ".bed")
     mafreq = SnpArrays.maf(genomat)
-    ts = PolrScoreTest(nm.model, zeros(size(genomat, 1), 1))
-    open(outfile * "." * string(test) * ".txt", "w") do io
-        println(io, "chr,pos,snpid,maf,pval")
-        for (j, row) in enumerate(eachline(plkfile * ".bim"))
-            cmask[j] || continue
-            copyto!(ts.Z, @view(genomat[rinds, j]), impute = true)
-            pval = polrtest(ts)
-            snpj = split(row)
-            println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$pval")
+    if test == :score
+        ts = PolrScoreTest(nm.model, zeros(nrows, 1))
+        open(outfile * ".scoretest.txt", "w") do io
+            println(io, "chr,pos,snpid,maf,pval")
+            for (j, row) in enumerate(eachline(plkfile * ".bim"))
+                cmask[j] || continue
+                if mafreq[j] == 0
+                    pval = 1.0
+                else
+                    copyto!(ts.Z, @view(genomat[rinds, j]), impute = true)
+                    pval = polrtest(ts)
+                end
+                snpj = split(row)
+                println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$pval")
+            end
         end
+    elseif test == :LRT
+        nulldev = deviance(nm.model)
+        Xaug = [nm.model.X zeros(nrows, 1)]
+        open(outfile * ".lrttest.txt", "w") do io
+            println(io, "chr,pos,snpid,maf,pval")
+            for (j, row) in enumerate(eachline(plkfile * ".bim"))
+                cmask[j] || continue
+                if mafreq[j] == 0
+                    pval = 1.0
+                else
+                    copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true)
+                    altmodel = polr(Xaug, nm.model.Y, nm.model.link, wts = nm.model.wts)
+                    pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                end
+                snpj = split(row)
+                println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$pval")
+            end
+        end
+    else
+        throw(ArgumentError("unrecognized test $test"))
     end
     nothing
 end

@@ -1,5 +1,6 @@
 CSV
 DataFrames
+Distributions
 PolrModels
 Reexport
 SnpArrays

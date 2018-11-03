@@ -1,8 +1,7 @@
 module PolrGWAS
 
-using CSV, DataFrames, Reexport, SnpArrays
+using CSV, DataFrames, Distributions, Reexport, SnpArrays
 @reexport using PolrModels
-
 
 export
     polrgwas
