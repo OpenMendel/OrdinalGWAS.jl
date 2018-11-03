@@ -1,4 +1,4 @@
-using CSV, PolrGWAS, StatsModels
+using PolrGWAS, StatsModels
 
 const datadir = joinpath(dirname(@__FILE__), "..", "data")
 
