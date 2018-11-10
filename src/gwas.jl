@@ -1,5 +1,5 @@
 """
-    polrgwas(formula, covfile, plkfile)
+    polrgwas(formula, covfile, plkfile; outfile="polrgwas", covtype=nothing, test=:score, link=LogitLink(), colinds=nothing, rowinds=nothing)
 
 # Position arguments 
 - `formula`: a model formula.
@@ -40,8 +40,6 @@ end
 # Keyword arguments
 - `outfile::AbstractString`: output file prefix; default is "polrgwas". Two output files
 `prefix.nullmodel.txt` and `prefix.scoretest.txt` will be written.  
-- `covartype::Vector{DataType}`: type information for `covarfile`. This is useful
-when `CSV.read(covarfile)` has parsing errors.  
 - `test::Symbol`: `:score` (default) or `:LRT`.
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
 or `CloglogLink()`
@@ -70,7 +68,7 @@ function polrgwas(
     # selected rows should match nobs in null model
     rinds = something(rowinds, 1:countlines(plkfile * ".fam"))
     nrows = eltype(rinds) == Bool ? count(rinds) : length(rinds)
-    nrows == nobs(nm) || throw(ArgumentError("number of samples SnpArray does not match null model"))
+    nrows == nobs(nm) || throw(ArgumentError("number of samples in SnpArray does not match null model"))
     # create SNP mask vector
     if colinds == nothing 
         cmask = trues(countlines(plkfile * ".bim"))
@@ -80,7 +78,7 @@ function polrgwas(
         cmask = falses(countlines(plkfile * ".bim"))
         cmask[colinds] .= true
     end
-    # carry out score test
+    # carry out score or test SNP by SNP
     genomat = SnpArrays.SnpArray(plkfile * ".bed")
     mafreq = SnpArrays.maf(genomat)
     if test == :score
@@ -103,18 +101,20 @@ function polrgwas(
         nulldev = deviance(nm.model)
         Xaug = [nm.model.X zeros(nrows, 1)]
         open(outfile * ".lrttest.txt", "w") do io
-            println(io, "chr,pos,snpid,maf,pval")
+            println(io, "chr,pos,snpid,maf,effect,pval")
             for (j, row) in enumerate(eachline(plkfile * ".bim"))
                 cmask[j] || continue
                 if mafreq[j] == 0
+                    eff = 0.0
                     pval = 1.0
                 else
                     copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true)
                     altmodel = polr(Xaug, nm.model.Y, nm.model.link, wts = nm.model.wts)
+                    eff = altmodel.β[end]
                     pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
                 end
                 snpj = split(row)
-                println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$pval")
+                println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$eff,$pval")
             end
         end
     else
