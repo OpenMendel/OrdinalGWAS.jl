@@ -1,3 +1,5 @@
+__precompile__()
+
 module PolrGWAS
 
 using CSV, DataFrames, Distributions, Reexport, SnpArrays
