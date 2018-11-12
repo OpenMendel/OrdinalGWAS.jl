@@ -6,7 +6,6 @@ const datadir = joinpath(dirname(@__FILE__), "..", "data")
 @formula(trait ~ 0 + sex),
 datadir * "/covariate.txt",
 datadir * "/hapmap3",
-covtype = [String, String, String, String, Float64, Int],
 test = :score
 )
 
@@ -14,7 +13,6 @@ test = :score
 @formula(trait ~ 0 + sex),
 datadir * "/covariate.txt",
 datadir * "/hapmap3",
-covtype = [String, String, String, String, Float64, Int],
 test = :LRT
 )
 

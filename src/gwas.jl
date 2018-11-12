@@ -1,24 +1,33 @@
 """
-    polrgwas(formula, covfile, plkfile; outfile="polrgwas", covtype=nothing, test=:score, link=LogitLink(), colinds=nothing, rowinds=nothing)
+    polrgwas(nullformula, covfile, plkfile)
+    polrgwas(nullformula, df, plkfile)
 
-# Position arguments 
-- `formula`: a model formula.
-- `covfile::AbstractString`: covariate file with header line. One column should be the
-ordered categorical phenotype coded as integers starting from 1.
-- `plkfile::AbstractString`: Plink file name without the 'bed`, `fam`, or `bim` extension.
+# Positional arguments 
+- `nullformula::Formula`: formula for the null model.
+- `covfile::AbstractString`: covariate file with one header line. One column 
+should be the ordered categorical phenotype coded as integers starting from 1.
+- `df::DataFrame`: DataFrame containing response and regressors.
+- `plkfile::AbstractString`: Plink file name without the 'bed`, `fam`, or `bim` 
+extension. If `plkfile == nothing`, only null model is fitted.
 
 # Keyword arguments
-- `outfile::AbstractString`: output file prefix; default is "polrgwas". Two output files
-`prefix.nullmodel.txt` and `prefix.scoretest.txt` will be written.  
-- `covartype::Vector{DataType}`: type information for `covarfile`. This is useful
+- `outfile::AbstractString`: output file prefix; default is `"polrgwas"``. Two output files
+`prefix.nullmodel.txt` and `prefix.scoretest.txt` (or `prefix.lrttest.txt`) will be written.
+- `covtype::Vector{DataType}`: type information for `covarfile`. This is useful
 when `CSV.read(covarfile)` has parsing errors.  
-- `test::Symbol`: `:score` or `:lrt`.
+- `testformula::Formula`: formula for test unit. Default is `~ 0 + snp))`.
+- `test::Symbol`: `:score` (default) or `:LRT`.
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
 or `CloglogLink()`
+- `colinds::Union{Nothing,AbstractVector{<:Integer}}`: SNP indices.
+- `rowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for bed file.
+- `solver`: A solver supported by MathProgBase. Default is `NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)`.
+    Other choices are IpoptSolver(print_level=0)`.
+- `verbose::Bool`: default is `false`.
 """
 function polrgwas(
-    # position arguments
-    formula::Formula,
+    # positional arguments
+    nullformula::Formula,
     covfile::AbstractString,
     plkfile::Union{Nothing,AbstractString} = nothing;
     # keyword arguments
@@ -26,40 +35,26 @@ function polrgwas(
     kwargs...
     )
     covdf = CSV.read(covfile; types=covtype)
-    polrgwas(formula, covdf, plkfile; kwargs...)
+    polrgwas(nullformula, covdf, plkfile; kwargs...)
 end
 
-"""
-    polrgwas(formula, df, plkfile)
-
-# Position arguments 
-- `formula`: a model formula.
-- `df::DataFrame`: DataFrame containing response and covariates.
-- `plkfile::AbstractString`: Plink file name without the 'bed`, `fam`, or `bim` extension.
-
-# Keyword arguments
-- `outfile::AbstractString`: output file prefix; default is "polrgwas". Two output files
-`prefix.nullmodel.txt` and `prefix.scoretest.txt` will be written.  
-- `test::Symbol`: `:score` (default) or `:LRT`.
-- `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
-or `CloglogLink()`
-- `colinds::Union{Nothing, AbstractVector{<:Integer}}`: SNP indices.
-- `rowinds::Union{Nothing, AbstractVector{<:Integer}}`: sample indices.
-"""
 function polrgwas(
-    formula::Formula,
+    # positional arguments
+    nullformula::Formula,
     df::DataFrame,
     plkfile::Union{Nothing,AbstractString} = nothing;
     # keyword arguments
+    testformula::Formula=@eval(@formula($(nullformula.lhs) ~ 0 + snp)),
     outfile::AbstractString = "polrgwas",
     link::GLM.Link = LogitLink(),
     test::Symbol = :score,
-    colinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
-    rowinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
-    verbose::Bool = true
+    colinds::Union{Nothing,AbstractVector{<:Integer}} = nothing,
+    rowinds::Union{Nothing,AbstractVector{<:Integer}} = nothing,
+    solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
+    verbose::Bool = false
     )
     # fit null model
-    nm = polr(formula, df, link)
+    nm = polr(nullformula, df, link, solver)
     verbose && show(nm)
     open(outfile * ".nullmodel.txt", "w") do io
         show(io, nm)
@@ -78,11 +73,17 @@ function polrgwas(
         cmask = falses(countlines(plkfile * ".bim"))
         cmask[colinds] .= true
     end
-    # carry out score or test SNP by SNP
+    # dataframe for alternative model
+    dfalt = df
+    dfalt[:snp] = zeros(size(df, 1))
+    # extra columns in design matrix to be tested
+    Z = similar(ModelMatrix(ModelFrame(testformula, dfalt)).m)
+    # carry out score or LRT test SNP by SNP
+    snponly = testformula.rhs == :(0 + snp)
     genomat = SnpArrays.SnpArray(plkfile * ".bed")
-    mafreq = SnpArrays.maf(genomat)
+    mafreq = SnpArrays.maf(genomat) # TODO: need to calibrate according to rowinds
     if test == :score
-        ts = PolrScoreTest(nm.model, zeros(nrows, 1))
+        ts = PolrScoreTest(nm.model, Z)
         open(outfile * ".scoretest.txt", "w") do io
             println(io, "chr,pos,snpid,maf,pval")
             for (j, row) in enumerate(eachline(plkfile * ".bim"))
@@ -90,31 +91,59 @@ function polrgwas(
                 if mafreq[j] == 0
                     pval = 1.0
                 else
-                    copyto!(ts.Z, @view(genomat[rinds, j]), impute = true)
+                    if snponly
+                        copyto!(ts.Z, @view(genomat[rinds, j]), impute = true)    
+                    else # snp + other terms
+                        copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true)
+                        ts.Z[:] = ModelMatrix(ModelFrame(testformula, dfalt)).m
+                    end
                     pval = polrtest(ts)
                 end
                 snpj = split(row)
-                println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$pval")
+                println(io, snpj[1], ",", snpj[4], ",", snpj[2], ",", mafreq[j], ",", pval)
             end
         end
     elseif test == :LRT
         nulldev = deviance(nm.model)
-        Xaug = [nm.model.X zeros(nrows, 1)]
+        Xaug = [nm.model.X Z]
+        q = size(Z, 2)
+        γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
         open(outfile * ".lrttest.txt", "w") do io
-            println(io, "chr,pos,snpid,maf,effect,pval")
+            if snponly
+                println(io, "chr,pos,snpid,maf,effect,pval")
+            else
+                print(io, "chr,pos,snpid,maf,")
+                for j in 1:q
+                    print(io, "effect", j, ",")
+                end
+                println(io, "pval")
+            end
             for (j, row) in enumerate(eachline(plkfile * ".bim"))
                 cmask[j] || continue
                 if mafreq[j] == 0
-                    eff = 0.0
+                    fill!(γ̂, 0)
                     pval = 1.0
                 else
-                    copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true)
-                    altmodel = polr(Xaug, nm.model.Y, nm.model.link, wts = nm.model.wts)
-                    eff = altmodel.β[end]
-                    pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                    if snponly
+                        copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true)
+                    else # snp + other terms
+                        copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true)
+                        Xaug[:, nm.model.p+1:end] = ModelMatrix(ModelFrame(testformula, dfalt)).m
+                    end
+                    altmodel = polr(Xaug, nm.model.Y, nm.model.link, solver, wts = nm.model.wts)
+                    copyto!(γ̂, 1, altmodel.β, nm.model.p + 1, q)
+                    pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
                 end
                 snpj = split(row)
-                println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(mafreq[j]),$eff,$pval")
+                if snponly
+                    println(io, snpj[1], ",", snpj[4], ",", snpj[2], ",", mafreq[j], ",", γ̂[1], ",", pval)
+                else
+                    print(io, snpj[1], ",", snpj[4], ",", snpj[2], ",", mafreq[j], ",")
+                    for j in 1:q
+                        print(io, γ̂[j], ",")
+                    end
+                    println(io, pval)
+                end
             end
         end
     else
