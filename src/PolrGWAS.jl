@@ -1,12 +1,12 @@
+__precompile__()
+
 module PolrGWAS
 
-using CSV, DataFrames, Reexport, SnpArrays
+using CSV, DataFrames, Distributions, Reexport, SnpArrays
 @reexport using PolrModels
 
+export polrgwas
 
-export
-    polrgwas
-
-include("polrgwas_score.jl")
+include("gwas.jl")
 
 end
