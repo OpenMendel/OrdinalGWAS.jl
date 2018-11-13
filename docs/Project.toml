@@ -1,6 +1,5 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-PolrModels = "b51826c6-2bc1-4eb0-a3af-c080fd29f1d0"
 
 [compat]
 Documenter = "~0.20"
