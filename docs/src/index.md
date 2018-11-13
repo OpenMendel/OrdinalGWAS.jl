@@ -1,7 +1,7 @@
 
 # PolrGWAS.jl
 
-PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes. It useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
+PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
 
 This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 ```julia
@@ -91,10 +91,13 @@ polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3")
 ```
 
 For documentation of the `polrgwas` function, type `?polrgwas` in Julia REPL.
+```@docs
+polrgwas
+```
 
 ### Formula for null model
 
-The first argument specifies the null model without SNP effects, e.g., `@formula(trait ~ 0 + sex)`, it's important to **exclude** the intercept because proportional odds model automatically incorporates intercepts for modeling purpose.
+The first argument specifies the null model without SNP effects, e.g., `@formula(trait ~ 0 + sex)`. It is important to **exclude** the intercept because proportional odds model automatically incorporates intercepts for modeling purpose.
 
 ### Input files
 
@@ -199,8 +202,36 @@ size(SnpArray("../data/hapmap3.bed"))
 
 The prefix of output files can be changed by the `outfile` keyword, e.g.,
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", outfile="testdata")
+polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", outfile="hapmap3")
 ```
+
+### Input covariates as DataFrame
+
+Internally `polrgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other format, users can input a DataFrame directly.
+```julia
+polrgwas(@formula(trait ~ 0 + sex), df, "../data/hapmap3")
+```
+!!! note
+
+    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. 
+
+For example, following code check that the first 2 columns of of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
+
+
+```julia
+covdf = CSV.read("../data/covariate.txt")
+plkfam = CSV.read("../data/hapmap3.fam", header=0, delim=' ')
+all(covdf[1] .== plkfam[1]) && all(covdf[2] .== plkfam[2])
+```
+
+
+
+
+    true
+
+
+
+### Timing
 
 For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 
@@ -209,7 +240,7 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 @btime(polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      134.300 ms (639488 allocations: 29.14 MiB)
+      130.940 ms (639486 allocations: 29.14 MiB)
 
 
 
@@ -226,7 +257,8 @@ E.g., to perform GWAS using the ordred Probit model
 
 
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", link=ProbitLink(), outfile="opm")
+polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    link=ProbitLink(), outfile="opm")
 ```
 
 
@@ -317,10 +349,11 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 ```julia
 # GWAS on selected SNPs
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", colinds = snpinds, outfile="commonvariant")
+@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.226046 seconds (829.18 k allocations: 39.028 MiB, 2.79% gc time)
+      0.233033 seconds (829.19 k allocations: 39.025 MiB, 6.21% gc time)
 
 
 
@@ -370,11 +403,8 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 ```julia
 # extra headline in commonvariant.scoretest.txt
-@show countlines("commonvariant.scoretest.txt"), count(snpinds)
+countlines("commonvariant.scoretest.txt"), count(snpinds)
 ```
-
-    (countlines("commonvariant.scoretest.txt"), count(snpinds)) = (12086, 12085)
-
 
 
 
@@ -397,10 +427,11 @@ By default, `polrgwas` calculates the score test p-value for each SNP. Score tes
 
 
 ```julia
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", test=:LRT, outfile="lrt")
+@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    test=:LRT, outfile="lrt")
 ```
 
-     20.647580 seconds (8.79 M allocations: 2.064 GiB, 1.76% gc time)
+     21.304734 seconds (8.79 M allocations: 2.064 GiB, 1.82% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -450,10 +481,11 @@ For large data sets, a practical solution is to perform score test first, then r
 
 
 ```julia
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", test=:score, outfile="hapmap", verbose=false)
+@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.231498 seconds (717.08 k allocations: 33.226 MiB, 11.04% gc time)
+      0.243864 seconds (717.09 k allocations: 33.225 MiB, 7.33% gc time)
 
 
 
@@ -571,10 +603,11 @@ scorepvals[tophits]
 
 
 ```julia
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", colinds=tophits, test=:LRT, outfile="hapmap", verbose=false)
+@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.189526 seconds (410.55 k allocations: 21.399 MiB, 4.38% gc time)
+      0.163965 seconds (408.83 k allocations: 21.313 MiB, 4.45% gc time)
 
 
 
@@ -690,4 +723,4 @@ rm("quadratic.scoretest.txt")
 
 ## Docker
 
-For ease of using PolrGWAS, we provides a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed. Following is tested on ???
+For ease of using PolrGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed. Following is tested on ???

@@ -1,10 +1,11 @@
-using Documenter
+using Documenter, PolrGWAS
 
 ENV["DOCUMENTER_DEBUG"] = "true"
 
 makedocs(
     format = :html,
-    sitename = "PolrGWAS"
+    sitename = "PolrGWAS",
+    modules = [PolrGWAS]
 )
 
 deploydocs(

@@ -32,8 +32,10 @@ jobs:
       julia: 1.0
       os: osx
       script:
-        # - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
+        - julia -e 'using Pkg; Pkg.add("Documenter")'
+        - julia -e 'include(joinpath(dirname(pathof(PolrGWAS)), "..", "docs", "make.jl"))'
+        # - julia --project=docs/ -e 'using Pkg; 
+        #                             Pkg.instantiate();
         #                             Pkg.develop(PackageSpec(path=pwd()))'
-        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();'
-        - julia --project=docs/ docs/make.jl
+        # - julia --project=docs/ docs/make.jl
       after_success: skip
