@@ -12,7 +12,9 @@ notifications:
   email: false
 git:
   depth: 99999999
-
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - julia -e 'using Pkg; Pkg.build("PolrGWAS"); Pkg.test("PolrGWAS"; coverage=true);'
 after_script:  # TODO: change to after_success once https://github.com/JuliaLang/julia/issues/28306 is fixed
   # push coverage results to Codecov and Coveralls
   - julia -e 'using Pkg, PolrGWAS; cd(joinpath(dirname(pathof(PolrGWAS)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'

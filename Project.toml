@@ -15,6 +15,7 @@ StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 
 [compat]
 PolrModels = ">=0.2.0"
+SnpArrays = ">=0.1.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
