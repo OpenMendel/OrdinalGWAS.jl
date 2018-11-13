@@ -8,6 +8,9 @@ julia:
   - 0.7
   - 1.0
   - nightly
+addons:
+    apt_packages:
+        - gfortran
 notifications:
   email: false
 git:
