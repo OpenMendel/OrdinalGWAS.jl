@@ -1,4 +1,4 @@
-using Documenter, PolrGWAS
+using Documenter
 
 ENV["DOCUMENTER_DEBUG"] = "true"
 
@@ -9,8 +9,5 @@ makedocs(
 
 deploydocs(
     repo   = "github.com/OpenMendel/PolrGWAS.jl.git",
-    target = "build",
-    julia  = "1.0",
-    deps   = nothing,
-    make   = nothing
+    target = "build"
 )

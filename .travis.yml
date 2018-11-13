@@ -21,6 +21,17 @@ before_script: # install dependent unregistered packages
 after_script:  # TODO: change to after_success once https://github.com/JuliaLang/julia/issues/28306 is fixed
   # push coverage results to Codecov and Coveralls
   - julia -e 'using Pkg, PolrGWAS; cd(joinpath(dirname(pathof(PolrGWAS)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
-  # Update the documentation
-  - julia -e 'using Pkg; Pkg.add("Documenter")'
-  - julia -e 'using PolrGWAS; ENV["DOCUMENTER_DEBUG"] = "true"; include(joinpath(dirname(pathof(PolrGWAS)), "..", "docs", "make.jl"))'
+  # # Update the documentation
+  # - julia -e 'using Pkg; Pkg.add("Documenter")'
+  # - julia -e 'using PolrGWAS; ENV["DOCUMENTER_DEBUG"] = "true"; include(joinpath(dirname(pathof(PolrGWAS)), "..", "docs", "make.jl"))'
+
+jobs:
+  include:
+    - stage: "Documentation"
+      julia: 1.0
+      os: linux
+      script:
+        - julia --project=docs/ -e 'using Pkg; Pkg.instantiate();
+                                    Pkg.develop(PackageSpec(path=pwd()))'
+        - julia --project=docs/ docs/make.jl
+      after_success: skip      

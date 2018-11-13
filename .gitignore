@@ -8,5 +8,4 @@ deps/build.log
 
 *.ipynb_checkpoints
 
-*.nullmodel.txt
-*.scoretest.txt
+docs/build
