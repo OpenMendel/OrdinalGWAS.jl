@@ -1,4 +1,4 @@
-using Documenter
+using Documenter, PolrGWAS
 
 ENV["DOCUMENTER_DEBUG"] = "true"
 
