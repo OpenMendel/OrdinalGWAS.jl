@@ -30,8 +30,8 @@ install:
 
 build_script:
   - echo "%JL_BUILD_SCRIPT%"
-  - C:\julia\bin\julia -e "%JL_BUILD_SCRIPT%"
   - C:\julia\bin\julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git", rev="juliav0.7"), PackageSpec(url="https://github.com/OpenMendel/PolrModels.jl.git", rev="master")]);'
+  - C:\julia\bin\julia -e "%JL_BUILD_SCRIPT%"
 
 test_script:
   - echo "%JL_TEST_SCRIPT%"
