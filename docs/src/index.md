@@ -3,6 +3,8 @@
 
 PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
 
+## Installation
+
 This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 ```julia
 (v0.7) pkg> add https://github.com/OpenMendel/SnpArrays.git#juliav0.7
@@ -29,6 +31,7 @@ versioninfo()
 
 
 ```julia
+# for use in this tutorial
 using BenchmarkTools, CSV, PolrGWAS, SnpArrays
 ```
 
@@ -241,7 +244,7 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 @btime(polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      130.269 ms (639486 allocations: 29.14 MiB)
+      128.940 ms (639486 allocations: 29.14 MiB)
 
 
 
@@ -356,7 +359,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.236900 seconds (829.19 k allocations: 39.025 MiB, 5.34% gc time)
+      0.218401 seconds (829.19 k allocations: 39.025 MiB, 3.64% gc time)
 
 
 
@@ -434,7 +437,7 @@ By default, `polrgwas` calculates p-value for each SNP using score test. Score t
     test=:LRT, outfile="lrt")
 ```
 
-     22.001869 seconds (8.79 M allocations: 2.064 GiB, 1.63% gc time)
+     19.977851 seconds (8.79 M allocations: 2.064 GiB, 2.05% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -488,7 +491,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.257659 seconds (717.09 k allocations: 33.225 MiB, 11.77% gc time)
+      0.233052 seconds (717.09 k allocations: 33.225 MiB, 10.99% gc time)
 
 
 
@@ -610,7 +613,7 @@ scorepvals[tophits]
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.168336 seconds (408.83 k allocations: 21.313 MiB, 4.68% gc time)
+      0.158214 seconds (408.84 k allocations: 21.313 MiB, 4.23% gc time)
 
 
 
@@ -727,3 +730,7 @@ rm("quadratic.scoretest.txt")
 ## Docker
 
 For ease of using PolrGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed. Following is tested on ???
+
+## Plots
+
+To plot the GWAS results, use the MendelPlots(???) package.

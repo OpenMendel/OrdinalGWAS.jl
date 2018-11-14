@@ -11,18 +11,19 @@
     extensions. If `plkfile==nothing`, only null model is fitted.
 
 # Keyword arguments
-- `outfile::AbstractString`: output file prefix; default is `polrgwas`. Two output files
+- `outfile::AbstractString`: output file prefix; default is `polrgwas`. Two CSV output files
     `prefix.nullmodel.txt` and `prefix.scoretest.txt` (or `prefix.lrttest.txt`) will be written.
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  
 - `testformula::Formula`: formula for test unit. Default is `@formula(~ 0 + snp)`.
 - `test::Symbol`: `:score` (default) or `:LRT`.
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
-    or `CloglogLink()`
+    or `CloglogLink()`.
 - `colinds::Union{Nothing,AbstractVector{<:Integer}}`: SNP indices.
 - `rowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for bed file.
-- `solver`: A solver supported by MathProgBase. Default is `NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)`.
-    Another common choice is `IpoptSolver(print_level=0)`.
+- `solver`: an optimization solver supported by MathProgBase. Default is 
+    `NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)`. Another common choice is 
+    `IpoptSolver(print_level=0)`.
 - `verbose::Bool`: default is `false`.
 """
 function polrgwas(
