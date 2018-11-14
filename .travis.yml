@@ -2,12 +2,12 @@
 language: julia
 sudo: required
 os:
-  - linux
+  # - linux
   - osx
 julia:
-  - 0.7
+  # - 0.7
   - 1.0
-  - nightly
+  # - nightly
 addons:
     apt_packages:
         - gfortran
@@ -33,7 +33,7 @@ jobs:
       os: osx
       script:
         - julia -e 'using Pkg; Pkg.add("Documenter")'
-        - julia -e 'include(joinpath(dirname(pathof(PolrGWAS)), "..", "docs", "make.jl"))'
+        - julia -e 'using PolrGWAS; include(joinpath(dirname(pathof(PolrGWAS)), "..", "docs", "make.jl"))'
         # - julia --project=docs/ -e 'using Pkg; 
         #                             Pkg.instantiate();
         #                             Pkg.develop(PackageSpec(path=pwd()))'
