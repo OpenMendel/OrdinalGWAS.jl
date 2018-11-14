@@ -11,7 +11,7 @@
     extensions. If `plkfile==nothing`, only null model is fitted.
 
 # Keyword arguments
-- `outfile::AbstractString`: output file prefix; default is `"polrgwas"``. Two output files
+- `outfile::AbstractString`: output file prefix; default is `polrgwas`. Two output files
     `prefix.nullmodel.txt` and `prefix.scoretest.txt` (or `prefix.lrttest.txt`) will be written.
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  

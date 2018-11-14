@@ -202,12 +202,13 @@ size(SnpArray("../data/hapmap3.bed"))
 
 The prefix of output files can be changed by the `outfile` keyword, e.g.,
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", outfile="hapmap3")
+polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    outfile="hapmap3")
 ```
 
-### Input covariates as DataFrame
+### Input non-genetic data as DataFrame
 
-Internally `polrgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other format, users can input a DataFrame directly.
+Internally `polrgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other format, users can parse first and then input a DataFrame to `polrgwas` directly.
 ```julia
 polrgwas(@formula(trait ~ 0 + sex), df, "../data/hapmap3")
 ```
@@ -215,7 +216,7 @@ polrgwas(@formula(trait ~ 0 + sex), df, "../data/hapmap3")
 
     Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. 
 
-For example, following code check that the first 2 columns of of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
+For example, following code checks that the first 2 columns of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
 
 
 ```julia
@@ -240,7 +241,7 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 @btime(polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      130.940 ms (639486 allocations: 29.14 MiB)
+      130.269 ms (639486 allocations: 29.14 MiB)
 
 
 
@@ -253,13 +254,15 @@ rm("polrgwas.nullmodel.txt")
 
 The `link` keyword argument of `polrgwas` can take value `LogitLink()` (default), `ProbitLink()` (ordred Probit model), `CloglogLink()` (proportional hazards model), or `CauchyLink()`.
 
-E.g., to perform GWAS using the ordred Probit model
+For example, to perform GWAS using the ordred Probit model
 
 
 ```julia
 polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
     link=ProbitLink(), outfile="opm")
 ```
+
+The estimates in null model and p-values are slightly different from proportional odds moodel.
 
 
 ```julia
@@ -353,7 +356,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.233033 seconds (829.19 k allocations: 39.025 MiB, 6.21% gc time)
+      0.236900 seconds (829.19 k allocations: 39.025 MiB, 5.34% gc time)
 
 
 
@@ -423,7 +426,7 @@ User should be particularly careful when using the `rowinds` keyword. Selected r
 
 ## Likelihood ratio test (LRT)
 
-By default, `polrgwas` calculates the score test p-value for each SNP. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:LRT`. LRT is much slower but may be more powerful than score test.
+By default, `polrgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:LRT`. LRT is much slower but may be more powerful than score test.
 
 
 ```julia
@@ -431,7 +434,7 @@ By default, `polrgwas` calculates the score test p-value for each SNP. Score tes
     test=:LRT, outfile="lrt")
 ```
 
-     21.304734 seconds (8.79 M allocations: 2.064 GiB, 1.82% gc time)
+     22.001869 seconds (8.79 M allocations: 2.064 GiB, 1.63% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -471,7 +474,7 @@ rm("lrt.lrttest.txt")
 rm("lrt.nullmodel.txt")
 ```
 
-In this case, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. 
+In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. 
 
 ## Score test for screening, LRT for power 
 
@@ -485,7 +488,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.243864 seconds (717.09 k allocations: 33.225 MiB, 7.33% gc time)
+      0.257659 seconds (717.09 k allocations: 33.225 MiB, 11.77% gc time)
 
 
 
@@ -607,7 +610,7 @@ scorepvals[tophits]
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.163965 seconds (408.83 k allocations: 21.313 MiB, 4.45% gc time)
+      0.168336 seconds (408.83 k allocations: 21.313 MiB, 4.68% gc time)
 
 
 
