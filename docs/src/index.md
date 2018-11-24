@@ -1,7 +1,7 @@
 
 # PolrGWAS.jl
 
-PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
+PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function [`polr` in R package MASS](https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr).
 
 ## Installation
 
@@ -46,12 +46,12 @@ using BenchmarkTools, CSV, PolrGWAS, SnpArrays
 ```
 
     total 3664
-    -rw-r--r--  1 huazhou  staff     6844 Nov 11 21:09 covariate.txt
-    -rw-r--r--  1 huazhou  staff  1128171 Nov 11 21:09 hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Nov 11 21:09 hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Nov 11 21:09 hapmap3.fam
-    -rw-r--r--  1 huazhou  staff   332960 Nov 11 21:09 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      773 Nov 11 21:09 simtrait.jl
+    -rw-r--r--  1 huazhou  staff     6844 Nov 23 17:58 covariate.txt
+    -rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 hapmap3.bed
+    -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
+    -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
+    -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
+    -rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl
 
 
 `covariate.txt` is a comma separated value (CSV) file containing the sample information, covariates `sex`, and phenotype `trait`. `trait` is coded as integer values 1, 2, 3 or 4. It was simulated from the script `simtrait.jl`. 
@@ -101,11 +101,11 @@ polrgwas
 
 ### Formula for null model
 
-The first argument specifies the null model without SNP effects, e.g., `@formula(trait ~ 0 + sex)`. It is important to **exclude** the intercept because proportional odds model automatically incorporates intercepts for modeling purpose.
+The first argument specifies the null model without SNP effects, e.g., `@formula(trait ~ 0 + sex)`. Following R and Julia convention, `trait ~ 0 + sex` explicitly excludes intercept. It is important to **exclude** the intercept in `polr` model formulation because proportional odds model automatically incorporates intercepts for modeling purpose.
 
 ### Input files
 
-`polrgwas` expects two input files: one for responses and covariates (second argument), the other the Plink files for genotypes (third argument).
+`polrgwas` expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).
 
 Covariates and phenotype are available in a csv file `covariate.txt`, which has one header line for variable names. Variable `trait` is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable `sex` as the covariate in GWAS.
 
@@ -143,9 +143,9 @@ Genotype data is available as binary Plink files.
 ;ls -l ../data/hapmap3.bed ../data/hapmap3.bim ../data/hapmap3.fam
 ```
 
-    -rw-r--r--  1 huazhou  staff  1128171 Nov 11 21:09 ../data/hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Nov 11 21:09 ../data/hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Nov 11 21:09 ../data/hapmap3.fam
+    -rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 ../data/hapmap3.bed
+    -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 ../data/hapmap3.bim
+    -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 ../data/hapmap3.fam
 
 
 There are 324 samples at 13,928 SNPs.
@@ -164,7 +164,11 @@ size(SnpArray("../data/hapmap3.bed"))
 
 ### Output files
 
-`polrgwas` outputs two files: `polrgwas.nullmodel.txt` and `polrgwas.scoretest.txt`. 
+`polrgwas` outputs two files: `polrgwas.nullmodel.txt` and `polrgwas.scoretest.txt`. The prefix `polrgwas` of output files can be changed by the `outfile` keyword, e.g.,
+```julia
+polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+    outfile="hapmap3")
+```
 
 * `polrgwas.nullmodel.txt` lists the estimated null model (without SNPs).  
 
@@ -204,12 +208,6 @@ size(SnpArray("../data/hapmap3.bed"))
     1,2194615,rs7553178,0.22685185185185186,0.16436415589171793
 
 
-The prefix of output files can be changed by the `outfile` keyword, e.g.,
-```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
-    outfile="hapmap3")
-```
-
 ### Input non-genetic data as DataFrame
 
 Internally `polrgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other format, users can parse first and then input a DataFrame to `polrgwas` directly.
@@ -245,7 +243,7 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 @btime(polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      144.061 ms (639486 allocations: 29.14 MiB)
+      135.580 ms (639486 allocations: 29.14 MiB)
 
 
 
@@ -257,7 +255,11 @@ rm("polrgwas.nullmodel.txt")
 
 ## Link functions
 
-The `link` keyword argument of `polrgwas` can take value `LogitLink()` (default), `ProbitLink()` (ordred Probit model), `CloglogLink()` (proportional hazards model), or `CauchyLink()`.
+The `link` keyword argument of `polrgwas` can take value:  
+- `LogitLink()`, proportional odds model (default),  
+- `ProbitLink()`, ordred Probit model,  
+- `CloglogLink()`, proportional hazards model), or 
+- `CauchyLink()`.
 
 For example, to perform GWAS using the ordred Probit model
 
@@ -361,7 +363,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.232119 seconds (829.19 k allocations: 39.025 MiB, 6.29% gc time)
+      0.229388 seconds (829.19 k allocations: 39.026 MiB, 3.10% gc time)
 
 
 
@@ -440,7 +442,7 @@ By default, `polrgwas` calculates p-value for each SNP using score test. Score t
     test=:LRT, outfile="lrt")
 ```
 
-     21.145873 seconds (8.79 M allocations: 2.064 GiB, 1.85% gc time)
+     23.011673 seconds (8.79 M allocations: 2.064 GiB, 1.66% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -495,7 +497,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.241566 seconds (717.09 k allocations: 33.225 MiB, 7.57% gc time)
+      0.274472 seconds (717.09 k allocations: 33.225 MiB, 13.07% gc time)
 
 
 
@@ -617,7 +619,7 @@ scorepvals[tophits]
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.163099 seconds (408.83 k allocations: 21.313 MiB, 4.48% gc time)
+      0.165360 seconds (408.48 k allocations: 21.257 MiB, 4.46% gc time)
 
 
 
@@ -736,22 +738,19 @@ rm("quadratic.scoretest.txt")
 
 ## Plots
 
-To plot the GWAS results, use the MendelPlots(???) package.
+To plot the GWAS results, use the MendelPlots (TODO) package.
 
 ## Docker
 
-For ease of using PolrGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker v18.06.1-ce-mac73.
+For ease of using PolrGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.
 
-**Step 1**: Create a Dockerfile with following content
+**Step 1**: Create a Dockerfile with content shown below. You can copy from [here](https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile).
 
 
 ```julia
 ;cat ../docker/Dockerfile
 ```
 
-    # docker build -t polrgwas-app
-    # docker run -t polrgwas-app
-    
     FROM centos:7
     
     WORKDIR /root
@@ -760,21 +759,21 @@ For ease of using PolrGWAS, we provide a Dockerfile so users don't need to insta
     
     RUN yum update -y && yum install -y \
         cmake \
-    	curl-devel \
-    	expat-devel \        
-    	gcc \
-    	gcc-c++ \
-    	gcc-gfortran \
-    	gettext-devel \    
-    	make \
-    	openssl \
-    	openssl098e \
-    	openssl-devel \    
-    	patch \
-        svn \    
-    	wget \
+        curl-devel \
+        expat-devel \
+        gcc \
+        gcc-c++ \
+        gcc-gfortran \
+        gettext-devel \
+        make \
+        openssl \
+        openssl098e \
+        openssl-devel \
+        patch \
+        svn \
+        wget \
         which \
-    	&& yum clean all    
+        && yum clean all    
     
     ENV PATH /usr/local/sbin:/usr/local/bin:$PATH
     
@@ -799,10 +798,10 @@ For ease of using PolrGWAS, we provide a Dockerfile so users don't need to insta
     ENV JULIA_VER $JULIA_VER_MAJ$JULIA_VER_MIN
     
     RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz \
-            && mkdir /usr/local/julia \
-            && tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1 \
-            && ln -s /usr/local/julia/bin/julia /usr/local/bin/julia \
-            && rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
+        && mkdir /usr/local/julia \
+        && tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1 \
+        && ln -s /usr/local/julia/bin/julia /usr/local/bin/julia \
+        && rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
     
     ENV JULIA_PKGDIR /usr/local/julia/share/julia/site
     
@@ -815,7 +814,7 @@ For ease of using PolrGWAS, we provide a Dockerfile so users don't need to insta
         Pkg.test("PolrGWAS");'
 
 
-**Step 2**: Build a docker image `polrgwas-app`, assuming that the Dockerfile is located at `../docker` folder. Building the image for the first time will take a couple minutes. 
+**Step 2**: Build a docker image `polrgwas-app`, assuming that the Dockerfile is located at `../docker` folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.
 
 
 ```julia
@@ -831,43 +830,43 @@ For ease of using PolrGWAS, we provide a Dockerfile so users don't need to insta
     Step 3/15 : RUN yum update -y && yum install -y epel-release && yum clean all
      ---> Using cache
      ---> a75b6baa5581
-    Step 4/15 : RUN yum update -y && yum install -y     cmake 	curl-devel 	expat-devel 	gcc 	gcc-c++ 	gcc-gfortran 	gettext-devel 	make 	openssl 	openssl098e 	openssl-devel 	patch     svn 	wget     which 	&& yum clean all
+    Step 4/15 : RUN yum update -y && yum install -y     cmake     curl-devel     expat-devel     gcc     gcc-c++     gcc-gfortran     gettext-devel     make     openssl     openssl098e     openssl-devel     patch     svn     wget     which     && yum clean all
      ---> Using cache
-     ---> 86c10ea52554
+     ---> dcf0f6ba6334
     Step 5/15 : ENV PATH /usr/local/sbin:/usr/local/bin:$PATH
      ---> Using cache
-     ---> 1f8bbe50b2b1
+     ---> 7861f46c17eb
     Step 6/15 : ENV LD_LIBRARY_PATH /usr/local/lib:/usr/local/lib64
      ---> Using cache
-     ---> fcb1fd9ca05c
+     ---> 4d3222181efc
     Step 7/15 : ENV GIT_VER 2.19.1
      ---> Using cache
-     ---> 8c009cd84eec
+     ---> b23c5cb67786
     Step 8/15 : RUN wget https://www.kernel.org/pub/software/scm/git/git-$GIT_VER.tar.gz     && tar xf git-$GIT_VER.tar.gz && cd git-$GIT_VER     && make -j"$(nproc --all)" prefix=/usr/local all     && make prefix=/usr/local -j"$(nproc --all)" install     && cd .. && rm -f git-$GIT_VER.tar.gz && rm -rf git-$GIT_VER
      ---> Using cache
-     ---> 55f45fe5dced
+     ---> 6beaafd797ec
     Step 9/15 : RUN git config --global url."https://".insteadOf git://
      ---> Using cache
-     ---> c4c3727a2b32
+     ---> f1aec5dd453f
     Step 10/15 : ENV JULIA_VER_MAJ 1.0
      ---> Using cache
-     ---> fea2564c122b
+     ---> 42eb17d93684
     Step 11/15 : ENV JULIA_VER_MIN .1
      ---> Using cache
-     ---> 8e8b2e1ec1b1
+     ---> 4289e3f44a22
     Step 12/15 : ENV JULIA_VER $JULIA_VER_MAJ$JULIA_VER_MIN
      ---> Using cache
-     ---> 830d6778deb4
-    Step 13/15 : RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz         && mkdir /usr/local/julia         && tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1         && ln -s /usr/local/julia/bin/julia /usr/local/bin/julia         && rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
+     ---> 2e9b9213c88c
+    Step 13/15 : RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz     && mkdir /usr/local/julia     && tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1     && ln -s /usr/local/julia/bin/julia /usr/local/bin/julia     && rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
      ---> Using cache
-     ---> 2c73cdaf6a2e
+     ---> 2510e817738a
     Step 14/15 : ENV JULIA_PKGDIR /usr/local/julia/share/julia/site
      ---> Using cache
-     ---> fb6400581092
+     ---> 3692e40f50fa
     Step 15/15 : RUN julia -e 'using Pkg;     Pkg.add([     PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git", rev="juliav0.7"),     PackageSpec(url="https://github.com/OpenMendel/PolrModels.jl.git", rev="master"),     PackageSpec(url="https://github.com/OpenMendel/PolrGWAS.jl.git", rev="master")     ]);     Pkg.test("PolrGWAS");'
      ---> Using cache
-     ---> 5eb06f9b2b32
-    Successfully built 5eb06f9b2b32
+     ---> af7e8765610c
+    Successfully built af7e8765610c
     Successfully tagged polrgwas-app:latest
 
 
@@ -879,7 +878,7 @@ For ease of using PolrGWAS, we provide a Dockerfile so users don't need to insta
 ```
 
 Here  
-- `-t polrgwas-app` creates a container using the `polrgwas-app` image build in step 1.  
+- `-t polrgwas-app` creates a container using the `polrgwas-app` image build in step 2.  
 - `-v /Users/huazhou/.julia/dev/PolrGWAS/data:/data` maps the `/Users/huazhou/.julia/dev/PolrGWAS/data` folder on host machine to the `/data` folder within the container. 
 - `julia -e 'using PolrGWAS; polrgwas(@formula(trait ~ 0 + sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/polrgwas");` calls Julia and runs `polrgwas` function. 
 
@@ -891,14 +890,14 @@ The output files are at `/Users/huazhou/.julia/dev/PolrGWAS/data`.
 ```
 
     total 5320
-    -rw-r--r--  1 huazhou  staff     6844 Nov 11 21:09 covariate.txt
-    -rw-r--r--  1 huazhou  staff  1128171 Nov 11 21:09 hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Nov 11 21:09 hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Nov 11 21:09 hapmap3.fam
-    -rw-r--r--  1 huazhou  staff   332960 Nov 11 21:09 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      347 Nov 14 14:37 polrgwas.nullmodel.txt
-    -rw-r--r--  1 huazhou  staff   842401 Nov 14 14:37 polrgwas.scoretest.txt
-    -rw-r--r--  1 huazhou  staff      773 Nov 11 21:09 simtrait.jl
+    -rw-r--r--  1 huazhou  staff     6844 Nov 23 17:58 covariate.txt
+    -rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 hapmap3.bed
+    -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
+    -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
+    -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
+    -rw-r--r--  1 huazhou  staff      347 Nov 23 19:14 polrgwas.nullmodel.txt
+    -rw-r--r--  1 huazhou  staff   842401 Nov 23 19:14 polrgwas.scoretest.txt
+    -rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl
 
 
 

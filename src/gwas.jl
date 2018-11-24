@@ -1,21 +1,21 @@
 """
-    polrgwas(nullformula, covfile, plkfile)
-    polrgwas(nullformula, df, plkfile)
+    polrgwas(nullformula, covfile, plinkfile)
+    polrgwas(nullformula, df, plinkfile)
 
 # Positional arguments 
 - `nullformula::Formula`: formula for the null model.
 - `covfile::AbstractString`: covariate file with one header line. One column 
     should be the ordered categorical phenotype coded as integers starting from 1.
 - `df::DataFrame`: DataFrame containing response and regressors.
-- `plkfile::AbstractString`: Plink file name without the bed, fam, or bim 
-    extensions. If `plkfile==nothing`, only null model is fitted.
+- `plinkfile::AbstractString`: Plink file name without the bed, fam, or bim 
+    extensions. If `plinkfile==nothing`, only null model is fitted.
 
 # Keyword arguments
 - `outfile::AbstractString`: output file prefix; default is `polrgwas`. Two CSV output files
     `prefix.nullmodel.txt` and `prefix.scoretest.txt` (or `prefix.lrttest.txt`) will be written.
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  
-- `testformula::Formula`: formula for test unit. Default is `@formula(~ 0 + snp)`.
+- `testformula::Formula`: formula for test unit. Default is `@formula(trait ~ 0 + snp)`.
 - `test::Symbol`: `:score` (default) or `:LRT`.
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
     or `CloglogLink()`.
@@ -30,20 +30,20 @@ function polrgwas(
     # positional arguments
     nullformula::Formula,
     covfile::AbstractString,
-    plkfile::Union{Nothing,AbstractString} = nothing;
+    plinkfile::Union{Nothing,AbstractString} = nothing;
     # keyword arguments
     covtype::Union{Nothing,Vector{DataType}} = nothing,
     kwargs...
     )
     covdf = CSV.read(covfile; types=covtype)
-    polrgwas(nullformula, covdf, plkfile; kwargs...)
+    polrgwas(nullformula, covdf, plinkfile; kwargs...)
 end
 
 function polrgwas(
     # positional arguments
     nullformula::Formula,
     df::DataFrame,
-    plkfile::Union{Nothing,AbstractString} = nothing;
+    plinkfile::Union{Nothing,AbstractString} = nothing;
     # keyword arguments
     testformula::Formula=@eval(@formula($(nullformula.lhs) ~ 0 + snp)),
     outfile::AbstractString = "polrgwas",
@@ -60,18 +60,18 @@ function polrgwas(
     open(outfile * ".nullmodel.txt", "w") do io
         show(io, nm)
     end
-    plkfile == nothing && (return nothing)
+    plinkfile == nothing && (return nothing)
     # selected rows should match nobs in null model
-    rinds = something(rowinds, 1:countlines(plkfile * ".fam"))
+    rinds = something(rowinds, 1:countlines(plinkfile * ".fam"))
     nrows = eltype(rinds) == Bool ? count(rinds) : length(rinds)
     nrows == nobs(nm) || throw(ArgumentError("number of samples in SnpArray does not match null model"))
     # create SNP mask vector
     if colinds == nothing 
-        cmask = trues(countlines(plkfile * ".bim"))
+        cmask = trues(countlines(plinkfile * ".bim"))
     elseif eltype(colinds) == Bool
         cmask = colinds
     else
-        cmask = falses(countlines(plkfile * ".bim"))
+        cmask = falses(countlines(plinkfile * ".bim"))
         cmask[colinds] .= true
     end
     # dataframe for alternative model
@@ -81,13 +81,13 @@ function polrgwas(
     Z = similar(ModelMatrix(ModelFrame(testformula, dfalt)).m)
     # carry out score or LRT test SNP by SNP
     snponly = testformula.rhs == :(0 + snp)
-    genomat = SnpArrays.SnpArray(plkfile * ".bed")
+    genomat = SnpArrays.SnpArray(plinkfile * ".bed")
     mafreq = SnpArrays.maf(genomat) # TODO: need to calibrate according to rowinds
     if test == :score
         ts = PolrScoreTest(nm.model, Z)
         open(outfile * ".scoretest.txt", "w") do io
             println(io, "chr,pos,snpid,maf,pval")
-            for (j, row) in enumerate(eachline(plkfile * ".bim"))
+            for (j, row) in enumerate(eachline(plinkfile * ".bim"))
                 cmask[j] || continue
                 if mafreq[j] == 0
                     pval = 1.0
@@ -119,7 +119,7 @@ function polrgwas(
                 end
                 println(io, "pval")
             end
-            for (j, row) in enumerate(eachline(plkfile * ".bim"))
+            for (j, row) in enumerate(eachline(plinkfile * ".bim"))
                 cmask[j] || continue
                 if mafreq[j] == 0
                     fill!(γ̂, 0)

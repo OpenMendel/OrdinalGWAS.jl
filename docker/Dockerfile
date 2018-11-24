@@ -1,6 +1,3 @@
-# docker build -t polrgwas-app
-# docker run -t polrgwas-app
-
 FROM centos:7
 
 WORKDIR /root
@@ -9,21 +6,21 @@ RUN yum update -y && yum install -y epel-release && yum clean all
 
 RUN yum update -y && yum install -y \
     cmake \
-	curl-devel \
-	expat-devel \        
-	gcc \
-	gcc-c++ \
-	gcc-gfortran \
-	gettext-devel \    
-	make \
-	openssl \
-	openssl098e \
-	openssl-devel \    
-	patch \
-    svn \    
-	wget \
+    curl-devel \
+    expat-devel \
+    gcc \
+    gcc-c++ \
+    gcc-gfortran \
+    gettext-devel \
+    make \
+    openssl \
+    openssl098e \
+    openssl-devel \
+    patch \
+    svn \
+    wget \
     which \
-	&& yum clean all    
+    && yum clean all    
 
 ENV PATH /usr/local/sbin:/usr/local/bin:$PATH
 
@@ -48,10 +45,10 @@ ENV JULIA_VER_MIN .1
 ENV JULIA_VER $JULIA_VER_MAJ$JULIA_VER_MIN
 
 RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz \
-        && mkdir /usr/local/julia \
-        && tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1 \
-        && ln -s /usr/local/julia/bin/julia /usr/local/bin/julia \
-        && rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
+    && mkdir /usr/local/julia \
+    && tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1 \
+    && ln -s /usr/local/julia/bin/julia /usr/local/bin/julia \
+    && rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
 
 ENV JULIA_PKGDIR /usr/local/julia/share/julia/site
 
