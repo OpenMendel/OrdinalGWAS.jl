@@ -1,11 +1,11 @@
-using PolrGWAS, Test, CSV
+using PolrGWAS, Test, CSV, SnpArrays
 
 const datadir = joinpath(dirname(@__FILE__), "..", "data")
 const covfile = datadir * "/covariate.txt"
 const plkfile = datadir * "/hapmap3"
 
 @testset "score test" begin
-    @time polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test = :score)
+    @time polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:score)
     @test isfile("polrgwas.nullmodel.txt")
     @test isfile("polrgwas.scoretest.txt")
     scorepvals = CSV.read("polrgwas.scoretest.txt")[5][1:5]
@@ -15,13 +15,32 @@ const plkfile = datadir * "/hapmap3"
 end
 
 @testset "LRT test" begin
-    @time polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test = :LRT)
+    @time polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:LRT)
     @test isfile("polrgwas.nullmodel.txt")
     @test isfile("polrgwas.lrttest.txt")
     lrtpvals = CSV.read("polrgwas.lrttest.txt")[6][1:5]
     @test all(lrtpvals .≈ [1.0, 1.91858366e-3, 1.80505056e-5, 5.87338471e-6, 8.08102258e-3])
     rm("polrgwas.nullmodel.txt")
     rm("polrgwas.lrttest.txt")
+end
+
+@testset "snpmodel" begin
+    # dominant model 
+    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:score, snpmodel=DOMINANT_MODEL)
+    @test isfile("polrgwas.nullmodel.txt")
+    @test isfile("polrgwas.scoretest.txt")
+    scorepvals = CSV.read("polrgwas.scoretest.txt")[5][1:5]
+    @test all(scorepvals .≈ [1.0, 1.24849027e-1, 4.08779119e-4, 5.19281523e-3, 7.04007765e-4])
+    rm("polrgwas.nullmodel.txt")
+    rm("polrgwas.scoretest.txt")
+    # recessive model 
+    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:score, snpmodel=RECESSIVE_MODEL)
+    @test isfile("polrgwas.nullmodel.txt")
+    @test isfile("polrgwas.scoretest.txt")
+    scorepvals = CSV.read("polrgwas.scoretest.txt")[5][1:5]
+    @test all(scorepvals .≈ [1.0, 4.56151864e-3, 2.77072395e-4, 4.25357392e-5, 1.66390827e-1])
+    rm("polrgwas.nullmodel.txt")
+    rm("polrgwas.scoretest.txt")
 end
 
 @testset "link" begin

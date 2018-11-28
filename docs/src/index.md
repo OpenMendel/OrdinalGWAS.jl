@@ -243,7 +243,7 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 @btime(polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      135.580 ms (639486 allocations: 29.14 MiB)
+      135.512 ms (639486 allocations: 29.14 MiB)
 
 
 
@@ -311,6 +311,17 @@ rm("opm.nullmodel.txt")
 rm("opm.scoretest.txt")
 ```
 
+## SNP models
+
+Genotypes are translated into numeric values according to different genetic model, which is specified by the `snpmodel` keyword. Default is `ADDITIVE_MODEL`.
+
+| Genotype | `SnpArray` | `ADDITIVE_MODEL` | `DOMINANT_MODEL` | `RECESSIVE_MODEL` |    
+|:---:|:---:|:---:|:---:|:---:|  
+| A1,A1 | 0x00 | 0 | 0 | 0 |  
+| missing | 0x01 | NaN | NaN | NaN |
+| A1,A2 | 0x02 | 1 | 1 | 0 |  
+| A2,A2 | 0x03 | 2 | 1 | 1 |  
+
 ## SNP and/or sample masks
 
 In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `colinds` and `rowinds` keywords of `polrgwas` function.
@@ -363,7 +374,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.229388 seconds (829.19 k allocations: 39.026 MiB, 3.10% gc time)
+      0.208230 seconds (830.43 k allocations: 39.104 MiB, 3.04% gc time)
 
 
 
@@ -442,7 +453,7 @@ By default, `polrgwas` calculates p-value for each SNP using score test. Score t
     test=:LRT, outfile="lrt")
 ```
 
-     23.011673 seconds (8.79 M allocations: 2.064 GiB, 1.66% gc time)
+     21.880595 seconds (8.79 M allocations: 2.064 GiB, 1.57% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -497,7 +508,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.274472 seconds (717.09 k allocations: 33.225 MiB, 13.07% gc time)
+      0.248936 seconds (718.03 k allocations: 33.280 MiB, 9.91% gc time)
 
 
 
@@ -619,7 +630,7 @@ scorepvals[tophits]
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.165360 seconds (408.48 k allocations: 21.257 MiB, 4.46% gc time)
+      0.159704 seconds (410.22 k allocations: 21.381 MiB, 4.47% gc time)
 
 
 
@@ -895,8 +906,8 @@ The output files are at `/Users/huazhou/.julia/dev/PolrGWAS/data`.
     -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
     -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
     -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      347 Nov 23 19:14 polrgwas.nullmodel.txt
-    -rw-r--r--  1 huazhou  staff   842401 Nov 23 19:14 polrgwas.scoretest.txt
+    -rw-r--r--  1 huazhou  staff      347 Nov 28 10:33 polrgwas.nullmodel.txt
+    -rw-r--r--  1 huazhou  staff   842401 Nov 28 10:33 polrgwas.scoretest.txt
     -rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl
 
 

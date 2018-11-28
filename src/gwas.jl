@@ -16,9 +16,10 @@
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  
 - `testformula::Formula`: formula for test unit. Default is `@formula(trait ~ 0 + snp)`.
-- `test::Symbol`: `:score` (default) or `:LRT`.
+- `test::Symbol`: `:score` (default) or `:LRT`.  
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
     or `CloglogLink()`.
+- `snpmodel`: `ADDITIVE_MODEL` (default), `DOMINANT_MODEL`, or `RECESSIVE_MODEL`.
 - `colinds::Union{Nothing,AbstractVector{<:Integer}}`: SNP indices.
 - `rowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for bed file.
 - `solver`: an optimization solver supported by MathProgBase. Default is 
@@ -49,6 +50,7 @@ function polrgwas(
     outfile::AbstractString = "polrgwas",
     link::GLM.Link = LogitLink(),
     test::Symbol = :score,
+    snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     colinds::Union{Nothing,AbstractVector{<:Integer}} = nothing,
     rowinds::Union{Nothing,AbstractVector{<:Integer}} = nothing,
     solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
@@ -93,9 +95,9 @@ function polrgwas(
                     pval = 1.0
                 else
                     if snponly
-                        copyto!(ts.Z, @view(genomat[rinds, j]), impute = true)    
+                        copyto!(ts.Z, @view(genomat[rinds, j]), impute = true, model=snpmodel)
                     else # snp + other terms
-                        copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true)
+                        copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true, model=snpmodel)
                         ts.Z[:] = ModelMatrix(ModelFrame(testformula, dfalt)).m
                     end
                     pval = polrtest(ts)
@@ -126,9 +128,9 @@ function polrgwas(
                     pval = 1.0
                 else
                     if snponly
-                        copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true)
+                        copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true, model=snpmodel)
                     else # snp + other terms
-                        copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true)
+                        copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true, model=snpmodel)
                         Xaug[:, nm.model.p+1:end] = ModelMatrix(ModelFrame(testformula, dfalt)).m
                     end
                     altmodel = polr(Xaug, nm.model.Y, nm.model.link, solver, wts = nm.model.wts)
