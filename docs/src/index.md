@@ -7,9 +7,9 @@ PolrGWAS.jl is a Julia package for performing genome-wide association studies (G
 
 This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 ```julia
-(v1.0) pkg> add https://github.com/OpenMendel/SnpArrays.git#juliav0.7
-(v1.0) pkg> add https://github.com/OpenMendel/PolrModels.git
-(v1.0) pkg> add https://github.com/OpenMendel/PolrGWAS.git
+(v1.0) pkg> add https://github.com/OpenMendel/SnpArrays.jl.git#juliav0.7
+(v1.0) pkg> add https://github.com/OpenMendel/PolrModels.jl.git
+(v1.0) pkg> add https://github.com/OpenMendel/PolrGWAS.jl.git
 ```
 
 
