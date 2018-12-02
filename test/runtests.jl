@@ -5,7 +5,7 @@ const covfile = datadir * "/covariate.txt"
 const plkfile = datadir * "/hapmap3"
 
 @testset "score test" begin
-    @time polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:score)
+    @time polrgwas(@formula(trait ~ sex), covfile, plkfile, test=:score)
     @test isfile("polrgwas.nullmodel.txt")
     @test isfile("polrgwas.scoretest.txt")
     scorepvals = CSV.read("polrgwas.scoretest.txt")[5][1:5]
@@ -15,7 +15,7 @@ const plkfile = datadir * "/hapmap3"
 end
 
 @testset "LRT test" begin
-    @time polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:LRT)
+    @time polrgwas(@formula(trait ~ sex), covfile, plkfile, test=:LRT)
     @test isfile("polrgwas.nullmodel.txt")
     @test isfile("polrgwas.lrttest.txt")
     lrtpvals = CSV.read("polrgwas.lrttest.txt")[6][1:5]
@@ -26,7 +26,7 @@ end
 
 @testset "snpmodel" begin
     # dominant model 
-    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:score, snpmodel=DOMINANT_MODEL)
+    polrgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, snpmodel=DOMINANT_MODEL)
     @test isfile("polrgwas.nullmodel.txt")
     @test isfile("polrgwas.scoretest.txt")
     scorepvals = CSV.read("polrgwas.scoretest.txt")[5][1:5]
@@ -34,7 +34,7 @@ end
     rm("polrgwas.nullmodel.txt")
     rm("polrgwas.scoretest.txt")
     # recessive model 
-    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, test=:score, snpmodel=RECESSIVE_MODEL)
+    polrgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, snpmodel=RECESSIVE_MODEL)
     @test isfile("polrgwas.nullmodel.txt")
     @test isfile("polrgwas.scoretest.txt")
     scorepvals = CSV.read("polrgwas.scoretest.txt")[5][1:5]
@@ -44,7 +44,7 @@ end
 end
 
 @testset "link" begin
-    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, link=ProbitLink(), outfile="opm")
+    polrgwas(@formula(trait ~ sex), covfile, plkfile, link=ProbitLink(), outfile="opm")
     @test isfile("opm.nullmodel.txt")
     @test isfile("opm.scoretest.txt")
     scorepvals = CSV.read("opm.scoretest.txt")[5][1:5]
@@ -54,7 +54,7 @@ end
 end
 
 @testset "mask" begin
-    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, colinds=1:5, outfile="first5snps")
+    polrgwas(@formula(trait ~ sex), covfile, plkfile, colinds=1:5, outfile="first5snps")
     @test isfile("first5snps.nullmodel.txt")
     @test isfile("first5snps.scoretest.txt")
     @test countlines("first5snps.scoretest.txt") == 6
@@ -66,7 +66,7 @@ end
 
 @testset "test formula" begin
     # score test
-    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, outfile="GxE", testformula=@formula(trait ~ 0 + snp + snp & sex))
+    polrgwas(@formula(trait ~ sex), covfile, plkfile, outfile="GxE", testformula=@formula(trait ~ snp + snp & sex))
     @test isfile("GxE.nullmodel.txt")
     @test isfile("GxE.scoretest.txt")
     scorepvals = CSV.read("GxE.scoretest.txt")[5][1:5]
@@ -74,12 +74,11 @@ end
     rm("GxE.nullmodel.txt")
     rm("GxE.scoretest.txt")
     # LRT, only first 5 SNPs
-    polrgwas(@formula(trait ~ 0 + sex), covfile, plkfile, outfile="GxE", 
-    testformula=@formula(trait ~ 0 + snp + snp & sex), test=:LRT, colinds=1:5)
+    polrgwas(@formula(trait ~ sex), covfile, plkfile, outfile="GxE", 
+    testformula=@formula(trait ~ snp + snp & sex), test=:LRT, colinds=1:5)
     @test isfile("GxE.nullmodel.txt")
     @test isfile("GxE.lrttest.txt")
     lrtpvals = CSV.read("GxE.lrttest.txt")[end]
-    @show lrtpvals
     @test isapprox(lrtpvals, [1.0, 7.22410973e-3, 1.01730983e-4, 1.88174211e-5, 2.88295705e-2], rtol=1e-4)
     rm("GxE.nullmodel.txt")
     rm("GxE.lrttest.txt")

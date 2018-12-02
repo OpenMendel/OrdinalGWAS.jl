@@ -46,7 +46,7 @@ function polrgwas(
     df::DataFrame,
     plinkfile::Union{Nothing,AbstractString} = nothing;
     # keyword arguments
-    testformula::Formula=@eval(@formula($(nullformula.lhs) ~ 0 + snp)),
+    testformula::Formula = @eval(@formula($(nullformula.lhs) ~ snp)),
     outfile::AbstractString = "polrgwas",
     link::GLM.Link = LogitLink(),
     test::Symbol = :score,
@@ -80,9 +80,11 @@ function polrgwas(
     dfalt = df
     dfalt[:snp] = zeros(size(df, 1))
     # extra columns in design matrix to be tested
-    Z = similar(ModelMatrix(ModelFrame(testformula, dfalt)).m)
+    mfalt = ModelFrame(testformula, dfalt)
+    mfalt.terms.intercept = false # drop intercept
+    Z = similar(ModelMatrix(mfalt).m)
     # carry out score or LRT test SNP by SNP
-    snponly = testformula.rhs == :(0 + snp)
+    snponly = testformula.rhs == :snp
     genomat = SnpArrays.SnpArray(plinkfile * ".bed")
     mafreq = SnpArrays.maf(genomat) # TODO: need to calibrate according to rowinds
     if test == :score
@@ -98,7 +100,9 @@ function polrgwas(
                         copyto!(ts.Z, @view(genomat[rinds, j]), impute = true, model=snpmodel)
                     else # snp + other terms
                         copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true, model=snpmodel)
-                        ts.Z[:] = ModelMatrix(ModelFrame(testformula, dfalt)).m
+                        mfalt = ModelFrame(testformula, dfalt)
+                        mfalt.terms.intercept = false # drop intercept
+                        ts.Z[:] = ModelMatrix(mfalt).m
                     end
                     pval = polrtest(ts)
                 end
@@ -131,7 +135,9 @@ function polrgwas(
                         copyto!(@view(Xaug[:, nm.model.p+1]), @view(genomat[rinds, j]), impute = true, model=snpmodel)
                     else # snp + other terms
                         copyto!(dfalt[:snp], @view(genomat[rinds, j]), impute = true, model=snpmodel)
-                        Xaug[:, nm.model.p+1:end] = ModelMatrix(ModelFrame(testformula, dfalt)).m
+                        mfalt = ModelFrame(testformula, dfalt)
+                        mfalt.terms.intercept = false # drop intercept
+                        Xaug[:, nm.model.p+1:end] = ModelMatrix(mfalt).m
                     end
                     altmodel = polr(Xaug, nm.model.Y, nm.model.link, solver, wts = nm.model.wts)
                     copyto!(γ̂, 1, altmodel.β, nm.model.p + 1, q)
