@@ -58,7 +58,7 @@ using BenchmarkTools, CSV, PolrGWAS, SnpArrays
 
 
 ```julia
-;head -20 ../data/covariate.txt
+;head ../data/covariate.txt
 ```
 
     famid,perid,faid,moid,sex,trait
@@ -71,16 +71,6 @@ using BenchmarkTools, CSV, PolrGWAS, SnpArrays
     2430,NA19914,0,0,2,4
     2470,NA20287,0,0,2,1
     2436,NA19713,0,0,2,3
-    2426,NA19904,0,0,1,1
-    2431,NA19917,0,0,2,1
-    2436,NA19982,0,0,1,2
-    2487,NA20340,0,0,1,4
-    2427,NA19909,0,0,2,4
-    2424,NA19834,0,0,1,4
-    2480,NA20317,0,0,2,4
-    2418,NA19818,0,0,1,1
-    2490,NA20346,0,0,1,2
-    2433,NA19921,0,0,2,4
 
 
 `hapmap3` is a set of Plink files that contain the genotype information of samples. 
@@ -91,7 +81,7 @@ The following command performs GWAS using the [proportional odds model](https://
 
 
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3")
+polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3")
 ```
 
 For documentation of the `polrgwas` function, type `?polrgwas` in Julia REPL.
@@ -101,7 +91,7 @@ polrgwas
 
 ### Formula for null model
 
-The first argument specifies the null model without SNP effects, e.g., `@formula(trait ~ 0 + sex)`. Following R and Julia convention, `trait ~ 0 + sex` explicitly excludes intercept. It is important to **exclude** the intercept in `polr` model formulation because proportional odds model automatically incorporates intercepts for modeling purpose.
+The first argument specifies the null model without SNP effects, e.g., `@formula(trait ~ sex)`.
 
 ### Input files
 
@@ -111,7 +101,7 @@ Covariates and phenotype are available in a csv file `covariate.txt`, which has 
 
 
 ```julia
-;head -20 ../data/covariate.txt
+;head ../data/covariate.txt
 ```
 
     famid,perid,faid,moid,sex,trait
@@ -124,16 +114,6 @@ Covariates and phenotype are available in a csv file `covariate.txt`, which has 
     2430,NA19914,0,0,2,4
     2470,NA20287,0,0,2,1
     2436,NA19713,0,0,2,3
-    2426,NA19904,0,0,1,1
-    2431,NA19917,0,0,2,1
-    2436,NA19982,0,0,1,2
-    2487,NA20340,0,0,1,4
-    2427,NA19909,0,0,2,4
-    2424,NA19834,0,0,1,4
-    2480,NA20317,0,0,2,4
-    2418,NA19818,0,0,1,1
-    2490,NA20346,0,0,1,2
-    2433,NA19921,0,0,2,4
 
 
 Genotype data is available as binary Plink files.
@@ -166,7 +146,7 @@ size(SnpArray("../data/hapmap3.bed"))
 
 `polrgwas` outputs two files: `polrgwas.nullmodel.txt` and `polrgwas.scoretest.txt`. The prefix `polrgwas` of output files can be changed by the `outfile` keyword, e.g.,
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     outfile="hapmap3")
 ```
 
@@ -212,7 +192,7 @@ polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3",
 
 Internally `polrgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other format, users can parse first and then input a DataFrame to `polrgwas` directly.
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), df, "../data/hapmap3")
+polrgwas(@formula(trait ~ sex), df, "../data/hapmap3")
 ```
 !!! note
 
@@ -240,10 +220,10 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 
 
 ```julia
-@btime(polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3"))
+@btime(polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      130.712 ms (639477 allocations: 29.13 MiB)
+      133.562 ms (639428 allocations: 29.13 MiB)
 
 
 
@@ -265,7 +245,7 @@ For example, to perform GWAS using the ordred Probit model
 
 
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     link=ProbitLink(), outfile="opm")
 ```
 
@@ -370,11 +350,11 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 ```julia
 # GWAS on selected SNPs
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.219613 seconds (831.17 k allocations: 39.139 MiB, 3.44% gc time)
+      0.207569 seconds (685.53 k allocations: 32.051 MiB, 3.18% gc time)
 
 
 
@@ -396,7 +376,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 
 ```julia
-;head -20 commonvariant.scoretest.txt
+;head commonvariant.scoretest.txt
 ```
 
     chr,pos,snpid,maf,pval
@@ -409,16 +389,6 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     1,2396747,rs13376356,0.1448598130841121,0.5320416198875456
     1,2823603,rs1563468,0.4830246913580247,0.225191391783573
     1,3025087,rs6690373,0.2538699690402477,0.7018469417717486
-    1,3431124,rs12093117,0.1099071207430341,0.42779374684900734
-    1,3633945,rs10910017,0.22187500000000004,0.913128778096905
-    1,4096895,rs6702633,0.4752321981424149,0.006516308271075796
-    1,4297388,rs684965,0.3055555555555556,0.09519531577509736
-    1,4498133,rs11809295,0.0993788819875776,0.08324350470610889
-    1,4698713,rs578528,0.32407407407407407,0.06923073232117855
-    1,4899946,rs4654471,0.3580246913580247,0.22453129666689242
-    1,5100369,rs6681148,0.13157894736842102,0.15566709962762512
-    1,5302730,rs10799197,0.4287925696594427,0.6690547960840125
-    1,5502779,rs10796400,0.2314814814814815,0.24152455743940068
 
 
 
@@ -449,18 +419,18 @@ By default, `polrgwas` calculates p-value for each SNP using score test. Score t
 
 
 ```julia
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     test=:LRT, outfile="lrt")
 ```
 
-     20.709661 seconds (8.81 M allocations: 2.065 GiB, 1.80% gc time)
+     22.163986 seconds (8.84 M allocations: 2.066 GiB, 1.65% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
 
 
 ```julia
-;head -20 lrt.lrttest.txt
+;head lrt.lrttest.txt
 ```
 
     chr,pos,snpid,maf,effect,pval
@@ -473,16 +443,6 @@ Test result is output to `outfile.lrttest.txt` file
     1,1789051,rs16824508,0.00462962962962965,-0.7338026388701573,0.5169027130129711
     1,1990452,rs2678939,0.4537037037037037,-0.13586499231819726,0.29946402200912603
     1,2194615,rs7553178,0.22685185185185186,-0.2512075640440123,0.16151069094439868
-    1,2396747,rs13376356,0.1448598130841121,0.12946142026273783,0.5387338201469207
-    1,2623158,rs28753913,0.0,0.0,1.0
-    1,2823603,rs1563468,0.4830246913580247,0.15515329587697405,0.23123002081577315
-    1,3025087,rs6690373,0.2538699690402477,-0.05966638389967704,0.6995722170701131
-    1,3225416,rs12043519,0.029320987654321007,1.1761887120778427,0.002016744167744886
-    1,3431124,rs12093117,0.1099071207430341,0.1824233299545801,0.4305201231293997
-    1,3633945,rs10910017,0.22187500000000004,-0.01793569262704999,0.9142024828415289
-    1,3895935,rs34770924,0.024691358024691357,0.0009448575482649847,0.9980482909192042
-    1,4096895,rs6702633,0.4752321981424149,0.42308741025632207,0.0063052493446845445
-    1,4297388,rs684965,0.3055555555555556,-0.27091872232225434,0.09226258176075279
 
 
 Note the extra `effect` column, which is the effect size (regression coefficient) for each SNP. 
@@ -504,16 +464,16 @@ For large data sets, a practical solution is to perform score test first, then r
 
 
 ```julia
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.249964 seconds (718.42 k allocations: 33.304 MiB, 12.06% gc time)
+      0.241610 seconds (718.29 k allocations: 33.291 MiB, 9.28% gc time)
 
 
 
 ```julia
-;head -20 hapmap.scoretest.txt
+;head hapmap.scoretest.txt
 ```
 
     chr,pos,snpid,maf,pval
@@ -526,16 +486,6 @@ For large data sets, a practical solution is to perform score test first, then r
     1,1789051,rs16824508,0.00462962962962965,0.5111981332544
     1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
     1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
-    1,2396747,rs13376356,0.1448598130841121,0.5320416198875456
-    1,2623158,rs28753913,0.0,1.0
-    1,2823603,rs1563468,0.4830246913580247,0.225191391783573
-    1,3025087,rs6690373,0.2538699690402477,0.7018469417717486
-    1,3225416,rs12043519,0.029320987654321007,0.0010797837613683529
-    1,3431124,rs12093117,0.1099071207430341,0.42779374684900734
-    1,3633945,rs10910017,0.22187500000000004,0.913128778096905
-    1,3895935,rs34770924,0.024691358024691357,0.9990210608648795
-    1,4096895,rs6702633,0.4752321981424149,0.006516308271075796
-    1,4297388,rs684965,0.3055555555555556,0.09519531577509736
 
 
 **Step 2**: Sort score test p-values and find top 10 SNPs.
@@ -626,16 +576,16 @@ scorepvals[tophits]
 
 
 ```julia
-@time polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
+@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.162109 seconds (411.63 k allocations: 21.434 MiB, 4.57% gc time)
+      0.145945 seconds (266.03 k allocations: 14.362 MiB)
 
 
 
 ```julia
-;head -20 hapmap.lrttest.txt
+;head hapmap.lrttest.txt
 ```
 
     chr,pos,snpid,maf,effect,pval
@@ -648,7 +598,6 @@ scorepvals[tophits]
     6,52474721,rs2073183,0.1826625386996904,0.7790794914858663,5.069394513906121e-5
     7,41152376,rs28880,0.3379629629629629,-0.814633902445351,9.180126530294943e-7
     7,84223996,rs4128623,0.07870370370370372,1.0022229316338573,6.587895464657512e-5
-    23,121048059,rs1937165,0.4380804953560371,0.5392313636256612,1.9754643855522616e-5
 
 
 
@@ -667,13 +616,13 @@ In following example, keyword `testformula=@formula(trait ~ 0 + snp + snp & sex)
 
 
 ```julia
-polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
-    outfile="GxE", testformula=@formula(trait ~ 0 + snp + snp & sex))
+polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+    outfile="GxE", testformula=@formula(trait ~ snp + snp & sex))
 ```
 
 
 ```julia
-;head -20 GxE.scoretest.txt
+;head GxE.scoretest.txt
 ```
 
     chr,pos,snpid,maf,pval
@@ -686,16 +635,6 @@ polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3",
     1,1789051,rs16824508,0.00462962962962965,0.2964363114944328
     1,1990452,rs2678939,0.4537037037037037,0.37924580479348785
     1,2194615,rs7553178,0.22685185185185186,0.325582269932396
-    1,2396747,rs13376356,0.1448598130841121,0.81664019848141
-    1,2623158,rs28753913,0.0,1.0
-    1,2823603,rs1563468,0.4830246913580247,0.394387712136073
-    1,3025087,rs6690373,0.2538699690402477,0.929341576466736
-    1,3225416,rs12043519,0.029320987654321007,0.004580867523699672
-    1,3431124,rs12093117,0.1099071207430341,0.521577659391361
-    1,3633945,rs10910017,0.22187500000000004,0.9879831700595433
-    1,3895935,rs34770924,0.024691358024691357,0.39083539216130736
-    1,4096895,rs6702633,0.4752321981424149,0.012628962362857694
-    1,4297388,rs684965,0.3055555555555556,0.15091465952476424
 
 
 
@@ -710,12 +649,12 @@ To test the linear and quadratic SNP effects jointly
 
 ```julia
 polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3", 
-    outfile="quadratic", testformula=@formula(trait ~ 0 + snp + snp & snp))
+    outfile="quadratic", testformula=@formula(trait ~ snp + snp & snp))
 ```
 
 
 ```julia
-;head -20 quadratic.scoretest.txt
+;head quadratic.scoretest.txt
 ```
 
     chr,pos,snpid,maf,pval
@@ -728,16 +667,6 @@ polrgwas(@formula(trait ~ 0 + sex), "../data/covariate.txt", "../data/hapmap3",
     1,1789051,rs16824508,0.00462962962962965,1.0
     1,1990452,rs2678939,0.4537037037037037,1.0
     1,2194615,rs7553178,0.22685185185185186,1.0
-    1,2396747,rs13376356,0.1448598130841121,1.0
-    1,2623158,rs28753913,0.0,1.0
-    1,2823603,rs1563468,0.4830246913580247,1.0
-    1,3025087,rs6690373,0.2538699690402477,1.0
-    1,3225416,rs12043519,0.029320987654321007,1.0
-    1,3431124,rs12093117,0.1099071207430341,1.0
-    1,3633945,rs10910017,0.22187500000000004,1.0
-    1,3895935,rs34770924,0.024691358024691357,0.9999992473357002
-    1,4096895,rs6702633,0.4752321981424149,1.0
-    1,4297388,rs684965,0.3055555555555556,1.0
 
 
 
@@ -906,8 +835,8 @@ The output files are at `/Users/huazhou/.julia/dev/PolrGWAS/data`.
     -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
     -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
     -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      347 Dec  1 10:12 polrgwas.nullmodel.txt
-    -rw-r--r--  1 huazhou  staff   842401 Dec  1 10:12 polrgwas.scoretest.txt
+    -rw-r--r--  1 huazhou  staff      347 Dec  1 20:22 polrgwas.nullmodel.txt
+    -rw-r--r--  1 huazhou  staff   842401 Dec  1 20:22 polrgwas.scoretest.txt
     -rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl
 
 
