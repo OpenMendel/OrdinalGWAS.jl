@@ -7,9 +7,9 @@ PolrGWAS.jl is a Julia package for performing genome-wide association studies (G
 
 This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 ```julia
-(v0.7) pkg> add https://github.com/OpenMendel/SnpArrays.git#juliav0.7
-(v0.7) pkg> add https://github.com/OpenMendel/PolrModels.git
-(v0.7) pkg> add https://github.com/OpenMendel/PolrGWAS.git
+(v1.0) pkg> add https://github.com/OpenMendel/SnpArrays.git#juliav0.7
+(v1.0) pkg> add https://github.com/OpenMendel/PolrModels.git
+(v1.0) pkg> add https://github.com/OpenMendel/PolrGWAS.git
 ```
 
 
@@ -18,8 +18,8 @@ This package requires Julia v0.7.0 or later and two other unregistered packages 
 versioninfo()
 ```
 
-    Julia Version 0.7.0
-    Commit a4cb80f3ed (2018-08-08 06:46 UTC)
+    Julia Version 1.0.2
+    Commit d789231e99 (2018-11-08 20:11 UTC)
     Platform Info:
       OS: macOS (x86_64-apple-darwin14.5.0)
       CPU: Intel(R) Core(TM) i7-6920HQ CPU @ 2.90GHz
@@ -146,8 +146,7 @@ size(SnpArray("../data/hapmap3.bed"))
 
 `polrgwas` outputs two files: `polrgwas.nullmodel.txt` and `polrgwas.scoretest.txt`. The prefix `polrgwas` of output files can be changed by the `outfile` keyword, e.g.,
 ```julia
-polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    outfile="hapmap3")
+polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", outfile="hapmap3")
 ```
 
 * `polrgwas.nullmodel.txt` lists the estimated null model (without SNPs).  
@@ -223,7 +222,7 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 @btime(polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      133.562 ms (639428 allocations: 29.13 MiB)
+      129.735 ms (639113 allocations: 29.12 MiB)
 
 
 
@@ -354,7 +353,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.207569 seconds (685.53 k allocations: 32.051 MiB, 3.18% gc time)
+      0.222907 seconds (767.25 k allocations: 36.103 MiB, 6.67% gc time)
 
 
 
@@ -423,7 +422,7 @@ By default, `polrgwas` calculates p-value for each SNP using score test. Score t
     test=:LRT, outfile="lrt")
 ```
 
-     22.163986 seconds (8.84 M allocations: 2.066 GiB, 1.65% gc time)
+     19.855754 seconds (8.19 M allocations: 2.045 GiB, 2.01% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -468,7 +467,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, outfile="hapmap", verbose=false)
 ```
 
-      0.241610 seconds (718.29 k allocations: 33.291 MiB, 9.28% gc time)
+      0.232228 seconds (717.17 k allocations: 33.237 MiB, 6.99% gc time)
 
 
 
@@ -580,7 +579,7 @@ scorepvals[tophits]
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.145945 seconds (266.03 k allocations: 14.362 MiB)
+      0.159806 seconds (351.95 k allocations: 18.710 MiB, 4.96% gc time)
 
 
 
@@ -612,7 +611,7 @@ rm("hapmap.scoretest.txt")
 
 In many applications, we want to test SNP effect and/or its interaction with other terms. `testformula` keyword specifies the test unit **besides** the covariates in `nullformula`. 
 
-In following example, keyword `testformula=@formula(trait ~ 0 + snp + snp & sex)` instructs `polrgwas` to test joint effect of `snp` and `snp & sex` interaction.
+In following example, keyword `testformula=@formula(trait ~ snp + snp & sex)` instructs `polrgwas` to test joint effect of `snp` and `snp & sex` interaction.
 
 
 ```julia
@@ -814,7 +813,7 @@ For ease of using PolrGWAS, we provide a Dockerfile so users don't need to insta
 
 
 ```julia
-;docker run -v /Users/huazhou/.julia/dev/PolrGWAS/data:/data -t polrgwas-app julia -e 'using PolrGWAS; polrgwas(@formula(trait ~ 0 + sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/polrgwas");'
+;docker run -v /Users/huazhou/.julia/dev/PolrGWAS/data:/data -t polrgwas-app julia -e 'using PolrGWAS; polrgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/polrgwas");'
 ```
 
 Here  
@@ -835,8 +834,8 @@ The output files are at `/Users/huazhou/.julia/dev/PolrGWAS/data`.
     -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
     -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
     -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      347 Dec  1 20:22 polrgwas.nullmodel.txt
-    -rw-r--r--  1 huazhou  staff   842401 Dec  1 20:22 polrgwas.scoretest.txt
+    -rw-r--r--  1 huazhou  staff      347 Dec  1 23:06 polrgwas.nullmodel.txt
+    -rw-r--r--  1 huazhou  staff   842401 Dec  1 23:06 polrgwas.scoretest.txt
     -rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl
 
 
