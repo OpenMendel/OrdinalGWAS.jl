@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>PolrGWAS.jl · PolrGWAS</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>PolrGWAS</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href>PolrGWAS.jl</a><ul class="internal"><li><a class="toctext" href="#Installation-1">Installation</a></li><li><a class="toctext" href="#Example-data-set-1">Example data set</a></li><li><a class="toctext" href="#Basic-usage-1">Basic usage</a></li><li><a class="toctext" href="#Link-functions-1">Link functions</a></li><li><a class="toctext" href="#SNP-models-1">SNP models</a></li><li><a class="toctext" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></li><li><a class="toctext" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></li><li><a class="toctext" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></li><li><a class="toctext" href="#GxE-or-other-interactions-1">GxE or other interactions</a></li><li><a class="toctext" href="#Plots-1">Plots</a></li><li><a class="toctext" href="#Docker-1">Docker</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>PolrGWAS.jl</a></li></ul><a class="edit-page" href="https://github.com/OpenMendel/PolrGWAS.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>PolrGWAS.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="PolrGWAS.jl-1" href="#PolrGWAS.jl-1">PolrGWAS.jl</a></h1><p>PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a> or <a href="https://en.wikipedia.org/wiki/Ordered_probit">ordred Probit model</a>. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function <a href="https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr"><code>polr</code> in R package MASS</a>.</p><h2><a class="nav-anchor" id="Installation-1" href="#Installation-1">Installation</a></h2><p>This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL</p><pre><code class="language-julia">(v1.0) pkg&gt; add https://github.com/OpenMendel/SnpArrays.jl.git#juliav0.7
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>PolrGWAS.jl · PolrGWAS</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>PolrGWAS</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href>PolrGWAS.jl</a><ul class="internal"><li><a class="toctext" href="#Installation-1">Installation</a></li><li><a class="toctext" href="#Example-data-set-1">Example data set</a></li><li><a class="toctext" href="#Basic-usage-1">Basic usage</a></li><li><a class="toctext" href="#Link-functions-1">Link functions</a></li><li><a class="toctext" href="#SNP-models-1">SNP models</a></li><li><a class="toctext" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></li><li><a class="toctext" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></li><li><a class="toctext" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></li><li><a class="toctext" href="#GxE-or-other-interactions-1">GxE or other interactions</a></li><li><a class="toctext" href="#Plots-(TODO)-1">Plots (TODO)</a></li><li><a class="toctext" href="#Docker-1">Docker</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>PolrGWAS.jl</a></li></ul><a class="edit-page" href="https://github.com/OpenMendel/PolrGWAS.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>PolrGWAS.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="PolrGWAS.jl-1" href="#PolrGWAS.jl-1">PolrGWAS.jl</a></h1><p>PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a> or <a href="https://en.wikipedia.org/wiki/Ordered_probit">ordred Probit model</a>. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function <a href="https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr"><code>polr</code> in R package MASS</a>.</p><h2><a class="nav-anchor" id="Installation-1" href="#Installation-1">Installation</a></h2><p>This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL</p><pre><code class="language-julia">(v1.0) pkg&gt; add https://github.com/OpenMendel/SnpArrays.jl.git#juliav0.7
 (v1.0) pkg&gt; add https://github.com/OpenMendel/PolrModels.jl.git
 (v1.0) pkg&gt; add https://github.com/OpenMendel/PolrGWAS.jl.git</code></pre><pre><code class="language-julia"># machine information for this tutorial
 versioninfo()</code></pre><pre><code class="language-none">Julia Version 1.0.2
@@ -12,23 +12,15 @@ Platform Info:
   LLVM: libLLVM-6.0.0 (ORCJIT, skylake)
 Environment:
   JULIA_EDITOR = code</code></pre><pre><code class="language-julia"># for use in this tutorial
-using BenchmarkTools, CSV, PolrGWAS, SnpArrays</code></pre><h2><a class="nav-anchor" id="Example-data-set-1" href="#Example-data-set-1">Example data set</a></h2><p><code>data</code> folder of the package contains an example data set.</p><pre><code class="language-julia">;ls -l ../data</code></pre><pre><code class="language-none">total 3664
+using BenchmarkTools, CSV, PolrGWAS, SnpArrays</code></pre><h2><a class="nav-anchor" id="Example-data-set-1" href="#Example-data-set-1">Example data set</a></h2><p><code>data</code> folder of the package contains an example data set. In this tutorial, we use relative path <code>../data</code>. In general, user can locate this folder by command</p><pre><code class="language-julia">import PolrGWAS
+joinpath(dirname(pathof(PolrGWAS)), &quot;../data&quot;)</code></pre><pre><code class="language-julia">;ls -l ../data</code></pre><pre><code class="language-none">total 3664
 -rw-r--r--  1 huazhou  staff     6844 Nov 23 17:58 covariate.txt
 -rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 hapmap3.bed
 -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
 -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
 -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
--rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl</code></pre><p><code>covariate.txt</code> is a comma separated value (CSV) file containing the sample information, covariates <code>sex</code>, and phenotype <code>trait</code>. <code>trait</code> is coded as integer values 1, 2, 3 or 4. It was simulated from the script <code>simtrait.jl</code>. </p><pre><code class="language-julia">;head ../data/covariate.txt</code></pre><pre><code class="language-none">famid,perid,faid,moid,sex,trait
-2431,NA19916,0,0,1,4
-2424,NA19835,0,0,2,4
-2469,NA20282,0,0,2,4
-2368,NA19703,0,0,1,3
-2425,NA19901,0,0,2,3
-2427,NA19908,0,0,1,4
-2430,NA19914,0,0,2,4
-2470,NA20287,0,0,2,1
-2436,NA19713,0,0,2,3</code></pre><p><code>hapmap3</code> is a set of Plink files that contain the genotype information of samples. </p><h2><a class="nav-anchor" id="Basic-usage-1" href="#Basic-usage-1">Basic usage</a></h2><p>The following command performs GWAS using the <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a>.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;)</code></pre><p>For documentation of the <code>polrgwas</code> function, type <code>?polrgwas</code> in Julia REPL.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="PolrGWAS.polrgwas" href="#PolrGWAS.polrgwas"><code>PolrGWAS.polrgwas</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">polrgwas(nullformula, covfile, plinkfile)
-polrgwas(nullformula, df, plinkfile)</code></pre><p><strong>Positional arguments</strong></p><ul><li><code>nullformula::Formula</code>: formula for the null model.</li><li><code>covfile::AbstractString</code>: covariate file with one header line. One column    should be the ordered categorical phenotype coded as integers starting from 1.</li><li><code>df::DataFrame</code>: DataFrame containing response and regressors.</li><li><code>plinkfile::AbstractString</code>: Plink file name without the bed, fam, or bim    extensions. If <code>plinkfile==nothing</code>, only null model is fitted.</li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>outfile::AbstractString</code>: output file prefix; default is <code>polrgwas</code>. Two CSV output files   <code>prefix.nullmodel.txt</code> and <code>prefix.scoretest.txt</code> (or <code>prefix.lrttest.txt</code>) will be written.</li><li><code>covtype::Vector{DataType}</code>: type information for <code>covfile</code>. This is useful   when <code>CSV.read(covarfile)</code> has parsing errors.  </li><li><code>testformula::Formula</code>: formula for test unit. Default is <code>@formula(trait ~ 0 + snp)</code>.</li><li><code>test::Symbol</code>: <code>:score</code> (default) or <code>:LRT</code>.  </li><li><code>link::GLM.Link</code>: <code>LogitLink()</code> (default), <code>ProbitLink()</code>, <code>CauchitLink()</code>,   or <code>CloglogLink()</code>.</li><li><code>snpmodel</code>: <code>ADDITIVE_MODEL</code> (default), <code>DOMINANT_MODEL</code>, or <code>RECESSIVE_MODEL</code>.</li><li><code>colinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: SNP indices.</li><li><code>rowinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: sample indices for bed file.</li><li><code>solver</code>: an optimization solver supported by MathProgBase. Default is    <code>NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)</code>. Another common choice is    <code>IpoptSolver(print_level=0)</code>.</li><li><code>verbose::Bool</code>: default is <code>false</code>.</li></ul></div></div><a class="source-link" target="_blank" href="https://github.com/OpenMendel/PolrGWAS.jl/blob/92b78372a819446f33b4a0a1e40a151b5d6dc2d9/src/gwas.jl#L1-L29">source</a></section><h3><a class="nav-anchor" id="Formula-for-null-model-1" href="#Formula-for-null-model-1">Formula for null model</a></h3><p>The first argument specifies the null model without SNP effects, e.g., <code>@formula(trait ~ sex)</code>.</p><h3><a class="nav-anchor" id="Input-files-1" href="#Input-files-1">Input files</a></h3><p><code>polrgwas</code> expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).</p><p>Covariates and phenotype are available in a csv file <code>covariate.txt</code>, which has one header line for variable names. Variable <code>trait</code> is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable <code>sex</code> as the covariate in GWAS.</p><pre><code class="language-julia">;head ../data/covariate.txt</code></pre><pre><code class="language-none">famid,perid,faid,moid,sex,trait
+-rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl</code></pre><h2><a class="nav-anchor" id="Basic-usage-1" href="#Basic-usage-1">Basic usage</a></h2><p>The following command performs GWAS using the <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a>.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;)</code></pre><p>For documentation of the <code>polrgwas</code> function, type <code>?polrgwas</code> in Julia REPL.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="PolrGWAS.polrgwas" href="#PolrGWAS.polrgwas"><code>PolrGWAS.polrgwas</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">polrgwas(nullformula, covfile, plinkfile)
+polrgwas(nullformula, df, plinkfile)</code></pre><p><strong>Positional arguments</strong></p><ul><li><code>nullformula::Formula</code>: formula for the null model.</li><li><code>covfile::AbstractString</code>: covariate file with one header line. One column    should be the ordered categorical phenotype coded as integers starting from 1.</li><li><code>df::DataFrame</code>: DataFrame containing response and regressors.</li><li><code>plinkfile::AbstractString</code>: Plink file name without the bed, fam, or bim    extensions. If <code>plinkfile==nothing</code>, only null model is fitted.</li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>outfile::AbstractString</code>: output file prefix; default is <code>polrgwas</code>. Two CSV output files   <code>prefix.nullmodel.txt</code> and <code>prefix.scoretest.txt</code> (or <code>prefix.lrttest.txt</code>) will be written.</li><li><code>covtype::Vector{DataType}</code>: type information for <code>covfile</code>. This is useful   when <code>CSV.read(covarfile)</code> has parsing errors.  </li><li><code>testformula::Formula</code>: formula for test unit. Default is <code>@formula(trait ~ 0 + snp)</code>.</li><li><code>test::Symbol</code>: <code>:score</code> (default) or <code>:LRT</code>.  </li><li><code>link::GLM.Link</code>: <code>LogitLink()</code> (default), <code>ProbitLink()</code>, <code>CauchitLink()</code>,   or <code>CloglogLink()</code>.</li><li><code>snpmodel</code>: <code>ADDITIVE_MODEL</code> (default), <code>DOMINANT_MODEL</code>, or <code>RECESSIVE_MODEL</code>.</li><li><code>colinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: SNP indices.</li><li><code>rowinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: sample indices for bed file.</li><li><code>solver</code>: an optimization solver supported by MathProgBase. Default is    <code>NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)</code>. Another common choice is    <code>IpoptSolver(print_level=0)</code>.</li><li><code>verbose::Bool</code>: default is <code>false</code>.</li></ul></div></div><a class="source-link" target="_blank" href="https://github.com/OpenMendel/PolrGWAS.jl/blob/2a2199938f4243fa6babf9602c05a34a144fbd2f/src/gwas.jl#L1-L29">source</a></section><h3><a class="nav-anchor" id="Formula-for-null-model-1" href="#Formula-for-null-model-1">Formula for null model</a></h3><p>The first argument specifies the null model without SNP effects, e.g., <code>@formula(trait ~ sex)</code>.</p><h3><a class="nav-anchor" id="Input-files-1" href="#Input-files-1">Input files</a></h3><p><code>polrgwas</code> expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).</p><p>Covariates and phenotype are available in a csv file, e.g., <code>covariate.txt</code>, which has one header line for variable names. Variable <code>trait</code> is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable <code>sex</code> as the covariate in GWAS.</p><pre><code class="language-julia">;head ../data/covariate.txt</code></pre><pre><code class="language-none">famid,perid,faid,moid,sex,trait
 2431,NA19916,0,0,1,4
 2424,NA19835,0,0,2,4
 2469,NA20282,0,0,2,4
@@ -39,7 +31,25 @@ polrgwas(nullformula, df, plinkfile)</code></pre><p><strong>Positional arguments
 2470,NA20287,0,0,2,1
 2436,NA19713,0,0,2,3</code></pre><p>Genotype data is available as binary Plink files.</p><pre><code class="language-julia">;ls -l ../data/hapmap3.bed ../data/hapmap3.bim ../data/hapmap3.fam</code></pre><pre><code class="language-none">-rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 ../data/hapmap3.bed
 -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 ../data/hapmap3.bim
--rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 ../data/hapmap3.fam</code></pre><p>There are 324 samples at 13,928 SNPs.</p><pre><code class="language-julia">size(SnpArray(&quot;../data/hapmap3.bed&quot;))</code></pre><pre><code class="language-none">(324, 13928)</code></pre><h3><a class="nav-anchor" id="Output-files-1" href="#Output-files-1">Output files</a></h3><p><code>polrgwas</code> outputs two files: <code>polrgwas.nullmodel.txt</code> and <code>polrgwas.scoretest.txt</code>. The prefix <code>polrgwas</code> of output files can be changed by the <code>outfile</code> keyword, e.g.,</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, outfile=&quot;hapmap3&quot;)</code></pre><ul><li><code>polrgwas.nullmodel.txt</code> lists the estimated null model (without SNPs).  </li></ul><pre><code class="language-julia">;cat polrgwas.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
+-rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 ../data/hapmap3.fam</code></pre><pre><code class="language-julia">;head ../data/hapmap3.fam</code></pre><pre><code class="language-none">2431 NA19916 0 0 1 -9
+2424 NA19835 0 0 2 -9
+2469 NA20282 0 0 2 -9
+2368 NA19703 0 0 1 -9
+2425 NA19901 0 0 2 -9
+2427 NA19908 0 0 1 -9
+2430 NA19914 0 0 2 -9
+2470 NA20287 0 0 2 -9
+2436 NA19713 0 0 2 -9
+2426 NA19904 0 0 1 -9</code></pre><pre><code class="language-julia">;head ../data/hapmap3.bim</code></pre><pre><code class="language-none">1	rs10458597	0	554484	0	2
+1	rs12562034	0	758311	1	2
+1	rs2710875	0	967643	1	2
+1	rs11260566	0	1168108	1	2
+1	rs1312568	0	1375074	1	2
+1	rs35154105	0	1588771	0	2
+1	rs16824508	0	1789051	1	2
+1	rs2678939	0	1990452	1	2
+1	rs7553178	0	2194615	1	2
+1	rs13376356	0	2396747	1	2</code></pre><p>There are 324 samples at 13,928 SNPs.</p><pre><code class="language-julia">size(SnpArray(&quot;../data/hapmap3.bed&quot;))</code></pre><pre><code class="language-none">(324, 13928)</code></pre><h3><a class="nav-anchor" id="Output-files-1" href="#Output-files-1">Output files</a></h3><p><code>polrgwas</code> outputs two files: <code>polrgwas.nullmodel.txt</code> and <code>polrgwas.scoretest.txt</code>. The prefix <code>polrgwas</code> can be changed by the <code>outfile</code> keyword, e.g.,</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, outfile=&quot;hapmap3&quot;)</code></pre><ul><li><code>polrgwas.nullmodel.txt</code> lists the estimated null model (without SNPs).  </li></ul><pre><code class="language-julia">;cat polrgwas.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
 
 Formula: trait ~ +sex
 
@@ -57,12 +67,12 @@ Coefficients:
 1,1588771,rs35154105,0.0,1.0
 1,1789051,rs16824508,0.00462962962962965,0.5111981332544
 1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><h3><a class="nav-anchor" id="Input-non-genetic-data-as-DataFrame-1" href="#Input-non-genetic-data-as-DataFrame-1">Input non-genetic data as DataFrame</a></h3><p>Internally <code>polrgwas</code> parses the covariate file as a DataFrame by <code>CSV.read(covfile)</code>. For covariate file of other format, users can parse first and then input a DataFrame to <code>polrgwas</code> directly.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), df, &quot;../data/hapmap3&quot;)</code></pre><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p>Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. </p></div></div><p>For example, following code checks that the first 2 columns of the <code>covariate.txt</code> file match the first 2 columns of the <code>hapmap3.fam</code> file exactly.</p><pre><code class="language-julia">covdf = CSV.read(&quot;../data/covariate.txt&quot;)
+1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><h3><a class="nav-anchor" id="Input-non-genetic-data-as-DataFrame-1" href="#Input-non-genetic-data-as-DataFrame-1">Input non-genetic data as DataFrame</a></h3><p>Internally <code>polrgwas</code> parses the covariate file as a DataFrame by <code>CSV.read(covfile)</code>. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to <code>polrgwas</code> directly.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), df, &quot;../data/hapmap3&quot;)</code></pre><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p>Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. </p></div></div><p>For example, following code checks that the first 2 columns of the <code>covariate.txt</code> file match the first 2 columns of the <code>hapmap3.fam</code> file exactly.</p><pre><code class="language-julia">covdf = CSV.read(&quot;../data/covariate.txt&quot;)
 plkfam = CSV.read(&quot;../data/hapmap3.fam&quot;, header=0, delim=&#39; &#39;)
-all(covdf[1] .== plkfam[1]) &amp;&amp; all(covdf[2] .== plkfam[2])</code></pre><pre><code class="language-none">true</code></pre><h3><a class="nav-anchor" id="Timing-1" href="#Timing-1">Timing</a></h3><p>For this moderate-sized data set, <code>polrgwas</code> takes less than 0.2 second.</p><pre><code class="language-julia">@btime(polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;))</code></pre><pre><code class="language-none">  129.735 ms (639113 allocations: 29.12 MiB)</code></pre><pre><code class="language-julia"># clean up
+all(covdf[1] .== plkfam[1]) &amp;&amp; all(covdf[2] .== plkfam[2])</code></pre><pre><code class="language-none">true</code></pre><h3><a class="nav-anchor" id="Timing-1" href="#Timing-1">Timing</a></h3><p>For this moderate-sized data set, <code>polrgwas</code> takes less than 0.2 second.</p><pre><code class="language-julia">@btime(polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;))</code></pre><pre><code class="language-none">  127.658 ms (639113 allocations: 29.12 MiB)</code></pre><pre><code class="language-julia"># clean up
 rm(&quot;polrgwas.scoretest.txt&quot;)
-rm(&quot;polrgwas.nullmodel.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Link-functions-1" href="#Link-functions-1">Link functions</a></h2><p>The <code>link</code> keyword argument of <code>polrgwas</code> can take value:  </p><ul><li><code>LogitLink()</code>, proportional odds model (default),  </li><li><code>ProbitLink()</code>, ordred Probit model,  </li><li><code>CloglogLink()</code>, proportional hazards model), or </li><li><code>CauchyLink()</code>.</li></ul><p>For example, to perform GWAS using the ordred Probit model</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    link=ProbitLink(), outfile=&quot;opm&quot;)</code></pre><p>The estimates in null model and p-values are slightly different from proportional odds moodel.</p><pre><code class="language-julia">;cat opm.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,ProbitLink},Array{Float64,2}}
+rm(&quot;polrgwas.nullmodel.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Link-functions-1" href="#Link-functions-1">Link functions</a></h2><p>The <code>link</code> keyword argument of <code>polrgwas</code> can take value:  </p><ul><li><code>LogitLink()</code>, proportional odds model (default),  </li><li><code>ProbitLink()</code>, ordred Probit model,  </li><li><code>CloglogLink()</code>, proportional hazards model, or </li><li><code>CauchyLink()</code>.</li></ul><p>For example, to perform GWAS using the ordred Probit model</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
+    link=ProbitLink(), outfile=&quot;opm&quot;)</code></pre><p>The estimates in null model and p-values are slightly different from those in proportional odds moodel.</p><pre><code class="language-julia">;cat opm.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,ProbitLink},Array{Float64,2}}
 
 Formula: trait ~ +sex
 
@@ -81,7 +91,7 @@ Coefficients:
 1,1789051,rs16824508,0.00462962962962965,0.48653776297859236
 1,1990452,rs2678939,0.4537037037037037,0.33231290090455434
 1,2194615,rs7553178,0.22685185185185186,0.25915513977197435</code></pre><pre><code class="language-julia">rm(&quot;opm.nullmodel.txt&quot;)
-rm(&quot;opm.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="SNP-models-1" href="#SNP-models-1">SNP models</a></h2><p>Genotypes are translated into numeric values according to different genetic model, which is specified by the <code>snpmodel</code> keyword. Default is <code>ADDITIVE_MODEL</code>.</p><table><tr><th>Genotype</th><th><code>SnpArray</code></th><th><code>ADDITIVE_MODEL</code></th><th><code>DOMINANT_MODEL</code></th><th><code>RECESSIVE_MODEL</code></th></tr><tr><td>A1,A1</td><td>0x00</td><td>0</td><td>0</td><td>0</td></tr><tr><td>missing</td><td>0x01</td><td>NaN</td><td>NaN</td><td>NaN</td></tr><tr><td>A1,A2</td><td>0x02</td><td>1</td><td>1</td><td>0</td></tr><tr><td>A2,A2</td><td>0x03</td><td>2</td><td>1</td><td>1</td></tr></table><h2><a class="nav-anchor" id="SNP-and/or-sample-masks-1" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></h2><p>In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the <code>colinds</code> and <code>rowinds</code> keywords of <code>polrgwas</code> function.</p><p>For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05</p><pre><code class="language-julia"># create SNP mask
+rm(&quot;opm.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="SNP-models-1" href="#SNP-models-1">SNP models</a></h2><p>Genotypes are translated into numeric values according to different genetic model, which is specified by the <code>snpmodel</code> keyword. Default is <code>ADDITIVE_MODEL</code>.</p><table><tr><th>Genotype</th><th><code>SnpArray</code></th><th><code>ADDITIVE_MODEL</code></th><th><code>DOMINANT_MODEL</code></th><th><code>RECESSIVE_MODEL</code></th></tr><tr><td>A1,A1</td><td>0x00</td><td>0</td><td>0</td><td>0</td></tr><tr><td>missing</td><td>0x01</td><td>NaN</td><td>NaN</td><td>NaN</td></tr><tr><td>A1,A2</td><td>0x02</td><td>1</td><td>1</td><td>0</td></tr><tr><td>A2,A2</td><td>0x03</td><td>2</td><td>1</td><td>1</td></tr></table><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p><code>polrgwas</code> imputes missing genotypes according to minor allele frequencies. </p></div></div><p>Users are advised to impute genotypes using more sophiscated methods before GWAS.</p><h2><a class="nav-anchor" id="SNP-and/or-sample-masks-1" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></h2><p>In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the <code>colinds</code> and <code>rowinds</code> keywords of <code>polrgwas</code> function.</p><p>For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05</p><pre><code class="language-julia"># create SNP mask
 snpinds = maf(SnpArray(&quot;../data/hapmap3.bed&quot;)) .≥ 0.05</code></pre><pre><code class="language-none">13928-element BitArray{1}:
  false
   true
@@ -110,7 +120,7 @@ snpinds = maf(SnpArray(&quot;../data/hapmap3.bed&quot;)) .≥ 0.05</code></pre><
  false
  false</code></pre><pre><code class="language-julia"># GWAS on selected SNPs
 @time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    colinds = snpinds, outfile=&quot;commonvariant&quot;)</code></pre><pre><code class="language-none">  0.222907 seconds (767.25 k allocations: 36.103 MiB, 6.67% gc time)</code></pre><pre><code class="language-julia">;cat commonvariant.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    colinds = snpinds, outfile=&quot;commonvariant&quot;)</code></pre><pre><code class="language-none">  0.219776 seconds (767.25 k allocations: 36.103 MiB, 2.98% gc time)</code></pre><pre><code class="language-julia">;cat commonvariant.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
 
 Formula: trait ~ +sex
 
@@ -128,11 +138,11 @@ Coefficients:
 1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
 1,2396747,rs13376356,0.1448598130841121,0.5320416198875456
 1,2823603,rs1563468,0.4830246913580247,0.225191391783573
-1,3025087,rs6690373,0.2538699690402477,0.7018469417717486</code></pre><pre><code class="language-julia"># extra headline in commonvariant.scoretest.txt
+1,3025087,rs6690373,0.2538699690402477,0.7018469417717486</code></pre><pre><code class="language-julia"># extra header line in commonvariant.scoretest.txt
 countlines(&quot;commonvariant.scoretest.txt&quot;), count(snpinds)</code></pre><pre><code class="language-none">(12086, 12085)</code></pre><pre><code class="language-julia"># clean up
 rm(&quot;commonvariant.scoretest.txt&quot;)
 rm(&quot;commonvariant.nullmodel.txt&quot;)</code></pre><p>User should be particularly careful when using the <code>rowinds</code> keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.</p><h2><a class="nav-anchor" id="Likelihood-ratio-test-(LRT)-1" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></h2><p>By default, <code>polrgwas</code> calculates p-value for each SNP using score test. Score test is fast because it doesn&#39;t require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword <code>test=:LRT</code>. LRT is much slower but may be more powerful than score test.</p><pre><code class="language-julia">@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    test=:LRT, outfile=&quot;lrt&quot;)</code></pre><pre><code class="language-none"> 19.855754 seconds (8.19 M allocations: 2.045 GiB, 2.01% gc time)</code></pre><p>Test result is output to <code>outfile.lrttest.txt</code> file</p><pre><code class="language-julia">;head lrt.lrttest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
+    test=:LRT, outfile=&quot;lrt&quot;)</code></pre><pre><code class="language-none"> 19.886657 seconds (8.19 M allocations: 2.045 GiB, 1.92% gc time)</code></pre><p>Test result is output to <code>outfile.lrttest.txt</code> file</p><pre><code class="language-julia">;head lrt.lrttest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
 1,554484,rs10458597,0.0,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,-1.0057833719544331,0.0019185836579804134
 1,967643,rs2710875,0.32407407407407407,-0.6488560566295055,1.805050556976241e-5
@@ -144,7 +154,7 @@ rm(&quot;commonvariant.nullmodel.txt&quot;)</code></pre><p>User should be partic
 1,2194615,rs7553178,0.22685185185185186,-0.2512075640440123,0.16151069094439868</code></pre><p>Note the extra <code>effect</code> column, which is the effect size (regression coefficient) for each SNP. </p><pre><code class="language-julia"># clean up
 rm(&quot;lrt.lrttest.txt&quot;)
 rm(&quot;lrt.nullmodel.txt&quot;)</code></pre><p>In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. </p><h2><a class="nav-anchor" id="Score-test-for-screening,-LRT-for-power-1" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></h2><p>For large data sets, a practical solution is to perform score test first, then re-do LRT for the most promising SNPs according to score test p-values.</p><p><strong>Step 1</strong>: Perform score test GWAS, results in <code>hapmap.scoretest.txt</code>.</p><pre><code class="language-julia">@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    test=:score, outfile=&quot;hapmap&quot;, verbose=false)</code></pre><pre><code class="language-none">  0.232228 seconds (717.17 k allocations: 33.237 MiB, 6.99% gc time)</code></pre><pre><code class="language-julia">;head hapmap.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
+    test=:score, outfile=&quot;hapmap&quot;)</code></pre><pre><code class="language-none">  0.169224 seconds (639.13 k allocations: 29.123 MiB, 10.91% gc time)</code></pre><pre><code class="language-julia">;head hapmap.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
 1,554484,rs10458597,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,0.004565312839540994
 1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
@@ -153,43 +163,9 @@ rm(&quot;lrt.nullmodel.txt&quot;)</code></pre><p>In this example, GWAS by score 
 1,1588771,rs35154105,0.0,1.0
 1,1789051,rs16824508,0.00462962962962965,0.5111981332544
 1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><p><strong>Step 2</strong>: Sort score test p-values and find top 10 SNPs.</p><pre><code class="language-julia">scorepvals = CSV.read(&quot;hapmap.scoretest.txt&quot;)[5]</code></pre><pre><code class="language-none">13928-element Array{Union{Missing, Float64},1}:
- 1.0                  
- 0.004565312839540994 
- 3.1082838285548695e-5
- 1.2168672367668912e-5
- 0.008206860046175221 
- 1.0                  
- 0.5111981332544      
- 0.29972829571847825  
- 0.1713331245805063   
- 0.5320416198875456   
- 1.0                  
- 0.225191391783573    
- 0.7018469417717486   
- ⋮                    
- 0.3659920717810955   
- 0.5612543378640146   
- 0.11646522388490779  
- 0.5216852471858483   
- 0.44711860378438606  
- 0.16565527326637602  
- 0.65590930553447     
- 0.89481895007441     
- 0.6559093055344556   
- 0.3462815220311233   
- 0.2316733923395225   
- 0.2651082379376032</code></pre><pre><code class="language-julia">tophits = sortperm(scorepvals)[1:10]</code></pre><pre><code class="language-none">10-element Array{Int64,1}:
-  6063
-  5071
-  2458
-     4
-  3291
- 13737
-  5293
-     3
-  6256
-  4183</code></pre><pre><code class="language-julia">scorepvals[tophits]</code></pre><pre><code class="language-none">10-element Array{Union{Missing, Float64},1}:
+1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><p><strong>Step 2</strong>: Sort score test p-values and find top 10 SNPs.</p><pre><code class="language-julia">scorepvals = CSV.read(&quot;hapmap.scoretest.txt&quot;)[5] # p-values in 5th column
+tophits = sortperm(scorepvals)[1:10] # indices of 10 SNPs with smallest p-values
+scorepvals[tophits] # smallest 10 p-values</code></pre><pre><code class="language-none">10-element Array{Union{Missing, Float64},1}:
  1.3080149099181335e-6
  6.536722765052079e-6 
  9.664742185669054e-6 
@@ -200,7 +176,7 @@ rm(&quot;lrt.nullmodel.txt&quot;)</code></pre><p>In this example, GWAS by score 
  3.1082838285548695e-5
  4.1010912875160476e-5
  4.2966265138454806e-5</code></pre><p><strong>Step 3</strong>: Re-do LRT on top hits.</p><pre><code class="language-julia">@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    colinds=tophits, test=:LRT, outfile=&quot;hapmap&quot;)</code></pre><pre><code class="language-none">  0.159806 seconds (351.95 k allocations: 18.710 MiB, 4.96% gc time)</code></pre><pre><code class="language-julia">;head hapmap.lrttest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
+    colinds=tophits, test=:LRT, outfile=&quot;hapmap&quot;)</code></pre><pre><code class="language-none">  0.159028 seconds (360.50 k allocations: 19.063 MiB, 4.11% gc time)</code></pre><pre><code class="language-julia">;cat hapmap.lrttest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
 1,967643,rs2710875,0.32407407407407407,-0.6488560566295055,1.805050556976241e-5
 1,1168108,rs11260566,0.19158878504672894,-0.9157225669357879,5.873384712685568e-6
 3,36821790,rs4678553,0.23456790123456794,0.7424952268973518,1.1303825016262592e-5
@@ -209,7 +185,8 @@ rm(&quot;lrt.nullmodel.txt&quot;)</code></pre><p>In this example, GWAS by score 
 6,7574576,rs1885466,0.17746913580246915,0.8750621092263019,7.272346896740631e-6
 6,52474721,rs2073183,0.1826625386996904,0.7790794914858663,5.069394513906121e-5
 7,41152376,rs28880,0.3379629629629629,-0.814633902445351,9.180126530294943e-7
-7,84223996,rs4128623,0.07870370370370372,1.0022229316338573,6.587895464657512e-5</code></pre><pre><code class="language-julia"># clean up
+7,84223996,rs4128623,0.07870370370370372,1.0022229316338573,6.587895464657512e-5
+23,121048059,rs1937165,0.4380804953560371,0.5392313636256612,1.9754643855522616e-5</code></pre><pre><code class="language-julia"># clean up
 rm(&quot;hapmap.nullmodel.txt&quot;)
 rm(&quot;hapmap.lrttest.txt&quot;)
 rm(&quot;hapmap.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="GxE-or-other-interactions-1" href="#GxE-or-other-interactions-1">GxE or other interactions</a></h2><p>In many applications, we want to test SNP effect and/or its interaction with other terms. <code>testformula</code> keyword specifies the test unit <strong>besides</strong> the covariates in <code>nullformula</code>. </p><p>In following example, keyword <code>testformula=@formula(trait ~ snp + snp &amp; sex)</code> instructs <code>polrgwas</code> to test joint effect of <code>snp</code> and <code>snp &amp; sex</code> interaction.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
@@ -224,132 +201,7 @@ rm(&quot;hapmap.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="G
 1,1990452,rs2678939,0.4537037037037037,0.37924580479348785
 1,2194615,rs7553178,0.22685185185185186,0.325582269932396</code></pre><pre><code class="language-julia"># clean up
 rm(&quot;GxE.nullmodel.txt&quot;)
-rm(&quot;GxE.scoretest.txt&quot;)</code></pre><p>To test the linear and quadratic SNP effects jointly</p><pre><code class="language-julia">polrgwas(@formula(trait ~ 0 + sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    outfile=&quot;quadratic&quot;, testformula=@formula(trait ~ snp + snp &amp; snp))</code></pre><pre><code class="language-julia">;head quadratic.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
-1,554484,rs10458597,0.0,1.0
-1,758311,rs12562034,0.07763975155279501,1.0
-1,967643,rs2710875,0.32407407407407407,1.0
-1,1168108,rs11260566,0.19158878504672894,1.0
-1,1375074,rs1312568,0.441358024691358,1.0
-1,1588771,rs35154105,0.0,1.0
-1,1789051,rs16824508,0.00462962962962965,1.0
-1,1990452,rs2678939,0.4537037037037037,1.0
-1,2194615,rs7553178,0.22685185185185186,1.0</code></pre><pre><code class="language-julia"># clean up
-rm(&quot;quadratic.nullmodel.txt&quot;)
-rm(&quot;quadratic.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Plots-1" href="#Plots-1">Plots</a></h2><p>To plot the GWAS results, use the MendelPlots (TODO) package.</p><h2><a class="nav-anchor" id="Docker-1" href="#Docker-1">Docker</a></h2><p>For ease of using PolrGWAS, we provide a Dockerfile so users don&#39;t need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.</p><p><strong>Step 1</strong>: Create a Dockerfile with content shown below. You can copy from <a href="https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile">here</a>.</p><pre><code class="language-julia">;cat ../docker/Dockerfile</code></pre><pre><code class="language-none">FROM centos:7
-
-WORKDIR /root
-
-RUN yum update -y &amp;&amp; yum install -y epel-release &amp;&amp; yum clean all
-
-RUN yum update -y &amp;&amp; yum install -y \
-    cmake \
-    curl-devel \
-    expat-devel \
-    gcc \
-    gcc-c++ \
-    gcc-gfortran \
-    gettext-devel \
-    make \
-    openssl \
-    openssl098e \
-    openssl-devel \
-    patch \
-    svn \
-    wget \
-    which \
-    &amp;&amp; yum clean all    
-
-ENV PATH /usr/local/sbin:/usr/local/bin:$PATH
-
-ENV LD_LIBRARY_PATH /usr/local/lib:/usr/local/lib64
-
-# GIT - https://git-scm.com/
-# http://tecadmin.net/install-git-2-0-on-centos-rhel-fedora/#
-ENV GIT_VER 2.19.1
-
-RUN wget https://www.kernel.org/pub/software/scm/git/git-$GIT_VER.tar.gz \
-    &amp;&amp; tar xf git-$GIT_VER.tar.gz &amp;&amp; cd git-$GIT_VER \
-    &amp;&amp; make -j&quot;$(nproc --all)&quot; prefix=/usr/local all \
-    &amp;&amp; make prefix=/usr/local -j&quot;$(nproc --all)&quot; install \
-    &amp;&amp; cd .. &amp;&amp; rm -f git-$GIT_VER.tar.gz &amp;&amp; rm -rf git-$GIT_VER
-
-# Makes git use https by default
-RUN git config --global url.&quot;https://&quot;.insteadOf git://
-
-# Julia
-ENV JULIA_VER_MAJ 1.0
-ENV JULIA_VER_MIN .1
-ENV JULIA_VER $JULIA_VER_MAJ$JULIA_VER_MIN
-
-RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz \
-    &amp;&amp; mkdir /usr/local/julia \
-    &amp;&amp; tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1 \
-    &amp;&amp; ln -s /usr/local/julia/bin/julia /usr/local/bin/julia \
-    &amp;&amp; rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
-
-ENV JULIA_PKGDIR /usr/local/julia/share/julia/site
-
-RUN julia -e &#39;using Pkg; \
-    Pkg.add([ \
-    PackageSpec(url=&quot;https://github.com/OpenMendel/SnpArrays.jl.git&quot;, rev=&quot;juliav0.7&quot;), \
-    PackageSpec(url=&quot;https://github.com/OpenMendel/PolrModels.jl.git&quot;, rev=&quot;master&quot;), \
-    PackageSpec(url=&quot;https://github.com/OpenMendel/PolrGWAS.jl.git&quot;, rev=&quot;master&quot;) \
-    ]); \
-    Pkg.test(&quot;PolrGWAS&quot;);&#39;</code></pre><p><strong>Step 2</strong>: Build a docker image <code>polrgwas-app</code>, assuming that the Dockerfile is located at <code>../docker</code> folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.</p><pre><code class="language-julia">;docker build -t polrgwas-app ../docker/</code></pre><pre><code class="language-none">Sending build context to Docker daemon  3.584kB
-Step 1/15 : FROM centos:7
- ---&gt; 75835a67d134
-Step 2/15 : WORKDIR /root
- ---&gt; Using cache
- ---&gt; f052f835f42d
-Step 3/15 : RUN yum update -y &amp;&amp; yum install -y epel-release &amp;&amp; yum clean all
- ---&gt; Using cache
- ---&gt; a75b6baa5581
-Step 4/15 : RUN yum update -y &amp;&amp; yum install -y     cmake     curl-devel     expat-devel     gcc     gcc-c++     gcc-gfortran     gettext-devel     make     openssl     openssl098e     openssl-devel     patch     svn     wget     which     &amp;&amp; yum clean all
- ---&gt; Using cache
- ---&gt; dcf0f6ba6334
-Step 5/15 : ENV PATH /usr/local/sbin:/usr/local/bin:$PATH
- ---&gt; Using cache
- ---&gt; 7861f46c17eb
-Step 6/15 : ENV LD_LIBRARY_PATH /usr/local/lib:/usr/local/lib64
- ---&gt; Using cache
- ---&gt; 4d3222181efc
-Step 7/15 : ENV GIT_VER 2.19.1
- ---&gt; Using cache
- ---&gt; b23c5cb67786
-Step 8/15 : RUN wget https://www.kernel.org/pub/software/scm/git/git-$GIT_VER.tar.gz     &amp;&amp; tar xf git-$GIT_VER.tar.gz &amp;&amp; cd git-$GIT_VER     &amp;&amp; make -j&quot;$(nproc --all)&quot; prefix=/usr/local all     &amp;&amp; make prefix=/usr/local -j&quot;$(nproc --all)&quot; install     &amp;&amp; cd .. &amp;&amp; rm -f git-$GIT_VER.tar.gz &amp;&amp; rm -rf git-$GIT_VER
- ---&gt; Using cache
- ---&gt; 6beaafd797ec
-Step 9/15 : RUN git config --global url.&quot;https://&quot;.insteadOf git://
- ---&gt; Using cache
- ---&gt; f1aec5dd453f
-Step 10/15 : ENV JULIA_VER_MAJ 1.0
- ---&gt; Using cache
- ---&gt; 42eb17d93684
-Step 11/15 : ENV JULIA_VER_MIN .1
- ---&gt; Using cache
- ---&gt; 4289e3f44a22
-Step 12/15 : ENV JULIA_VER $JULIA_VER_MAJ$JULIA_VER_MIN
- ---&gt; Using cache
- ---&gt; 2e9b9213c88c
-Step 13/15 : RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz     &amp;&amp; mkdir /usr/local/julia     &amp;&amp; tar xf julia-$JULIA_VER-linux-x86_64.tar.gz --directory /usr/local/julia --strip-components=1     &amp;&amp; ln -s /usr/local/julia/bin/julia /usr/local/bin/julia     &amp;&amp; rm -f julia-$JULIA_VER-linux-x86_64.tar.gz
- ---&gt; Using cache
- ---&gt; 2510e817738a
-Step 14/15 : ENV JULIA_PKGDIR /usr/local/julia/share/julia/site
- ---&gt; Using cache
- ---&gt; 3692e40f50fa
-Step 15/15 : RUN julia -e &#39;using Pkg;     Pkg.add([     PackageSpec(url=&quot;https://github.com/OpenMendel/SnpArrays.jl.git&quot;, rev=&quot;juliav0.7&quot;),     PackageSpec(url=&quot;https://github.com/OpenMendel/PolrModels.jl.git&quot;, rev=&quot;master&quot;),     PackageSpec(url=&quot;https://github.com/OpenMendel/PolrGWAS.jl.git&quot;, rev=&quot;master&quot;)     ]);     Pkg.test(&quot;PolrGWAS&quot;);&#39;
- ---&gt; Using cache
- ---&gt; af7e8765610c
-Successfully built af7e8765610c
-Successfully tagged polrgwas-app:latest</code></pre><p><strong>Step 3</strong>: Suppose data files are located at <code>/Users/huazhou/.julia/dev/PolrGWAS/data</code> folder, run analysis by</p><pre><code class="language-julia">;docker run -v /Users/huazhou/.julia/dev/PolrGWAS/data:/data -t polrgwas-app julia -e &#39;using PolrGWAS; polrgwas(@formula(trait ~ sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, outfile=&quot;/data/polrgwas&quot;);&#39;</code></pre><p>Here  </p><ul><li><code>-t polrgwas-app</code> creates a container using the <code>polrgwas-app</code> image build in step 2.  </li><li><code>-v /Users/huazhou/.julia/dev/PolrGWAS/data:/data</code> maps the <code>/Users/huazhou/.julia/dev/PolrGWAS/data</code> folder on host machine to the <code>/data</code> folder within the container. </li><li><code>julia -e &#39;using PolrGWAS; polrgwas(@formula(trait ~ 0 + sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, outfile=&quot;/data/polrgwas&quot;);</code> calls Julia and runs <code>polrgwas</code> function. </li></ul><p>The output files are at <code>/Users/huazhou/.julia/dev/PolrGWAS/data</code>. </p><pre><code class="language-julia">;ls -l /Users/huazhou/.julia/dev/PolrGWAS/data/</code></pre><pre><code class="language-none">total 5320
--rw-r--r--  1 huazhou  staff     6844 Nov 23 17:58 covariate.txt
--rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 hapmap3.bed
--rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
--rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
--rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
--rw-r--r--  1 huazhou  staff      347 Dec  1 23:06 polrgwas.nullmodel.txt
--rw-r--r--  1 huazhou  staff   842401 Dec  1 23:06 polrgwas.scoretest.txt
--rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl</code></pre><pre><code class="language-julia"># clean up
-rm(&quot;/Users/huazhou/.julia/dev/PolrGWAS/data/polrgwas.nullmodel.txt&quot;)
-rm(&quot;/Users/huazhou/.julia/dev/PolrGWAS/data/polrgwas.scoretest.txt&quot;)</code></pre><footer><hr/></footer></article></body></html>
+rm(&quot;GxE.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Plots-(TODO)-1" href="#Plots-(TODO)-1">Plots (TODO)</a></h2><p>To plot the GWAS results, use the MendelPlots (TODO) package.</p><h2><a class="nav-anchor" id="Docker-1" href="#Docker-1">Docker</a></h2><p>For ease of using PolrGWAS, we provide a Dockerfile so users don&#39;t need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.</p><p><strong>Step 1</strong>: Create a Dockerfile with content <a href="https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile">here</a>, or, if the bash command <code>wget</code> is available,</p><pre><code class="language-bash"># on command line
+wget https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile</code></pre><p><strong>Step 2</strong>: Build a docker image called <code>polrgwas-app</code>, assuming that the Dockerfile is located in the <code>../docker</code> folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.</p><pre><code class="language-bash"># on command line
+docker build -t polrgwas-app ../docker/</code></pre><p><strong>Step 3</strong>: Suppose data files are located at <code>/path/to/data</code> folder, run analysis by</p><pre><code class="language-bash"># on command line
+docker run -v /path/to/data:/data -t polrgwas-app julia -e &#39;using PolrGWAS; polrgwas(@formula(trait ~ sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, outfile=&quot;/data/polrgwas&quot;);&#39;</code></pre><p>Here  </p><ul><li><code>-t polrgwas-app</code> creates a container using the <code>polrgwas-app</code> image build in step 2.  </li><li><code>-v /path/to/data:/data</code> maps the <code>/path/to/data</code> folder on host machine to the <code>/data</code> folder within the container. </li><li><code>julia -e &#39;using PolrGWAS; polrgwas(@formula(trait ~ 0 + sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, outfile=&quot;/data/polrgwas&quot;);</code> calls Julia and runs <code>polrgwas</code> function. </li></ul><p>The output files are written in <code>/path/to/data</code> directory. </p><footer><hr/></footer></article></body></html>
