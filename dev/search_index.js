@@ -137,11 +137,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "#Plots-(TODO)-1",
+    "location": "#Plotting-Results-1",
     "page": "PolrGWAS.jl",
-    "title": "Plots (TODO)",
+    "title": "Plotting Results",
     "category": "section",
-    "text": "To plot the GWAS results, use the MendelPlots (TODO) package."
+    "text": "To plot the GWAS results, use the MendelPlots.jl package."
 },
 
 {
