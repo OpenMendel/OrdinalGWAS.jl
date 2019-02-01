@@ -609,9 +609,9 @@ rm("GxE.nullmodel.txt")
 rm("GxE.scoretest.txt")
 ```
 
-## Plots (TODO)
+## Plotting Results
 
-To plot the GWAS results, use the MendelPlots (TODO) package.
+To plot the GWAS results, use the [MendelPlots.jl package](https://openmendel.github.io/MendelPlots.jl/latest/).
 
 ## Docker
 
