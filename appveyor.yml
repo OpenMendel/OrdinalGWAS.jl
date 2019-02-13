@@ -1,7 +1,7 @@
 environment:
   matrix:
-  - julia_version: 0.7
-  - julia_version: 1
+  - julia_version: 1.0
+  - julia_version: 1.1
   - julia_version: nightly
 
 platform:
@@ -30,7 +30,7 @@ install:
 
 build_script:
   - echo "install SnpArrays and PolrModels"
-  - C:\julia\bin\julia -e "using Pkg; Pkg.add([PackageSpec(url=\"https://github.com/OpenMendel/SnpArrays.jl.git\", rev=\"juliav0.7\"), PackageSpec(url=\"https://github.com/OpenMendel/PolrModels.jl.git\", rev=\"master\")]);"
+  - C:\julia\bin\julia -e "using Pkg; Pkg.add([PackageSpec(url=\"https://github.com/OpenMendel/SnpArrays.jl.git\", rev=\"juliav0.7\"), PackageSpec(url=\"https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git\", rev=\"master\")]);"
   - echo "%JL_BUILD_SCRIPT%"
   - C:\julia\bin\julia -e "%JL_BUILD_SCRIPT%"
 

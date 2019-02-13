@@ -1,15 +1,15 @@
 
-# PolrGWAS.jl
+# OrdinalGWAS.jl
 
-PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function [`polr` in R package MASS](https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr).
+OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function [`polr` in R package MASS](https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr).
 
 ## Installation
 
-This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
+This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays.jl and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 ```julia
-(v1.0) pkg> add https://github.com/OpenMendel/SnpArrays.jl.git#juliav0.7
-(v1.0) pkg> add https://github.com/OpenMendel/PolrModels.jl.git
-(v1.0) pkg> add https://github.com/OpenMendel/PolrGWAS.jl.git
+(v1.0) pkg> add https://github.com/OpenMendel/SnpArrays.jl.git
+(v1.0) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git
+(v1.0) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl.git
 ```
 
 
@@ -18,8 +18,8 @@ This package requires Julia v0.7.0 or later and two other unregistered packages 
 versioninfo()
 ```
 
-    Julia Version 1.0.2
-    Commit d789231e99 (2018-11-08 20:11 UTC)
+    Julia Version 1.0.3
+    Commit 099e826241 (2018-12-18 01:34 UTC)
     Platform Info:
       OS: macOS (x86_64-apple-darwin14.5.0)
       CPU: Intel(R) Core(TM) i7-6920HQ CPU @ 2.90GHz
@@ -33,7 +33,7 @@ versioninfo()
 
 ```julia
 # for use in this tutorial
-using BenchmarkTools, CSV, PolrGWAS, SnpArrays
+using BenchmarkTools, CSV, OrdinalGWAS, SnpArrays
 ```
 
 ## Example data set
@@ -41,7 +41,7 @@ using BenchmarkTools, CSV, PolrGWAS, SnpArrays
 `data` folder of the package contains an example data set. In this tutorial, we use relative path `../data`. In general, user can locate this folder by command
 ```julia
 import PolrGWAS
-joinpath(dirname(pathof(PolrGWAS)), "../data")
+joinpath(dirname(pathof(OrdinalGWAS)), "../data")
 ```
 
 
@@ -50,12 +50,12 @@ joinpath(dirname(pathof(PolrGWAS)), "../data")
 ```
 
     total 3664
-    -rw-r--r--  1 huazhou  staff     6844 Nov 23 17:58 covariate.txt
-    -rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
-    -rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl
+    -rw-r--r--  1 huazhou  staff     6844 Feb 13 09:42 covariate.txt
+    -rw-r--r--  1 huazhou  staff  1128171 Feb 13 09:42 hapmap3.bed
+    -rw-r--r--  1 huazhou  staff   388672 Feb 13 09:42 hapmap3.bim
+    -rw-r--r--  1 huazhou  staff     7136 Feb 13 09:42 hapmap3.fam
+    -rw-r--r--  1 huazhou  staff   332960 Feb 13 09:42 hapmap3.map
+    -rw-r--r--  1 huazhou  staff      773 Feb 13 09:42 simtrait.jl
 
 
 ## Basic usage
@@ -64,12 +64,12 @@ The following command performs GWAS using the [proportional odds model](https://
 
 
 ```julia
-polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3")
+ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3")
 ```
 
-For documentation of the `polrgwas` function, type `?polrgwas` in Julia REPL.
+For documentation of the `ordinalgwas` function, type `?ordinalgwas` in Julia REPL.
 ```@docs
-polrgwas
+ordinalgwas
 ```
 
 ### Formula for null model
@@ -106,9 +106,9 @@ Genotype data is available as binary Plink files.
 ;ls -l ../data/hapmap3.bed ../data/hapmap3.bim ../data/hapmap3.fam
 ```
 
-    -rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 ../data/hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 ../data/hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 ../data/hapmap3.fam
+    -rw-r--r--  1 huazhou  staff  1128171 Feb 13 09:42 ../data/hapmap3.bed
+    -rw-r--r--  1 huazhou  staff   388672 Feb 13 09:42 ../data/hapmap3.bim
+    -rw-r--r--  1 huazhou  staff     7136 Feb 13 09:42 ../data/hapmap3.fam
 
 
 
@@ -161,19 +161,19 @@ size(SnpArray("../data/hapmap3.bed"))
 
 ### Output files
 
-`polrgwas` outputs two files: `polrgwas.nullmodel.txt` and `polrgwas.scoretest.txt`. The prefix `polrgwas` can be changed by the `outfile` keyword, e.g.,
+`ordinalgwas` outputs two files: `ordinalgwas.nullmodel.txt` and `ordinalgwas.scoretest.txt`. The prefix `ordinalgwas` can be changed by the `outfile` keyword, e.g.,
 ```julia
-polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", outfile="hapmap3")
+ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", outfile="hapmap3")
 ```
 
-* `polrgwas.nullmodel.txt` lists the estimated null model (without SNPs).  
+* `ordinalgwas.nullmodel.txt` lists the estimated null model (without SNPs). 
 
 
 ```julia
-;cat polrgwas.nullmodel.txt
+;cat ordinalgwas.nullmodel.txt
 ```
 
-    StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
     Formula: trait ~ +sex
     
@@ -185,11 +185,11 @@ polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", outf
     β1    0.424656  0.213914  1.98517   0.0480
 
 
-* `polrgwas.scoretest.txt` tallies the SNPs and their pvalues. 
+* `ordinalgwas.scoretest.txt` tallies the SNPs and their pvalues. 
 
 
 ```julia
-;head polrgwas.scoretest.txt
+;head ordinalgwas.scoretest.txt
 ```
 
     chr,pos,snpid,maf,pval
@@ -206,9 +206,9 @@ polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", outf
 
 ### Input non-genetic data as DataFrame
 
-Internally `polrgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `polrgwas` directly.
+Internally `ordinalgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `ordinalgwas` directly.
 ```julia
-polrgwas(@formula(trait ~ sex), df, "../data/hapmap3")
+ordinalgwas(@formula(trait ~ sex), df, "../data/hapmap3")
 ```
 !!! note
 
@@ -236,22 +236,22 @@ For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
 
 
 ```julia
-@btime(polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3"))
+@btime(ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3"))
 ```
 
-      127.658 ms (639113 allocations: 29.12 MiB)
+      122.205 ms (639114 allocations: 29.12 MiB)
 
 
 
 ```julia
 # clean up
-rm("polrgwas.scoretest.txt")
-rm("polrgwas.nullmodel.txt")
+rm("ordinalgwas.scoretest.txt")
+rm("ordinalgwas.nullmodel.txt")
 ```
 
 ## Link functions
 
-The `link` keyword argument of `polrgwas` can take value:  
+The `link` keyword argument of `ordinalgwas` can take value:  
 - `LogitLink()`, proportional odds model (default),  
 - `ProbitLink()`, ordred Probit model,  
 - `CloglogLink()`, proportional hazards model, or 
@@ -261,7 +261,7 @@ For example, to perform GWAS using the ordred Probit model
 
 
 ```julia
-polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     link=ProbitLink(), outfile="opm")
 ```
 
@@ -272,7 +272,7 @@ The estimates in null model and p-values are slightly different from those in pr
 ;cat opm.nullmodel.txt
 ```
 
-    StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,ProbitLink},Array{Float64,2}}
+    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,ProbitLink},Array{Float64,2}}
     
     Formula: trait ~ +sex
     
@@ -320,13 +320,13 @@ Genotypes are translated into numeric values according to different genetic mode
 
 !!! note
 
-    `polrgwas` imputes missing genotypes according to minor allele frequencies. 
+    `ordinalgwas` imputes missing genotypes according to minor allele frequencies. 
     
 Users are advised to impute genotypes using more sophiscated methods before GWAS.
 
 ## SNP and/or sample masks
 
-In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `colinds` and `rowinds` keywords of `polrgwas` function.
+In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `colinds` and `rowinds` keywords of `ordinalgwas` function.
 
 For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05
 
@@ -372,11 +372,11 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 ```julia
 # GWAS on selected SNPs
-@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     colinds = snpinds, outfile="commonvariant")
 ```
 
-      0.219776 seconds (767.25 k allocations: 36.103 MiB, 2.98% gc time)
+      0.222445 seconds (763.04 k allocations: 35.890 MiB, 5.72% gc time)
 
 
 
@@ -384,7 +384,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 ;cat commonvariant.nullmodel.txt
 ```
 
-    StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
     Formula: trait ~ +sex
     
@@ -437,15 +437,15 @@ User should be particularly careful when using the `rowinds` keyword. Selected r
 
 ## Likelihood ratio test (LRT)
 
-By default, `polrgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:LRT`. LRT is much slower but may be more powerful than score test.
+By default, `ordinalgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:LRT`. LRT is much slower but may be more powerful than score test.
 
 
 ```julia
-@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     test=:LRT, outfile="lrt")
 ```
 
-     19.886657 seconds (8.19 M allocations: 2.045 GiB, 1.92% gc time)
+     19.246120 seconds (8.19 M allocations: 2.045 GiB, 2.17% gc time)
 
 
 Test result is output to `outfile.lrttest.txt` file
@@ -486,11 +486,11 @@ For large data sets, a practical solution is to perform score test first, then r
 
 
 ```julia
-@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     test=:score, outfile="hapmap")
 ```
 
-      0.169224 seconds (639.13 k allocations: 29.123 MiB, 10.91% gc time)
+      0.174742 seconds (639.13 k allocations: 29.121 MiB, 15.12% gc time)
 
 
 
@@ -540,11 +540,11 @@ scorepvals[tophits] # smallest 10 p-values
 
 
 ```julia
-@time polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     colinds=tophits, test=:LRT, outfile="hapmap")
 ```
 
-      0.159028 seconds (360.50 k allocations: 19.063 MiB, 4.11% gc time)
+      0.159163 seconds (349.75 k allocations: 18.455 MiB, 4.99% gc time)
 
 
 
@@ -577,11 +577,11 @@ rm("hapmap.scoretest.txt")
 
 In many applications, we want to test SNP effect and/or its interaction with other terms. `testformula` keyword specifies the test unit **besides** the covariates in `nullformula`. 
 
-In following example, keyword `testformula=@formula(trait ~ snp + snp & sex)` instructs `polrgwas` to test joint effect of `snp` and `snp & sex` interaction.
+In following example, keyword `testformula=@formula(trait ~ snp + snp & sex)` instructs `ordinalgwas` to test joint effect of `snp` and `snp & sex` interaction.
 
 
 ```julia
-polrgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
+ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
     outfile="GxE", testformula=@formula(trait ~ snp + snp & sex))
 ```
 
@@ -615,29 +615,29 @@ To plot the GWAS results, use the [MendelPlots.jl package](https://openmendel.gi
 
 ## Docker
 
-For ease of using PolrGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.
+For ease of using OrdinalGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.
 
-**Step 1**: Create a Dockerfile with content [here](https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile), or, if the bash command `wget` is available,
+**Step 1**: Create a Dockerfile with content [here](https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile), or, if the bash command `wget` is available,
 ```bash
 # on command line
-wget https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile
+wget https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile
 ```
 
-**Step 2**: Build a docker image called `polrgwas-app`, assuming that the Dockerfile is located in the `../docker` folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.
+**Step 2**: Build a docker image called `ordinalgwas-app`, assuming that the Dockerfile is located in the `../docker` folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.
 ```bash
 # on command line
-docker build -t polrgwas-app ../docker/
+docker build -t ordinalgwas-app ../docker/
 ```
 
 **Step 3**: Suppose data files are located at `/path/to/data` folder, run analysis by
 ```bash
 # on command line
-docker run -v /path/to/data:/data -t polrgwas-app julia -e 'using PolrGWAS; polrgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/polrgwas");'
+docker run -v /path/to/data:/data -t ordinalgwas-app julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/ordinalgwas");'
 ```
 
 Here  
-- `-t polrgwas-app` creates a container using the `polrgwas-app` image build in step 2.  
+- `-t ordinalgwas-app` creates a container using the `ordinalgwas-app` image build in step 2.  
 - `-v /path/to/data:/data` maps the `/path/to/data` folder on host machine to the `/data` folder within the container. 
-- `julia -e 'using PolrGWAS; polrgwas(@formula(trait ~ 0 + sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/polrgwas");` calls Julia and runs `polrgwas` function. 
+- `julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ 0 + sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/ordinalgwas");` calls Julia and runs `ordinalgwas` function. 
 
 The output files are written in `/path/to/data` directory. 

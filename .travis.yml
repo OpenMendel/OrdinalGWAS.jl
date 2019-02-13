@@ -5,8 +5,8 @@ os:
   - linux
   - osx
 julia:
-  - 0.7
   - 1.0
+  - 1.1
   - nightly
 matrix:
   allow_failures:
@@ -21,10 +21,10 @@ git:
 
 before_script: # install dependent unregistered packages
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git", rev="juliav0.7"), PackageSpec(url="https://github.com/OpenMendel/PolrModels.jl.git", rev="master")]);'
+  - julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git", rev="juliav0.7"), PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git", rev="master")]);'
 after_script:  # TODO: change to after_success once https://github.com/JuliaLang/julia/issues/28306 is fixed
   # push coverage results to Codecov and Coveralls
-  - julia -e 'using Pkg, PolrGWAS; cd(joinpath(dirname(pathof(PolrGWAS)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
+  - julia -e 'using Pkg, OrdinalGWAS; cd(joinpath(dirname(pathof(OrdinalGWAS)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
 
 jobs:
   include:
@@ -33,6 +33,6 @@ jobs:
       os: osx
       script:
         - julia -e 'using Pkg; Pkg.add("Documenter")'
-        - julia -e 'using PolrGWAS; include(joinpath(dirname(pathof(PolrGWAS)), "..", "docs", "make.jl"))'
+        - julia -e 'using OrdinalGWAS; include(joinpath(dirname(pathof(OrdinalGWAS)), "..", "docs", "make.jl"))'
       after_script: skip
       after_success: skip

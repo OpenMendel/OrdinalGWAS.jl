@@ -1,6 +1,6 @@
 """
-    polrgwas(nullformula, covfile, plinkfile)
-    polrgwas(nullformula, df, plinkfile)
+    ordinalgwas(nullformula, covfile, plinkfile)
+    ordinalgwas(nullformula, df, plinkfile)
 
 # Positional arguments 
 - `nullformula::Formula`: formula for the null model.
@@ -11,7 +11,7 @@
     extensions. If `plinkfile==nothing`, only null model is fitted.
 
 # Keyword arguments
-- `outfile::AbstractString`: output file prefix; default is `polrgwas`. Two CSV output files
+- `outfile::AbstractString`: output file prefix; default is `ordinalgwas`. Two CSV output files
     `prefix.nullmodel.txt` and `prefix.scoretest.txt` (or `prefix.lrttest.txt`) will be written.
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  
@@ -27,7 +27,7 @@
     `IpoptSolver(print_level=0)`.
 - `verbose::Bool`: default is `false`.
 """
-function polrgwas(
+function ordinalgwas(
     # positional arguments
     nullformula::Formula,
     covfile::AbstractString,
@@ -37,17 +37,17 @@ function polrgwas(
     kwargs...
     )
     covdf = CSV.read(covfile; types=covtype)
-    polrgwas(nullformula, covdf, plinkfile; kwargs...)
+    ordinalgwas(nullformula, covdf, plinkfile; kwargs...)
 end
 
-function polrgwas(
+function ordinalgwas(
     # positional arguments
     nullformula::Formula,
     df::DataFrame,
     plinkfile::Union{Nothing,AbstractString} = nothing;
     # keyword arguments
     testformula::Formula = @eval(@formula($(nullformula.lhs) ~ snp)),
-    outfile::AbstractString = "polrgwas",
+    outfile::AbstractString = "ordinalgwas",
     link::GLM.Link = LogitLink(),
     test::Symbol = :score,
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
@@ -88,7 +88,7 @@ function polrgwas(
     genomat = SnpArrays.SnpArray(plinkfile * ".bed")
     mafreq = SnpArrays.maf(genomat) # TODO: need to calibrate according to rowinds
     if test == :score
-        ts = PolrScoreTest(nm.model, Z)
+        ts = OrdinalMultinomialScoreTest(nm.model, Z)
         open(outfile * ".scoretest.txt", "w") do io
             println(io, "chr,pos,snpid,maf,pval")
             for (j, row) in enumerate(eachline(plinkfile * ".bim"))

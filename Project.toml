@@ -1,20 +1,20 @@
-name = "PolrGWAS"
+name = "OrdinalGWAS"
 uuid = "00428148-03d9-50ae-bfb7-4a690d5612f1"
 keywords = ["ordered multinomial model", "proportional odds model", "GWAS"]
 author = ["Hua Zhou <huazhou@ucla.edu>", "Chris German <germc3@ucla.edu>", "OpenMendel Team"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-PolrModels = "b51826c6-2bc1-4eb0-a3af-c080fd29f1d0"
+OrdinalMultinomialModels = "b51826c6-2bc1-4eb0-a3af-c080fd29f1d0"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SnpArrays = "4e780e97-f5bf-4111-9dc4-b70aaf691b06"
 StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 
 [compat]
-PolrModels = ">=0.2.0"
+OrdinalMultinomialModels = ">=0.3.0"
 SnpArrays = ">=0.1.0"
 
 [extras]

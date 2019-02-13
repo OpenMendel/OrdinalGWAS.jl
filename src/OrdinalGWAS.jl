@@ -1,11 +1,11 @@
 __precompile__()
 
-module PolrGWAS
+module OrdinalGWAS
 
 using CSV, DataFrames, Distributions, Reexport, SnpArrays
-@reexport using PolrModels
+@reexport using OrdinalMultinomialModels
 
-export polrgwas
+export ordinalgwas
 
 include("gwas.jl")
 
