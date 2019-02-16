@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>PolrGWAS.jl · PolrGWAS</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>PolrGWAS</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href>PolrGWAS.jl</a><ul class="internal"><li><a class="toctext" href="#Installation-1">Installation</a></li><li><a class="toctext" href="#Example-data-set-1">Example data set</a></li><li><a class="toctext" href="#Basic-usage-1">Basic usage</a></li><li><a class="toctext" href="#Link-functions-1">Link functions</a></li><li><a class="toctext" href="#SNP-models-1">SNP models</a></li><li><a class="toctext" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></li><li><a class="toctext" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></li><li><a class="toctext" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></li><li><a class="toctext" href="#GxE-or-other-interactions-1">GxE or other interactions</a></li><li><a class="toctext" href="#Plotting-Results-1">Plotting Results</a></li><li><a class="toctext" href="#Docker-1">Docker</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>PolrGWAS.jl</a></li></ul><a class="edit-page" href="https://github.com/OpenMendel/PolrGWAS.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>PolrGWAS.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="PolrGWAS.jl-1" href="#PolrGWAS.jl-1">PolrGWAS.jl</a></h1><p>PolrGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a> or <a href="https://en.wikipedia.org/wiki/Ordered_probit">ordred Probit model</a>. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function <a href="https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr"><code>polr</code> in R package MASS</a>.</p><h2><a class="nav-anchor" id="Installation-1" href="#Installation-1">Installation</a></h2><p>This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays and PolrModels. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL</p><pre><code class="language-julia">(v1.0) pkg&gt; add https://github.com/OpenMendel/SnpArrays.jl.git#juliav0.7
-(v1.0) pkg&gt; add https://github.com/OpenMendel/PolrModels.jl.git
-(v1.0) pkg&gt; add https://github.com/OpenMendel/PolrGWAS.jl.git</code></pre><pre><code class="language-julia"># machine information for this tutorial
-versioninfo()</code></pre><pre><code class="language-none">Julia Version 1.0.2
-Commit d789231e99 (2018-11-08 20:11 UTC)
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>OrdinalGWAS.jl · OrdinalGWAS</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>OrdinalGWAS</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href>OrdinalGWAS.jl</a><ul class="internal"><li><a class="toctext" href="#Installation-1">Installation</a></li><li><a class="toctext" href="#Example-data-set-1">Example data set</a></li><li><a class="toctext" href="#Basic-usage-1">Basic usage</a></li><li><a class="toctext" href="#Link-functions-1">Link functions</a></li><li><a class="toctext" href="#SNP-models-1">SNP models</a></li><li><a class="toctext" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></li><li><a class="toctext" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></li><li><a class="toctext" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></li><li><a class="toctext" href="#GxE-or-other-interactions-1">GxE or other interactions</a></li><li><a class="toctext" href="#Plotting-Results-1">Plotting Results</a></li><li><a class="toctext" href="#Docker-1">Docker</a></li><li><a class="toctext" href="#Multiple-Plink-files-1">Multiple Plink files</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href>OrdinalGWAS.jl</a></li></ul><a class="edit-page" href="https://github.com/OpenMendel/OrdinalGWAS.jl/blob/master/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>OrdinalGWAS.jl</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="OrdinalGWAS.jl-1" href="#OrdinalGWAS.jl-1">OrdinalGWAS.jl</a></h1><p>OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a> or <a href="https://en.wikipedia.org/wiki/Ordered_probit">ordred Probit model</a>. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).</p><h2><a class="nav-anchor" id="Installation-1" href="#Installation-1">Installation</a></h2><p>This package requires Julia v0.7.0 or later and two other unregistered packages SnpArrays.jl and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL</p><pre><code class="language-julia">(v1.0) pkg&gt; add https://github.com/OpenMendel/SnpArrays.jl.git
+(v1.0) pkg&gt; add https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git
+(v1.0) pkg&gt; add https://github.com/OpenMendel/OrdinalGWAS.jl.git</code></pre><pre><code class="language-julia"># machine information for this tutorial
+versioninfo()</code></pre><pre><code class="language-none">Julia Version 1.0.3
+Commit 099e826241 (2018-12-18 01:34 UTC)
 Platform Info:
   OS: macOS (x86_64-apple-darwin14.5.0)
   CPU: Intel(R) Core(TM) i7-6920HQ CPU @ 2.90GHz
@@ -12,15 +12,25 @@ Platform Info:
   LLVM: libLLVM-6.0.0 (ORCJIT, skylake)
 Environment:
   JULIA_EDITOR = code</code></pre><pre><code class="language-julia"># for use in this tutorial
-using BenchmarkTools, CSV, PolrGWAS, SnpArrays</code></pre><h2><a class="nav-anchor" id="Example-data-set-1" href="#Example-data-set-1">Example data set</a></h2><p><code>data</code> folder of the package contains an example data set. In this tutorial, we use relative path <code>../data</code>. In general, user can locate this folder by command</p><pre><code class="language-julia">import PolrGWAS
-joinpath(dirname(pathof(PolrGWAS)), &quot;../data&quot;)</code></pre><pre><code class="language-julia">;ls -l ../data</code></pre><pre><code class="language-none">total 3664
--rw-r--r--  1 huazhou  staff     6844 Nov 23 17:58 covariate.txt
--rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 hapmap3.bed
--rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 hapmap3.bim
--rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 hapmap3.fam
--rw-r--r--  1 huazhou  staff   332960 Nov 23 17:58 hapmap3.map
--rw-r--r--  1 huazhou  staff      773 Nov 23 17:58 simtrait.jl</code></pre><h2><a class="nav-anchor" id="Basic-usage-1" href="#Basic-usage-1">Basic usage</a></h2><p>The following command performs GWAS using the <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a>.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;)</code></pre><p>For documentation of the <code>polrgwas</code> function, type <code>?polrgwas</code> in Julia REPL.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="PolrGWAS.polrgwas" href="#PolrGWAS.polrgwas"><code>PolrGWAS.polrgwas</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">polrgwas(nullformula, covfile, plinkfile)
-polrgwas(nullformula, df, plinkfile)</code></pre><p><strong>Positional arguments</strong></p><ul><li><code>nullformula::Formula</code>: formula for the null model.</li><li><code>covfile::AbstractString</code>: covariate file with one header line. One column    should be the ordered categorical phenotype coded as integers starting from 1.</li><li><code>df::DataFrame</code>: DataFrame containing response and regressors.</li><li><code>plinkfile::AbstractString</code>: Plink file name without the bed, fam, or bim    extensions. If <code>plinkfile==nothing</code>, only null model is fitted.</li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>outfile::AbstractString</code>: output file prefix; default is <code>polrgwas</code>. Two CSV output files   <code>prefix.nullmodel.txt</code> and <code>prefix.scoretest.txt</code> (or <code>prefix.lrttest.txt</code>) will be written.</li><li><code>covtype::Vector{DataType}</code>: type information for <code>covfile</code>. This is useful   when <code>CSV.read(covarfile)</code> has parsing errors.  </li><li><code>testformula::Formula</code>: formula for test unit. Default is <code>@formula(trait ~ 0 + snp)</code>.</li><li><code>test::Symbol</code>: <code>:score</code> (default) or <code>:LRT</code>.  </li><li><code>link::GLM.Link</code>: <code>LogitLink()</code> (default), <code>ProbitLink()</code>, <code>CauchitLink()</code>,   or <code>CloglogLink()</code>.</li><li><code>snpmodel</code>: <code>ADDITIVE_MODEL</code> (default), <code>DOMINANT_MODEL</code>, or <code>RECESSIVE_MODEL</code>.</li><li><code>colinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: SNP indices.</li><li><code>rowinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: sample indices for bed file.</li><li><code>solver</code>: an optimization solver supported by MathProgBase. Default is    <code>NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)</code>. Another common choice is    <code>IpoptSolver(print_level=0)</code>.</li><li><code>verbose::Bool</code>: default is <code>false</code>.</li></ul></div></div><a class="source-link" target="_blank" href="https://github.com/OpenMendel/PolrGWAS.jl/blob/207754fdbef67386f445dbc9ac82fe8a4f8d9f60/src/gwas.jl#L1-L29">source</a></section><h3><a class="nav-anchor" id="Formula-for-null-model-1" href="#Formula-for-null-model-1">Formula for null model</a></h3><p>The first argument specifies the null model without SNP effects, e.g., <code>@formula(trait ~ sex)</code>.</p><h3><a class="nav-anchor" id="Input-files-1" href="#Input-files-1">Input files</a></h3><p><code>polrgwas</code> expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).</p><p>Covariates and phenotype are available in a csv file, e.g., <code>covariate.txt</code>, which has one header line for variable names. Variable <code>trait</code> is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable <code>sex</code> as the covariate in GWAS.</p><pre><code class="language-julia">;head ../data/covariate.txt</code></pre><pre><code class="language-none">famid,perid,faid,moid,sex,trait
+using BenchmarkTools, CSV, Glob, OrdinalGWAS, SnpArrays</code></pre><h2><a class="nav-anchor" id="Example-data-set-1" href="#Example-data-set-1">Example data set</a></h2><p><code>data</code> folder of the package contains an example data set. In general, user can locate this folder by command</p><pre><code class="language-julia">using OrdinalGWAS
+const datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), &quot;../data/&quot;))</code></pre><pre><code class="language-none">&quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/&quot;</code></pre><pre><code class="language-julia"># content of the data folder
+readdir(datadir)</code></pre><pre><code class="language-none">6-element Array{String,1}:
+ &quot;covariate.txt&quot;
+ &quot;hapmap3.bed&quot;  
+ &quot;hapmap3.bim&quot;  
+ &quot;hapmap3.fam&quot;  
+ &quot;hapmap3.map&quot;  
+ &quot;simtrait.jl&quot;</code></pre><h2><a class="nav-anchor" id="Basic-usage-1" href="#Basic-usage-1">Basic usage</a></h2><p>The following command performs GWAS using the <a href="https://en.wikipedia.org/wiki/Ordered_logit">proportional odds model</a>. The output is the fitted null model.</p><pre><code class="language-julia">ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;)</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+
+Formula: trait ~ +sex
+
+Coefficients:
+      Estimate Std.Error  t value Pr(&gt;|t|)
+θ1    -1.48564  0.358891 -4.13952    &lt;1e-4
+θ2   -0.569479  0.341044 -1.66981   0.0959
+θ3    0.429815  0.339642  1.26549   0.2066
+β1    0.424656  0.213914  1.98517   0.0480</code></pre><p>For documentation of the <code>ordinalgwas</code> function, type <code>?ordinalgwas</code> in Julia REPL.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="OrdinalGWAS.ordinalgwas" href="#OrdinalGWAS.ordinalgwas"><code>OrdinalGWAS.ordinalgwas</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-none">ordinalgwas(nullformula, covfile, plinkfile)
+ordinalgwas(nullformula, df, plinkfile)</code></pre><p><strong>Positional arguments</strong></p><ul><li><code>nullformula::Formula</code>: formula for the null model.</li><li><code>covfile::AbstractString</code>: covariate file (csv) with one header line. One column    should be the ordered categorical phenotype coded as integers starting from 1.</li><li><code>df::DataFrame</code>: DataFrame containing response and regressors.</li><li><code>plinkfile::AbstractString</code>: Plink file name without the bed, fam, or bim    extensions. If <code>plinkfile==nothing</code>, only null model is fitted.</li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>nullfile::AbstractString</code>: output file for the fitted null model; default is    <code>ordinalgwas.null.txt</code>. </li><li><code>pvalfile::AbstractString</code>: output file for the gwas p-values; default is    <code>ordinalgwas.pval.txt</code>. </li><li><code>covtype::Vector{DataType}</code>: type information for <code>covfile</code>. This is useful   when <code>CSV.read(covarfile)</code> has parsing errors.  </li><li><code>covrowinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: sample indices for covariate file.  </li><li><code>testformula::Formula</code>: formula for test unit. Default is <code>@formula(trait ~ 0 + snp)</code>.</li><li><code>test::Symbol</code>: <code>:score</code> (default) or <code>:lrt</code>.  </li><li><code>link::GLM.Link</code>: <code>LogitLink()</code> (default), <code>ProbitLink()</code>, <code>CauchitLink()</code>,   or <code>CloglogLink()</code>.</li><li><code>snpmodel</code>: <code>ADDITIVE_MODEL</code> (default), <code>DOMINANT_MODEL</code>, or <code>RECESSIVE_MODEL</code>.</li><li><code>snpinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: SNP indices for bed file.</li><li><code>bedrowinds::Union{Nothing,AbstractVector{&lt;:Integer}}</code>: sample indices for bed file.</li><li><code>solver</code>: an optimization solver supported by MathProgBase. Default is    <code>NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)</code>. Another common choice is    <code>IpoptSolver(print_level=0)</code>.</li><li><code>verbose::Bool</code>: default is <code>false</code>.</li></ul></div></div><a class="source-link" target="_blank" href="https://github.com/OpenMendel/OrdinalGWAS.jl/blob/3c8723d74b1e2ddfc23cff0b3fc4c19bf428a753/src/gwas.jl#L1-L32">source</a></section><h3><a class="nav-anchor" id="Formula-for-null-model-1" href="#Formula-for-null-model-1">Formula for null model</a></h3><p>The first argument specifies the null model without SNP effects, e.g., <code>@formula(trait ~ sex)</code>.</p><h3><a class="nav-anchor" id="Input-files-1" href="#Input-files-1">Input files</a></h3><p><code>ordinalgwas</code> expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).</p><p>Covariates and phenotype are available in a csv file, e.g., <code>covariate.txt</code>, which has one header line for variable names. Variable <code>trait</code> is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable <code>sex</code> as the covariate in GWAS.</p><pre><code class="language-julia">run(`head $(datadir)covariate.txt`);</code></pre><pre><code class="language-none">famid,perid,faid,moid,sex,trait
 2431,NA19916,0,0,1,4
 2424,NA19835,0,0,2,4
 2469,NA20282,0,0,2,4
@@ -29,27 +39,11 @@ polrgwas(nullformula, df, plinkfile)</code></pre><p><strong>Positional arguments
 2427,NA19908,0,0,1,4
 2430,NA19914,0,0,2,4
 2470,NA20287,0,0,2,1
-2436,NA19713,0,0,2,3</code></pre><p>Genotype data is available as binary Plink files.</p><pre><code class="language-julia">;ls -l ../data/hapmap3.bed ../data/hapmap3.bim ../data/hapmap3.fam</code></pre><pre><code class="language-none">-rw-r--r--  1 huazhou  staff  1128171 Nov 23 17:58 ../data/hapmap3.bed
--rw-r--r--  1 huazhou  staff   388672 Nov 23 17:58 ../data/hapmap3.bim
--rw-r--r--  1 huazhou  staff     7136 Nov 23 17:58 ../data/hapmap3.fam</code></pre><pre><code class="language-julia">;head ../data/hapmap3.fam</code></pre><pre><code class="language-none">2431 NA19916 0 0 1 -9
-2424 NA19835 0 0 2 -9
-2469 NA20282 0 0 2 -9
-2368 NA19703 0 0 1 -9
-2425 NA19901 0 0 2 -9
-2427 NA19908 0 0 1 -9
-2430 NA19914 0 0 2 -9
-2470 NA20287 0 0 2 -9
-2436 NA19713 0 0 2 -9
-2426 NA19904 0 0 1 -9</code></pre><pre><code class="language-julia">;head ../data/hapmap3.bim</code></pre><pre><code class="language-none">1	rs10458597	0	554484	0	2
-1	rs12562034	0	758311	1	2
-1	rs2710875	0	967643	1	2
-1	rs11260566	0	1168108	1	2
-1	rs1312568	0	1375074	1	2
-1	rs35154105	0	1588771	0	2
-1	rs16824508	0	1789051	1	2
-1	rs2678939	0	1990452	1	2
-1	rs7553178	0	2194615	1	2
-1	rs13376356	0	2396747	1	2</code></pre><p>There are 324 samples at 13,928 SNPs.</p><pre><code class="language-julia">size(SnpArray(&quot;../data/hapmap3.bed&quot;))</code></pre><pre><code class="language-none">(324, 13928)</code></pre><h3><a class="nav-anchor" id="Output-files-1" href="#Output-files-1">Output files</a></h3><p><code>polrgwas</code> outputs two files: <code>polrgwas.nullmodel.txt</code> and <code>polrgwas.scoretest.txt</code>. The prefix <code>polrgwas</code> can be changed by the <code>outfile</code> keyword, e.g.,</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, outfile=&quot;hapmap3&quot;)</code></pre><ul><li><code>polrgwas.nullmodel.txt</code> lists the estimated null model (without SNPs).  </li></ul><pre><code class="language-julia">;cat polrgwas.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
+2436,NA19713,0,0,2,3</code></pre><p>Genotype data is available as binary Plink files.</p><pre><code class="language-julia">readdir(glob&quot;hapmap3.*&quot;, datadir)</code></pre><pre><code class="language-none">4-element Array{String,1}:
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bed&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bim&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.fam&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.map&quot;</code></pre><p>There are 324 samples at 13,928 SNPs.</p><pre><code class="language-julia">size(SnpArray(datadir * &quot;hapmap3.bed&quot;))</code></pre><pre><code class="language-none">(324, 13928)</code></pre><h3><a class="nav-anchor" id="Output-files-1" href="#Output-files-1">Output files</a></h3><p><code>ordinalgwas</code> outputs two files: <code>ordinalgwas.null.txt</code> and <code>ordinalgwas.pval.txt</code>. </p><ul><li><code>ordinalgwas.null.txt</code> lists the estimated null model (without SNPs). </li></ul><pre><code class="language-julia">run(`cat ordinalgwas.null.txt`);</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
 
 Formula: trait ~ +sex
 
@@ -58,7 +52,7 @@ Coefficients:
 θ1    -1.48564  0.358891 -4.13952    &lt;1e-4
 θ2   -0.569479  0.341044 -1.66981   0.0959
 θ3    0.429815  0.339642  1.26549   0.2066
-β1    0.424656  0.213914  1.98517   0.0480</code></pre><ul><li><code>polrgwas.scoretest.txt</code> tallies the SNPs and their pvalues. </li></ul><pre><code class="language-julia">;head polrgwas.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
+β1    0.424656  0.213914  1.98517   0.0480</code></pre><ul><li><code>ordinalgwas.pval.txt</code> tallies the SNPs and their pvalues. </li></ul><pre><code class="language-julia">run(`head ordinalgwas.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
 1,554484,rs10458597,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,0.004565312839540994
 1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
@@ -67,12 +61,12 @@ Coefficients:
 1,1588771,rs35154105,0.0,1.0
 1,1789051,rs16824508,0.00462962962962965,0.5111981332544
 1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><h3><a class="nav-anchor" id="Input-non-genetic-data-as-DataFrame-1" href="#Input-non-genetic-data-as-DataFrame-1">Input non-genetic data as DataFrame</a></h3><p>Internally <code>polrgwas</code> parses the covariate file as a DataFrame by <code>CSV.read(covfile)</code>. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to <code>polrgwas</code> directly.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), df, &quot;../data/hapmap3&quot;)</code></pre><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p>Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. </p></div></div><p>For example, following code checks that the first 2 columns of the <code>covariate.txt</code> file match the first 2 columns of the <code>hapmap3.fam</code> file exactly.</p><pre><code class="language-julia">covdf = CSV.read(&quot;../data/covariate.txt&quot;)
-plkfam = CSV.read(&quot;../data/hapmap3.fam&quot;, header=0, delim=&#39; &#39;)
-all(covdf[1] .== plkfam[1]) &amp;&amp; all(covdf[2] .== plkfam[2])</code></pre><pre><code class="language-none">true</code></pre><h3><a class="nav-anchor" id="Timing-1" href="#Timing-1">Timing</a></h3><p>For this moderate-sized data set, <code>polrgwas</code> takes less than 0.2 second.</p><pre><code class="language-julia">@btime(polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;))</code></pre><pre><code class="language-none">  127.658 ms (639113 allocations: 29.12 MiB)</code></pre><pre><code class="language-julia"># clean up
-rm(&quot;polrgwas.scoretest.txt&quot;)
-rm(&quot;polrgwas.nullmodel.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Link-functions-1" href="#Link-functions-1">Link functions</a></h2><p>The <code>link</code> keyword argument of <code>polrgwas</code> can take value:  </p><ul><li><code>LogitLink()</code>, proportional odds model (default),  </li><li><code>ProbitLink()</code>, ordred Probit model,  </li><li><code>CloglogLink()</code>, proportional hazards model, or </li><li><code>CauchyLink()</code>.</li></ul><p>For example, to perform GWAS using the ordred Probit model</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    link=ProbitLink(), outfile=&quot;opm&quot;)</code></pre><p>The estimates in null model and p-values are slightly different from those in proportional odds moodel.</p><pre><code class="language-julia">;cat opm.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,ProbitLink},Array{Float64,2}}
+1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><p>Output file names can be changed by the <code>nullfile</code> and <code>pvalfile</code> keywords respectively. For example, </p><pre><code class="language-julia">ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, pvalfile=&quot;ordinalgwas.pval.txt.gz&quot;)</code></pre><p>will output the p-value file in compressed gz format.</p><h3><a class="nav-anchor" id="Input-non-genetic-data-as-DataFrame-1" href="#Input-non-genetic-data-as-DataFrame-1">Input non-genetic data as DataFrame</a></h3><p>Internally <code>ordinalgwas</code> parses the covariate file as a DataFrame by <code>CSV.read(covfile)</code>. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to <code>ordinalgwas</code> directly.</p><pre><code class="language-julia">ordinalgwas(@formula(trait ~ sex), df, plinkfile)</code></pre><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p>Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. </p></div></div><p>For example, following code checks that the first 2 columns of the <code>covariate.txt</code> file match the first 2 columns of the <code>hapmap3.fam</code> file exactly.</p><pre><code class="language-julia">covdf = CSV.read(datadir * &quot;covariate.txt&quot;)
+plkfam = CSV.read(datadir * &quot;hapmap3.fam&quot;, header=0, delim=&#39; &#39;)
+all(covdf[1] .== plkfam[1]) &amp;&amp; all(covdf[2] .== plkfam[2])</code></pre><pre><code class="language-none">true</code></pre><h3><a class="nav-anchor" id="Timing-1" href="#Timing-1">Timing</a></h3><p>For this moderate-sized data set, <code>ordinalgwas</code> takes less than 0.2 second.</p><pre><code class="language-julia">@btime(ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;));</code></pre><pre><code class="language-none">  163.797 ms (710982 allocations: 33.35 MiB)</code></pre><pre><code class="language-julia"># clean up
+rm(&quot;ordinalgwas.null.txt&quot;)
+rm(&quot;ordinalgwas.pval.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Link-functions-1" href="#Link-functions-1">Link functions</a></h2><p>The <code>link</code> keyword argument of <code>ordinalgwas</code> can take value:  </p><ul><li><code>LogitLink()</code>, proportional odds model (default),  </li><li><code>ProbitLink()</code>, ordred Probit model,  </li><li><code>CloglogLink()</code>, proportional hazards model, or </li><li><code>CauchyLink()</code>.</li></ul><p>For example, to perform GWAS using the ordred Probit model</p><pre><code class="language-julia">ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, 
+    link=ProbitLink(), nullfile=&quot;opm.null.txt&quot;, pvalfile=&quot;opm.pval.txt&quot;)</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,ProbitLink},Array{Float64,2}}
 
 Formula: trait ~ +sex
 
@@ -81,7 +75,7 @@ Coefficients:
 θ1   -0.866156  0.210677 -4.11129    &lt;1e-4
 θ2   -0.359878  0.205817 -1.74854   0.0813
 θ3    0.247054  0.205382   1.2029   0.2299
-β1    0.251058  0.128225  1.95795   0.0511</code></pre><pre><code class="language-julia">;head opm.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
+β1    0.251058  0.128225  1.95795   0.0511</code></pre><p>The estimates in null model and p-values are slightly different from those in proportional odds moodel.</p><pre><code class="language-julia">run(`head opm.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
 1,554484,rs10458597,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,0.010076916742300138
 1,967643,rs2710875,0.32407407407407407,2.6272564941853933e-5
@@ -90,37 +84,18 @@ Coefficients:
 1,1588771,rs35154105,0.0,1.0
 1,1789051,rs16824508,0.00462962962962965,0.48653776297859236
 1,1990452,rs2678939,0.4537037037037037,0.33231290090455434
-1,2194615,rs7553178,0.22685185185185186,0.25915513977197435</code></pre><pre><code class="language-julia">rm(&quot;opm.nullmodel.txt&quot;)
-rm(&quot;opm.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="SNP-models-1" href="#SNP-models-1">SNP models</a></h2><p>Genotypes are translated into numeric values according to different genetic model, which is specified by the <code>snpmodel</code> keyword. Default is <code>ADDITIVE_MODEL</code>.</p><table><tr><th>Genotype</th><th><code>SnpArray</code></th><th><code>ADDITIVE_MODEL</code></th><th><code>DOMINANT_MODEL</code></th><th><code>RECESSIVE_MODEL</code></th></tr><tr><td>A1,A1</td><td>0x00</td><td>0</td><td>0</td><td>0</td></tr><tr><td>missing</td><td>0x01</td><td>NaN</td><td>NaN</td><td>NaN</td></tr><tr><td>A1,A2</td><td>0x02</td><td>1</td><td>1</td><td>0</td></tr><tr><td>A2,A2</td><td>0x03</td><td>2</td><td>1</td><td>1</td></tr></table><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p><code>polrgwas</code> imputes missing genotypes according to minor allele frequencies. </p></div></div><p>Users are advised to impute genotypes using more sophiscated methods before GWAS.</p><h2><a class="nav-anchor" id="SNP-and/or-sample-masks-1" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></h2><p>In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the <code>colinds</code> and <code>rowinds</code> keywords of <code>polrgwas</code> function.</p><p>For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05</p><pre><code class="language-julia"># create SNP mask
-snpinds = maf(SnpArray(&quot;../data/hapmap3.bed&quot;)) .≥ 0.05</code></pre><pre><code class="language-none">13928-element BitArray{1}:
- false
-  true
-  true
-  true
-  true
- false
- false
-  true
-  true
-  true
- false
-  true
-  true
-     ⋮
-  true
-  true
-  true
-  true
-  true
-  true
-  true
-  true
-  true
- false
- false
- false</code></pre><pre><code class="language-julia"># GWAS on selected SNPs
-@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    colinds = snpinds, outfile=&quot;commonvariant&quot;)</code></pre><pre><code class="language-none">  0.219776 seconds (767.25 k allocations: 36.103 MiB, 2.98% gc time)</code></pre><pre><code class="language-julia">;cat commonvariant.nullmodel.txt</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{PolrModel{Int64,Float64,LogitLink},Array{Float64,2}}
+1,2194615,rs7553178,0.22685185185185186,0.25915513977197435</code></pre><pre><code class="language-julia">rm(&quot;opm.null.txt&quot;)
+rm(&quot;opm.pval.txt&quot;)</code></pre><h2><a class="nav-anchor" id="SNP-models-1" href="#SNP-models-1">SNP models</a></h2><p>Genotypes are translated into numeric values according to different genetic model, which is specified by the <code>snpmodel</code> keyword. Default is <code>ADDITIVE_MODEL</code>.</p><table><tr><th>Genotype</th><th><code>SnpArray</code></th><th><code>ADDITIVE_MODEL</code></th><th><code>DOMINANT_MODEL</code></th><th><code>RECESSIVE_MODEL</code></th></tr><tr><td>A1,A1</td><td>0x00</td><td>0</td><td>0</td><td>0</td></tr><tr><td>missing</td><td>0x01</td><td>NaN</td><td>NaN</td><td>NaN</td></tr><tr><td>A1,A2</td><td>0x02</td><td>1</td><td>1</td><td>0</td></tr><tr><td>A2,A2</td><td>0x03</td><td>2</td><td>1</td><td>1</td></tr></table><div class="admonition note"><div class="admonition-title">Note</div><div class="admonition-text"><p><code>ordinalgwas</code> imputes missing genotypes according to minor allele frequencies. </p></div></div><p>Users are advised to impute genotypes using more sophiscated methods before GWAS.</p><h2><a class="nav-anchor" id="SNP-and/or-sample-masks-1" href="#SNP-and/or-sample-masks-1">SNP and/or sample masks</a></h2><p>In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the <code>colinds</code> and <code>rowinds</code> keywords of <code>ordinalgwas</code> function.</p><p>For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05</p><pre><code class="language-julia"># create SNP mask
+snpinds = maf(SnpArray(&quot;../data/hapmap3.bed&quot;)) .≥ 0.05
+# GWAS on selected SNPs
+@time ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, 
+    snpinds=snpinds, nullfile=&quot;commonvariant.null.txt&quot;, pvalfile=&quot;commonvariant.pval.txt&quot;)</code></pre><pre><code class="language-none">  0.288047 seconds (881.64 k allocations: 42.516 MiB, 4.56% gc time)
+
+
+
+
+
+StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
 
 Formula: trait ~ +sex
 
@@ -129,7 +104,7 @@ Coefficients:
 θ1    -1.48564  0.358891 -4.13952    &lt;1e-4
 θ2   -0.569479  0.341044 -1.66981   0.0959
 θ3    0.429815  0.339642  1.26549   0.2066
-β1    0.424656  0.213914  1.98517   0.0480</code></pre><pre><code class="language-julia">;head commonvariant.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
+β1    0.424656  0.213914  1.98517   0.0480</code></pre><pre><code class="language-julia">run(`head commonvariant.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
 1,758311,rs12562034,0.07763975155279501,0.004565312839540994
 1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
 1,1168108,rs11260566,0.19158878504672894,1.2168672367668912e-5
@@ -138,11 +113,26 @@ Coefficients:
 1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
 1,2396747,rs13376356,0.1448598130841121,0.5320416198875456
 1,2823603,rs1563468,0.4830246913580247,0.225191391783573
-1,3025087,rs6690373,0.2538699690402477,0.7018469417717486</code></pre><pre><code class="language-julia"># extra header line in commonvariant.scoretest.txt
-countlines(&quot;commonvariant.scoretest.txt&quot;), count(snpinds)</code></pre><pre><code class="language-none">(12086, 12085)</code></pre><pre><code class="language-julia"># clean up
-rm(&quot;commonvariant.scoretest.txt&quot;)
-rm(&quot;commonvariant.nullmodel.txt&quot;)</code></pre><p>User should be particularly careful when using the <code>rowinds</code> keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.</p><h2><a class="nav-anchor" id="Likelihood-ratio-test-(LRT)-1" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></h2><p>By default, <code>polrgwas</code> calculates p-value for each SNP using score test. Score test is fast because it doesn&#39;t require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword <code>test=:LRT</code>. LRT is much slower but may be more powerful than score test.</p><pre><code class="language-julia">@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    test=:LRT, outfile=&quot;lrt&quot;)</code></pre><pre><code class="language-none"> 19.886657 seconds (8.19 M allocations: 2.045 GiB, 1.92% gc time)</code></pre><p>Test result is output to <code>outfile.lrttest.txt</code> file</p><pre><code class="language-julia">;head lrt.lrttest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
+1,3025087,rs6690373,0.2538699690402477,0.7018469417717486</code></pre><pre><code class="language-julia"># extra header line in commonvariant.pval.txt
+countlines(&quot;commonvariant.pval.txt&quot;), count(snpinds)</code></pre><pre><code class="language-none">(12086, 12085)</code></pre><pre><code class="language-julia"># clean up
+rm(&quot;commonvariant.null.txt&quot;)
+rm(&quot;commonvariant.pval.txt&quot;)</code></pre><p>User should be particularly careful when using the <code>bedrowinds</code> keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.</p><h2><a class="nav-anchor" id="Likelihood-ratio-test-(LRT)-1" href="#Likelihood-ratio-test-(LRT)-1">Likelihood ratio test (LRT)</a></h2><p>By default, <code>ordinalgwas</code> calculates p-value for each SNP using score test. Score test is fast because it doesn&#39;t require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword <code>test=:lrt</code>. LRT is much slower but may be more powerful than score test.</p><pre><code class="language-julia">@time ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, 
+    test=:LRT, nullfile=&quot;lrt.null.txt&quot;, pvalfile=&quot;lrt.pval.txt&quot;)</code></pre><pre><code class="language-none"> 19.431711 seconds (8.18 M allocations: 2.044 GiB, 2.12% gc time)
+
+
+
+
+
+StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+
+Formula: trait ~ +sex
+
+Coefficients:
+      Estimate Std.Error  t value Pr(&gt;|t|)
+θ1    -1.48564  0.358891 -4.13952    &lt;1e-4
+θ2   -0.569479  0.341044 -1.66981   0.0959
+θ3    0.429815  0.339642  1.26549   0.2066
+β1    0.424656  0.213914  1.98517   0.0480</code></pre><p>Note the extra <code>effect</code> column in pvalfile, which is the effect size (regression coefficient) for each SNP. </p><pre><code class="language-julia">run(`head lrt.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
 1,554484,rs10458597,0.0,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,-1.0057833719544331,0.0019185836579804134
 1,967643,rs2710875,0.32407407407407407,-0.6488560566295055,1.805050556976241e-5
@@ -151,10 +141,10 @@ rm(&quot;commonvariant.nullmodel.txt&quot;)</code></pre><p>User should be partic
 1,1588771,rs35154105,0.0,0.0,1.0
 1,1789051,rs16824508,0.00462962962962965,-0.7338026388701573,0.5169027130129711
 1,1990452,rs2678939,0.4537037037037037,-0.13586499231819726,0.29946402200912603
-1,2194615,rs7553178,0.22685185185185186,-0.2512075640440123,0.16151069094439868</code></pre><p>Note the extra <code>effect</code> column, which is the effect size (regression coefficient) for each SNP. </p><pre><code class="language-julia"># clean up
-rm(&quot;lrt.lrttest.txt&quot;)
-rm(&quot;lrt.nullmodel.txt&quot;)</code></pre><p>In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. </p><h2><a class="nav-anchor" id="Score-test-for-screening,-LRT-for-power-1" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></h2><p>For large data sets, a practical solution is to perform score test first, then re-do LRT for the most promising SNPs according to score test p-values.</p><p><strong>Step 1</strong>: Perform score test GWAS, results in <code>hapmap.scoretest.txt</code>.</p><pre><code class="language-julia">@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    test=:score, outfile=&quot;hapmap&quot;)</code></pre><pre><code class="language-none">  0.169224 seconds (639.13 k allocations: 29.123 MiB, 10.91% gc time)</code></pre><pre><code class="language-julia">;head hapmap.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
+1,2194615,rs7553178,0.22685185185185186,-0.2512075640440123,0.16151069094439868</code></pre><pre><code class="language-julia"># clean up
+rm(&quot;lrt.pval.txt&quot;)
+rm(&quot;lrt.null.txt&quot;)</code></pre><p>In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. </p><h2><a class="nav-anchor" id="Score-test-for-screening,-LRT-for-power-1" href="#Score-test-for-screening,-LRT-for-power-1">Score test for screening, LRT for power</a></h2><p>For large data sets, a practical solution is to perform score test first, then re-do LRT for the most promising SNPs according to score test p-values.</p><p><strong>Step 1</strong>: Perform score test GWAS, results in <code>score.pval.txt</code>.</p><pre><code class="language-julia">@time ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, 
+    test=:score, pvalfile=&quot;score.pval.txt&quot;);</code></pre><pre><code class="language-none">  0.252777 seconds (758.61 k allocations: 35.808 MiB, 11.23% gc time)</code></pre><pre><code class="language-julia">run(`head score.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
 1,554484,rs10458597,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,0.004565312839540994
 1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
@@ -163,7 +153,7 @@ rm(&quot;lrt.nullmodel.txt&quot;)</code></pre><p>In this example, GWAS by score 
 1,1588771,rs35154105,0.0,1.0
 1,1789051,rs16824508,0.00462962962962965,0.5111981332544
 1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><p><strong>Step 2</strong>: Sort score test p-values and find top 10 SNPs.</p><pre><code class="language-julia">scorepvals = CSV.read(&quot;hapmap.scoretest.txt&quot;)[5] # p-values in 5th column
+1,2194615,rs7553178,0.22685185185185186,0.1713331245805063</code></pre><p><strong>Step 2</strong>: Sort score test p-values and find top 10 SNPs.</p><pre><code class="language-julia">scorepvals = CSV.read(&quot;score.pval.txt&quot;)[5] # p-values in 5th column
 tophits = sortperm(scorepvals)[1:10] # indices of 10 SNPs with smallest p-values
 scorepvals[tophits] # smallest 10 p-values</code></pre><pre><code class="language-none">10-element Array{Union{Missing, Float64},1}:
  1.3080149099181335e-6
@@ -175,8 +165,8 @@ scorepvals[tophits] # smallest 10 p-values</code></pre><pre><code class="languag
  2.6844521269963608e-5
  3.1082838285548695e-5
  4.1010912875160476e-5
- 4.2966265138454806e-5</code></pre><p><strong>Step 3</strong>: Re-do LRT on top hits.</p><pre><code class="language-julia">@time polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    colinds=tophits, test=:LRT, outfile=&quot;hapmap&quot;)</code></pre><pre><code class="language-none">  0.159028 seconds (360.50 k allocations: 19.063 MiB, 4.11% gc time)</code></pre><pre><code class="language-julia">;cat hapmap.lrttest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
+ 4.2966265138454806e-5</code></pre><p><strong>Step 3</strong>: Re-do LRT on top hits.</p><pre><code class="language-julia">@time ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, 
+    snpinds=tophits, test=:LRT, pvalfile=&quot;lrt.pval.txt&quot;);</code></pre><pre><code class="language-none">  0.211356 seconds (358.33 k allocations: 20.107 MiB, 4.04% gc time)</code></pre><pre><code class="language-julia">run(`cat lrt.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,effect,pval
 1,967643,rs2710875,0.32407407407407407,-0.6488560566295055,1.805050556976241e-5
 1,1168108,rs11260566,0.19158878504672894,-0.9157225669357879,5.873384712685568e-6
 3,36821790,rs4678553,0.23456790123456794,0.7424952268973518,1.1303825016262592e-5
@@ -187,10 +177,10 @@ scorepvals[tophits] # smallest 10 p-values</code></pre><pre><code class="languag
 7,41152376,rs28880,0.3379629629629629,-0.814633902445351,9.180126530294943e-7
 7,84223996,rs4128623,0.07870370370370372,1.0022229316338573,6.587895464657512e-5
 23,121048059,rs1937165,0.4380804953560371,0.5392313636256612,1.9754643855522616e-5</code></pre><pre><code class="language-julia"># clean up
-rm(&quot;hapmap.nullmodel.txt&quot;)
-rm(&quot;hapmap.lrttest.txt&quot;)
-rm(&quot;hapmap.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="GxE-or-other-interactions-1" href="#GxE-or-other-interactions-1">GxE or other interactions</a></h2><p>In many applications, we want to test SNP effect and/or its interaction with other terms. <code>testformula</code> keyword specifies the test unit <strong>besides</strong> the covariates in <code>nullformula</code>. </p><p>In following example, keyword <code>testformula=@formula(trait ~ snp + snp &amp; sex)</code> instructs <code>polrgwas</code> to test joint effect of <code>snp</code> and <code>snp &amp; sex</code> interaction.</p><pre><code class="language-julia">polrgwas(@formula(trait ~ sex), &quot;../data/covariate.txt&quot;, &quot;../data/hapmap3&quot;, 
-    outfile=&quot;GxE&quot;, testformula=@formula(trait ~ snp + snp &amp; sex))</code></pre><pre><code class="language-julia">;head GxE.scoretest.txt</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
+rm(&quot;ordinalgwas.null.txt&quot;)
+rm(&quot;score.pval.txt&quot;)
+rm(&quot;lrt.pval.txt&quot;)</code></pre><h2><a class="nav-anchor" id="GxE-or-other-interactions-1" href="#GxE-or-other-interactions-1">GxE or other interactions</a></h2><p>In many applications, we want to test SNP effect and/or its interaction with other terms. <code>testformula</code> keyword specifies the test unit <strong>besides</strong> the covariates in <code>nullformula</code>. </p><p>In following example, keyword <code>testformula=@formula(trait ~ snp + snp &amp; sex)</code> instructs <code>ordinalgwas</code> to test joint effect of <code>snp</code> and <code>snp &amp; sex</code> interaction.</p><pre><code class="language-julia">ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, datadir * &quot;hapmap3&quot;, 
+    pvalfile=&quot;GxE.pval.txt&quot;, testformula=@formula(trait ~ snp + snp &amp; sex));</code></pre><pre><code class="language-julia">run(`head GxE.pval.txt`);</code></pre><pre><code class="language-none">chr,pos,snpid,maf,pval
 1,554484,rs10458597,0.0,1.0
 1,758311,rs12562034,0.07763975155279501,0.017446010412254197
 1,967643,rs2710875,0.32407407407407407,0.0001667073239489097
@@ -200,8 +190,103 @@ rm(&quot;hapmap.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="G
 1,1789051,rs16824508,0.00462962962962965,0.2964363114944328
 1,1990452,rs2678939,0.4537037037037037,0.37924580479348785
 1,2194615,rs7553178,0.22685185185185186,0.325582269932396</code></pre><pre><code class="language-julia"># clean up
-rm(&quot;GxE.nullmodel.txt&quot;)
-rm(&quot;GxE.scoretest.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Plotting-Results-1" href="#Plotting-Results-1">Plotting Results</a></h2><p>To plot the GWAS results, use the <a href="https://openmendel.github.io/MendelPlots.jl/latest/">MendelPlots.jl package</a>.</p><h2><a class="nav-anchor" id="Docker-1" href="#Docker-1">Docker</a></h2><p>For ease of using PolrGWAS, we provide a Dockerfile so users don&#39;t need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.</p><p><strong>Step 1</strong>: Create a Dockerfile with content <a href="https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile">here</a>, or, if the bash command <code>wget</code> is available,</p><pre><code class="language-bash"># on command line
-wget https://raw.githubusercontent.com/OpenMendel/PolrGWAS.jl/master/docker/Dockerfile</code></pre><p><strong>Step 2</strong>: Build a docker image called <code>polrgwas-app</code>, assuming that the Dockerfile is located in the <code>../docker</code> folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.</p><pre><code class="language-bash"># on command line
-docker build -t polrgwas-app ../docker/</code></pre><p><strong>Step 3</strong>: Suppose data files are located at <code>/path/to/data</code> folder, run analysis by</p><pre><code class="language-bash"># on command line
-docker run -v /path/to/data:/data -t polrgwas-app julia -e &#39;using PolrGWAS; polrgwas(@formula(trait ~ sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, outfile=&quot;/data/polrgwas&quot;);&#39;</code></pre><p>Here  </p><ul><li><code>-t polrgwas-app</code> creates a container using the <code>polrgwas-app</code> image build in step 2.  </li><li><code>-v /path/to/data:/data</code> maps the <code>/path/to/data</code> folder on host machine to the <code>/data</code> folder within the container. </li><li><code>julia -e &#39;using PolrGWAS; polrgwas(@formula(trait ~ 0 + sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, outfile=&quot;/data/polrgwas&quot;);</code> calls Julia and runs <code>polrgwas</code> function. </li></ul><p>The output files are written in <code>/path/to/data</code> directory. </p><footer><hr/></footer></article></body></html>
+rm(&quot;ordinalgwas.null.txt&quot;)
+rm(&quot;GxE.pval.txt&quot;)</code></pre><h2><a class="nav-anchor" id="Plotting-Results-1" href="#Plotting-Results-1">Plotting Results</a></h2><p>To plot the GWAS results, use the <a href="https://openmendel.github.io/MendelPlots.jl/latest/">MendelPlots.jl package</a>.</p><h2><a class="nav-anchor" id="Docker-1" href="#Docker-1">Docker</a></h2><p>For ease of using OrdinalGWAS, we provide a Dockerfile so users don&#39;t need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.</p><p><strong>Step 1</strong>: Create a Dockerfile with content <a href="https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile">here</a>, or, if the bash command <code>wget</code> is available, obtain Dockerfile by</p><pre><code class="language-bash"># on command line
+wget https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile</code></pre><p><strong>Step 2</strong>: Build a docker image called <code>ordinalgwas-app</code>, assuming that the Dockerfile is located in the <code>../docker</code> folder. Building the image for the first time can take up to 10 minutes; but it only needs to be done once.</p><pre><code class="language-bash"># on command line
+docker build -t ordinalgwas-app ../docker/</code></pre><p><strong>Step 3</strong>: Suppose data files are located at <code>/path/to/data</code> folder, run analysis by</p><pre><code class="language-bash"># on command line
+docker run -v /path/to/data:/data -t ordinalgwas-app julia -e &#39;using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, nullfile=&quot;/data/ordinalgwas.null.txt&quot;, pvalfile=&quot;/data/ordinalgwas&quot;);&#39;</code></pre><p>Here  </p><ul><li><code>-t ordinalgwas-app</code> creates a container using the <code>ordinalgwas-app</code> image build in step 2.  </li><li><code>-v /path/to/data:/data</code> maps the <code>/path/to/data</code> folder on host machine to the <code>/data</code> folder within the container. </li><li><code>julia -e &#39;using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), &quot;/data/covariate.txt&quot;, &quot;/data/hapmap3&quot;, nullfile=&quot;/data/ordinalgwas.null.txt&quot;, pvalfile=&quot;/data/ordinalgwas&quot;);</code> calls Julia and runs <code>ordinalgwas</code> function. </li></ul><p>The output files are written in <code>/path/to/data</code> directory.</p><h2><a class="nav-anchor" id="Multiple-Plink-files-1" href="#Multiple-Plink-files-1">Multiple Plink files</a></h2><p>In large scale studies, genotypes data are split into multiple Plink files, e.g., by chromosomes. Then GWAS analysis can be done in parallel. This can be achieved by two steps.</p><p>Let&#39;s first create demo data by splitting hapmap3 according to chromosome:</p><pre><code class="language-julia"># split example hapmap3 data according to chromosome
+SnpArrays.split_plink(&quot;../data/hapmap3&quot;, :chromosome; prefix=&quot;../data/hapmap3.chr.&quot;)
+readdir(glob&quot;hapmap3.chr.*&quot;, datadir)</code></pre><pre><code class="language-none">75-element Array{String,1}:
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bed&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bim&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.fam&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bed&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bim&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.fam&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bed&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bim&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.fam&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bed&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bim&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.fam&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.bed&quot;
+ ⋮                                                                 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bed&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bim&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.fam&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bed&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bim&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.fam&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bed&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bim&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.fam&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bed&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bim&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.fam&quot;</code></pre><p>Step 1: Fit the null model (and optionally save to file <code>fittednullmodel.jld2</code>). Setting third argument <code>plinkfile</code> to <code>nothing</code> instructs <code>ordinalgwas</code> function to fit the null model only.</p><pre><code class="language-julia">nm = ordinalgwas(@formula(trait ~ sex), datadir * &quot;covariate.txt&quot;, nothing)
+# # optional for cluster computing
+# using JLD2, FileIO
+# @save &quot;../data/fittednullmodel.jld2&quot; nm</code></pre><pre><code class="language-none">StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+
+Formula: trait ~ +sex
+
+Coefficients:
+      Estimate Std.Error  t value Pr(&gt;|t|)
+θ1    -1.48564  0.358891 -4.13952    &lt;1e-4
+θ2   -0.569479  0.341044 -1.66981   0.0959
+θ3    0.429815  0.339642  1.26549   0.2066
+β1    0.424656  0.213914  1.98517   0.0480</code></pre><p>Step 2: GWAS for each chromosome. This step can be submitted as separate jobs on a cluster.</p><pre><code class="language-julia"># # Optional for cluster computing: load fitted null model
+# using JLD2, FileIO, DataFrames
+# @load &quot;../data/fittednullmodel.jld2&quot; nm
+
+# this part can be submitted as separate jobs
+for chr in 1:23
+    plinkfile = datadir * &quot;hapmap3.chr.&quot; * string(chr)
+    pvalfile = plinkfile * &quot;.pval.txt&quot; 
+    ordinalgwas(nm, plinkfile, pvalfile=pvalfile)
+end</code></pre><pre><code class="language-julia"># show the result files
+readdir(glob&quot;*.pval.txt&quot;, datadir)</code></pre><pre><code class="language-none">23-element Array{String,1}:
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.14.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.15.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.16.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.17.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.18.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.19.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.2.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.20.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.21.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.22.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.23.pval.txt&quot;
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.3.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.4.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.5.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.pval.txt&quot; 
+ &quot;/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.pval.txt&quot;</code></pre><p>If in the rare situations when the multiple sets of Plink files lack the corresponding <code>fam</code> file or the corresponding bed and bim files have different filenames, then users need to explicitly supply bed filename, bim file name, and number of individuals. Replace Step 2 by </p><p>Step 2&#39;: GWAS for each chromosome.</p><pre><code class="language-julia"># # Optional for cluster computing: load fitted null model
+# using JLD2, FileIO, DataFrames
+# @load &quot;../data/fittednullmodel.jld2&quot; nm
+
+# this part can be submitted as separate job
+for chr in 1:23
+    bedfile = datadir * &quot;hapmap3.chr.&quot; * string(chr) * &quot;.bed&quot;
+    bimfile = datadir * &quot;hapmap3.chr.&quot; * string(chr) * &quot;.bim&quot;
+    pvalfile = datadir * &quot;hapmap3.chr.&quot; * string(chr) * &quot;.pval.txt&quot;
+    ordinalgwas(nm, bedfile, bimfile, 324; pvalfile=pvalfile)
+end</code></pre><pre><code class="language-julia"># clean up
+isfile(&quot;ordinalgwas.null.txt&quot;) &amp;&amp; rm(&quot;ordinalgwas.null.txt&quot;)
+isfile(datadir * &quot;fittednullmodel.jld2&quot;) &amp;&amp; rm(datadir * &quot;fittednullmodel.jld2&quot;)
+for chr in 1:23
+    pvalfile = datadir * &quot;hapmap3.chr.&quot; * string(chr) * &quot;.pval.txt&quot;
+    isfile(pvalfile) &amp;&amp; rm(pvalfile)
+end
+for chr in 1:26
+    plinkfile = datadir * &quot;hapmap3.chr.&quot; * string(chr)
+    isfile(plinkfile * &quot;.bed&quot;) &amp;&amp; rm(plinkfile * &quot;.bed&quot;)
+    isfile(plinkfile * &quot;.fam&quot;) &amp;&amp; rm(plinkfile * &quot;.fam&quot;)
+    isfile(plinkfile * &quot;.bim&quot;) &amp;&amp; rm(plinkfile * &quot;.bim&quot;)
+end</code></pre><footer><hr/></footer></article></body></html>
