@@ -1,7 +1,7 @@
 
 # OrdinalGWAS.jl
 
-OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). The package name follows the function [`polr` in R package MASS](https://www.rdocumentation.org/packages/MASS/versions/7.3-3/topics/polr).
+OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
 
 ## Installation
 
@@ -33,39 +33,70 @@ versioninfo()
 
 ```julia
 # for use in this tutorial
-using BenchmarkTools, CSV, OrdinalGWAS, SnpArrays
+using BenchmarkTools, CSV, Glob, OrdinalGWAS, SnpArrays
 ```
 
 ## Example data set
 
-`data` folder of the package contains an example data set. In this tutorial, we use relative path `../data`. In general, user can locate this folder by command
-```julia
-import PolrGWAS
-joinpath(dirname(pathof(OrdinalGWAS)), "../data")
-```
+`data` folder of the package contains an example data set. In general, user can locate this folder by command
 
 
 ```julia
-;ls -l ../data
+using OrdinalGWAS
+const datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
 ```
 
-    total 3664
-    -rw-r--r--  1 huazhou  staff     6844 Feb 13 09:42 covariate.txt
-    -rw-r--r--  1 huazhou  staff  1128171 Feb 13 09:42 hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Feb 13 09:42 hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Feb 13 09:42 hapmap3.fam
-    -rw-r--r--  1 huazhou  staff   332960 Feb 13 09:42 hapmap3.map
-    -rw-r--r--  1 huazhou  staff      773 Feb 13 09:42 simtrait.jl
+
+
+
+    "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/"
+
+
+
+
+```julia
+# content of the data folder
+readdir(datadir)
+```
+
+
+
+
+    6-element Array{String,1}:
+     "covariate.txt"
+     "hapmap3.bed"  
+     "hapmap3.bim"  
+     "hapmap3.fam"  
+     "hapmap3.map"  
+     "simtrait.jl"  
+
 
 
 ## Basic usage
 
-The following command performs GWAS using the [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit).
+The following command performs GWAS using the [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit). The output is the fitted null model.
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3")
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3")
 ```
+
+
+
+
+    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    Formula: trait ~ +sex
+    
+    Coefficients:
+          Estimate Std.Error  t value Pr(>|t|)
+    θ1    -1.48564  0.358891 -4.13952    <1e-4
+    θ2   -0.569479  0.341044 -1.66981   0.0959
+    θ3    0.429815  0.339642  1.26549   0.2066
+    β1    0.424656  0.213914  1.98517   0.0480
+
+
+
 
 For documentation of the `ordinalgwas` function, type `?ordinalgwas` in Julia REPL.
 ```@docs
@@ -78,13 +109,13 @@ The first argument specifies the null model without SNP effects, e.g., `@formula
 
 ### Input files
 
-`polrgwas` expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).
+`ordinalgwas` expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).
 
 Covariates and phenotype are available in a csv file, e.g., `covariate.txt`, which has one header line for variable names. Variable `trait` is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable `sex` as the covariate in GWAS.
 
 
 ```julia
-;head ../data/covariate.txt
+run(`head $(datadir)covariate.txt`);
 ```
 
     famid,perid,faid,moid,sex,trait
@@ -103,53 +134,25 @@ Genotype data is available as binary Plink files.
 
 
 ```julia
-;ls -l ../data/hapmap3.bed ../data/hapmap3.bim ../data/hapmap3.fam
+readdir(glob"hapmap3.*", datadir)
 ```
 
-    -rw-r--r--  1 huazhou  staff  1128171 Feb 13 09:42 ../data/hapmap3.bed
-    -rw-r--r--  1 huazhou  staff   388672 Feb 13 09:42 ../data/hapmap3.bim
-    -rw-r--r--  1 huazhou  staff     7136 Feb 13 09:42 ../data/hapmap3.fam
 
 
 
-```julia
-;head ../data/hapmap3.fam
-```
+    4-element Array{String,1}:
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.map"
 
-    2431 NA19916 0 0 1 -9
-    2424 NA19835 0 0 2 -9
-    2469 NA20282 0 0 2 -9
-    2368 NA19703 0 0 1 -9
-    2425 NA19901 0 0 2 -9
-    2427 NA19908 0 0 1 -9
-    2430 NA19914 0 0 2 -9
-    2470 NA20287 0 0 2 -9
-    2436 NA19713 0 0 2 -9
-    2426 NA19904 0 0 1 -9
-
-
-
-```julia
-;head ../data/hapmap3.bim
-```
-
-    1	rs10458597	0	554484	0	2
-    1	rs12562034	0	758311	1	2
-    1	rs2710875	0	967643	1	2
-    1	rs11260566	0	1168108	1	2
-    1	rs1312568	0	1375074	1	2
-    1	rs35154105	0	1588771	0	2
-    1	rs16824508	0	1789051	1	2
-    1	rs2678939	0	1990452	1	2
-    1	rs7553178	0	2194615	1	2
-    1	rs13376356	0	2396747	1	2
 
 
 There are 324 samples at 13,928 SNPs.
 
 
 ```julia
-size(SnpArray("../data/hapmap3.bed"))
+size(SnpArray(datadir * "hapmap3.bed"))
 ```
 
 
@@ -161,16 +164,13 @@ size(SnpArray("../data/hapmap3.bed"))
 
 ### Output files
 
-`ordinalgwas` outputs two files: `ordinalgwas.nullmodel.txt` and `ordinalgwas.scoretest.txt`. The prefix `ordinalgwas` can be changed by the `outfile` keyword, e.g.,
-```julia
-ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", outfile="hapmap3")
-```
+`ordinalgwas` outputs two files: `ordinalgwas.null.txt` and `ordinalgwas.pval.txt`. 
 
-* `ordinalgwas.nullmodel.txt` lists the estimated null model (without SNPs). 
+* `ordinalgwas.null.txt` lists the estimated null model (without SNPs). 
 
 
 ```julia
-;cat ordinalgwas.nullmodel.txt
+run(`cat ordinalgwas.null.txt`);
 ```
 
     StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
@@ -185,11 +185,11 @@ ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", o
     β1    0.424656  0.213914  1.98517   0.0480
 
 
-* `ordinalgwas.scoretest.txt` tallies the SNPs and their pvalues. 
+* `ordinalgwas.pval.txt` tallies the SNPs and their pvalues. 
 
 
 ```julia
-;head ordinalgwas.scoretest.txt
+run(`head ordinalgwas.pval.txt`);
 ```
 
     chr,pos,snpid,maf,pval
@@ -204,11 +204,17 @@ ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", o
     1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
 
 
+Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
+```julia
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", pvalfile="ordinalgwas.pval.txt.gz")
+```
+will output the p-value file in compressed gz format.
+
 ### Input non-genetic data as DataFrame
 
 Internally `ordinalgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `ordinalgwas` directly.
 ```julia
-ordinalgwas(@formula(trait ~ sex), df, "../data/hapmap3")
+ordinalgwas(@formula(trait ~ sex), df, plinkfile)
 ```
 !!! note
 
@@ -218,8 +224,8 @@ For example, following code checks that the first 2 columns of the `covariate.tx
 
 
 ```julia
-covdf = CSV.read("../data/covariate.txt")
-plkfam = CSV.read("../data/hapmap3.fam", header=0, delim=' ')
+covdf = CSV.read(datadir * "covariate.txt")
+plkfam = CSV.read(datadir * "hapmap3.fam", header=0, delim=' ')
 all(covdf[1] .== plkfam[1]) && all(covdf[2] .== plkfam[2])
 ```
 
@@ -232,21 +238,21 @@ all(covdf[1] .== plkfam[1]) && all(covdf[2] .== plkfam[2])
 
 ### Timing
 
-For this moderate-sized data set, `polrgwas` takes less than 0.2 second.
+For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 
 
 ```julia
-@btime(ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3"))
+@btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      122.205 ms (639114 allocations: 29.12 MiB)
+      163.797 ms (710982 allocations: 33.35 MiB)
 
 
 
 ```julia
 # clean up
-rm("ordinalgwas.scoretest.txt")
-rm("ordinalgwas.nullmodel.txt")
+rm("ordinalgwas.null.txt")
+rm("ordinalgwas.pval.txt")
 ```
 
 ## Link functions
@@ -261,16 +267,12 @@ For example, to perform GWAS using the ordred Probit model
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    link=ProbitLink(), outfile="opm")
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+    link=ProbitLink(), nullfile="opm.null.txt", pvalfile="opm.pval.txt")
 ```
 
-The estimates in null model and p-values are slightly different from those in proportional odds moodel.
 
 
-```julia
-;cat opm.nullmodel.txt
-```
 
     StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,ProbitLink},Array{Float64,2}}
     
@@ -285,8 +287,12 @@ The estimates in null model and p-values are slightly different from those in pr
 
 
 
+
+The estimates in null model and p-values are slightly different from those in proportional odds moodel.
+
+
 ```julia
-;head opm.scoretest.txt
+run(`head opm.pval.txt`);
 ```
 
     chr,pos,snpid,maf,pval
@@ -303,8 +309,8 @@ The estimates in null model and p-values are slightly different from those in pr
 
 
 ```julia
-rm("opm.nullmodel.txt")
-rm("opm.scoretest.txt")
+rm("opm.null.txt")
+rm("opm.pval.txt")
 ```
 
 ## SNP models
@@ -334,55 +340,16 @@ For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.0
 ```julia
 # create SNP mask
 snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
-```
-
-
-
-
-    13928-element BitArray{1}:
-     false
-      true
-      true
-      true
-      true
-     false
-     false
-      true
-      true
-      true
-     false
-      true
-      true
-         ⋮
-      true
-      true
-      true
-      true
-      true
-      true
-      true
-      true
-      true
-     false
-     false
-     false
-
-
-
-
-```julia
 # GWAS on selected SNPs
-@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    colinds = snpinds, outfile="commonvariant")
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+    snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.222445 seconds (763.04 k allocations: 35.890 MiB, 5.72% gc time)
+      0.288047 seconds (881.64 k allocations: 42.516 MiB, 4.56% gc time)
 
 
 
-```julia
-;cat commonvariant.nullmodel.txt
-```
+
 
     StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
@@ -397,8 +364,10 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 
 
+
+
 ```julia
-;head commonvariant.scoretest.txt
+run(`head commonvariant.pval.txt`);
 ```
 
     chr,pos,snpid,maf,pval
@@ -415,8 +384,8 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 
 
 ```julia
-# extra header line in commonvariant.scoretest.txt
-countlines("commonvariant.scoretest.txt"), count(snpinds)
+# extra header line in commonvariant.pval.txt
+countlines("commonvariant.pval.txt"), count(snpinds)
 ```
 
 
@@ -429,30 +398,47 @@ countlines("commonvariant.scoretest.txt"), count(snpinds)
 
 ```julia
 # clean up
-rm("commonvariant.scoretest.txt")
-rm("commonvariant.nullmodel.txt")
+rm("commonvariant.null.txt")
+rm("commonvariant.pval.txt")
 ```
 
-User should be particularly careful when using the `rowinds` keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
+User should be particularly careful when using the `bedrowinds` keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
 
 ## Likelihood ratio test (LRT)
 
-By default, `ordinalgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:LRT`. LRT is much slower but may be more powerful than score test.
+By default, `ordinalgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:lrt`. LRT is much slower but may be more powerful than score test.
 
 
 ```julia
-@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    test=:LRT, outfile="lrt")
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+    test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     19.246120 seconds (8.19 M allocations: 2.045 GiB, 2.17% gc time)
+     19.431711 seconds (8.18 M allocations: 2.044 GiB, 2.12% gc time)
 
 
-Test result is output to `outfile.lrttest.txt` file
+
+
+
+    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    Formula: trait ~ +sex
+    
+    Coefficients:
+          Estimate Std.Error  t value Pr(>|t|)
+    θ1    -1.48564  0.358891 -4.13952    <1e-4
+    θ2   -0.569479  0.341044 -1.66981   0.0959
+    θ3    0.429815  0.339642  1.26549   0.2066
+    β1    0.424656  0.213914  1.98517   0.0480
+
+
+
+
+Note the extra `effect` column in pvalfile, which is the effect size (regression coefficient) for each SNP. 
 
 
 ```julia
-;head lrt.lrttest.txt
+run(`head lrt.pval.txt`);
 ```
 
     chr,pos,snpid,maf,effect,pval
@@ -467,13 +453,11 @@ Test result is output to `outfile.lrttest.txt` file
     1,2194615,rs7553178,0.22685185185185186,-0.2512075640440123,0.16151069094439868
 
 
-Note the extra `effect` column, which is the effect size (regression coefficient) for each SNP. 
-
 
 ```julia
 # clean up
-rm("lrt.lrttest.txt")
-rm("lrt.nullmodel.txt")
+rm("lrt.pval.txt")
+rm("lrt.null.txt")
 ```
 
 In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. 
@@ -482,20 +466,20 @@ In this example, GWAS by score test takes less than 0.2 second, while GWAS by LR
 
 For large data sets, a practical solution is to perform score test first, then re-do LRT for the most promising SNPs according to score test p-values.
 
-**Step 1**: Perform score test GWAS, results in `hapmap.scoretest.txt`.
+**Step 1**: Perform score test GWAS, results in `score.pval.txt`.
 
 
 ```julia
-@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    test=:score, outfile="hapmap")
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+    test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.174742 seconds (639.13 k allocations: 29.121 MiB, 15.12% gc time)
+      0.252777 seconds (758.61 k allocations: 35.808 MiB, 11.23% gc time)
 
 
 
 ```julia
-;head hapmap.scoretest.txt
+run(`head score.pval.txt`);
 ```
 
     chr,pos,snpid,maf,pval
@@ -514,7 +498,7 @@ For large data sets, a practical solution is to perform score test first, then r
 
 
 ```julia
-scorepvals = CSV.read("hapmap.scoretest.txt")[5] # p-values in 5th column
+scorepvals = CSV.read("score.pval.txt")[5] # p-values in 5th column
 tophits = sortperm(scorepvals)[1:10] # indices of 10 SNPs with smallest p-values
 scorepvals[tophits] # smallest 10 p-values
 ```
@@ -540,16 +524,16 @@ scorepvals[tophits] # smallest 10 p-values
 
 
 ```julia
-@time ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    colinds=tophits, test=:LRT, outfile="hapmap")
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+    snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.159163 seconds (349.75 k allocations: 18.455 MiB, 4.99% gc time)
+      0.211356 seconds (358.33 k allocations: 20.107 MiB, 4.04% gc time)
 
 
 
 ```julia
-;cat hapmap.lrttest.txt
+run(`cat lrt.pval.txt`);
 ```
 
     chr,pos,snpid,maf,effect,pval
@@ -568,9 +552,9 @@ scorepvals[tophits] # smallest 10 p-values
 
 ```julia
 # clean up
-rm("hapmap.nullmodel.txt")
-rm("hapmap.lrttest.txt")
-rm("hapmap.scoretest.txt")
+rm("ordinalgwas.null.txt")
+rm("score.pval.txt")
+rm("lrt.pval.txt")
 ```
 
 ## GxE or other interactions
@@ -581,13 +565,13 @@ In following example, keyword `testformula=@formula(trait ~ snp + snp & sex)` in
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3", 
-    outfile="GxE", testformula=@formula(trait ~ snp + snp & sex))
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+    pvalfile="GxE.pval.txt", testformula=@formula(trait ~ snp + snp & sex));
 ```
 
 
 ```julia
-;head GxE.scoretest.txt
+run(`head GxE.pval.txt`);
 ```
 
     chr,pos,snpid,maf,pval
@@ -605,8 +589,8 @@ ordinalgwas(@formula(trait ~ sex), "../data/covariate.txt", "../data/hapmap3",
 
 ```julia
 # clean up
-rm("GxE.nullmodel.txt")
-rm("GxE.scoretest.txt")
+rm("ordinalgwas.null.txt")
+rm("GxE.pval.txt")
 ```
 
 ## Plotting Results
@@ -617,7 +601,7 @@ To plot the GWAS results, use the [MendelPlots.jl package](https://openmendel.gi
 
 For ease of using OrdinalGWAS, we provide a Dockerfile so users don't need to install Julia and required packages. Only Docker app needs to be installed in order to run analysis. Following is tested on Docker 2.0.0.0-mac78.
 
-**Step 1**: Create a Dockerfile with content [here](https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile), or, if the bash command `wget` is available,
+**Step 1**: Create a Dockerfile with content [here](https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile), or, if the bash command `wget` is available, obtain Dockerfile by
 ```bash
 # on command line
 wget https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docker/Dockerfile
@@ -632,12 +616,173 @@ docker build -t ordinalgwas-app ../docker/
 **Step 3**: Suppose data files are located at `/path/to/data` folder, run analysis by
 ```bash
 # on command line
-docker run -v /path/to/data:/data -t ordinalgwas-app julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/ordinalgwas");'
+docker run -v /path/to/data:/data -t ordinalgwas-app julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", nullfile="/data/ordinalgwas.null.txt", pvalfile="/data/ordinalgwas");'
 ```
 
 Here  
 - `-t ordinalgwas-app` creates a container using the `ordinalgwas-app` image build in step 2.  
 - `-v /path/to/data:/data` maps the `/path/to/data` folder on host machine to the `/data` folder within the container. 
-- `julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ 0 + sex), "/data/covariate.txt", "/data/hapmap3", outfile="/data/ordinalgwas");` calls Julia and runs `ordinalgwas` function. 
+- `julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", nullfile="/data/ordinalgwas.null.txt", pvalfile="/data/ordinalgwas");` calls Julia and runs `ordinalgwas` function. 
 
-The output files are written in `/path/to/data` directory. 
+The output files are written in `/path/to/data` directory.
+
+## Multiple Plink files
+
+In large scale studies, genotypes data are split into multiple Plink files, e.g., by chromosomes. Then GWAS analysis can be done in parallel. This can be achieved by two steps.
+
+Let's first create demo data by splitting hapmap3 according to chromosome:
+
+
+```julia
+# split example hapmap3 data according to chromosome
+SnpArrays.split_plink("../data/hapmap3", :chromosome; prefix="../data/hapmap3.chr.")
+readdir(glob"hapmap3.chr.*", datadir)
+```
+
+
+
+
+    75-element Array{String,1}:
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.bed"
+     ⋮                                                                 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.fam" 
+
+
+
+Step 1: Fit the null model (and optionally save to file `fittednullmodel.jld2`). Setting third argument `plinkfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
+
+
+```julia
+nm = ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", nothing)
+# # optional for cluster computing
+# using JLD2, FileIO
+# @save "../data/fittednullmodel.jld2" nm
+```
+
+
+
+
+    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    Formula: trait ~ +sex
+    
+    Coefficients:
+          Estimate Std.Error  t value Pr(>|t|)
+    θ1    -1.48564  0.358891 -4.13952    <1e-4
+    θ2   -0.569479  0.341044 -1.66981   0.0959
+    θ3    0.429815  0.339642  1.26549   0.2066
+    β1    0.424656  0.213914  1.98517   0.0480
+
+
+
+
+Step 2: GWAS for each chromosome. This step can be submitted as separate jobs on a cluster.
+
+
+```julia
+# # Optional for cluster computing: load fitted null model
+# using JLD2, FileIO, DataFrames
+# @load "../data/fittednullmodel.jld2" nm
+
+# this part can be submitted as separate jobs
+for chr in 1:23
+    plinkfile = datadir * "hapmap3.chr." * string(chr)
+    pvalfile = plinkfile * ".pval.txt" 
+    ordinalgwas(nm, plinkfile, pvalfile=pvalfile)
+end
+```
+
+
+```julia
+# show the result files
+readdir(glob"*.pval.txt", datadir)
+```
+
+
+
+
+    23-element Array{String,1}:
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.14.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.15.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.16.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.17.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.18.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.19.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.2.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.20.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.21.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.22.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.23.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.3.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.4.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.5.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.pval.txt" 
+
+
+
+If in the rare situations when the multiple sets of Plink files lack the corresponding `fam` file or the corresponding bed and bim files have different filenames, then users need to explicitly supply bed filename, bim file name, and number of individuals. Replace Step 2 by 
+
+Step 2': GWAS for each chromosome.
+
+
+```julia
+# # Optional for cluster computing: load fitted null model
+# using JLD2, FileIO, DataFrames
+# @load "../data/fittednullmodel.jld2" nm
+
+# this part can be submitted as separate job
+for chr in 1:23
+    bedfile = datadir * "hapmap3.chr." * string(chr) * ".bed"
+    bimfile = datadir * "hapmap3.chr." * string(chr) * ".bim"
+    pvalfile = datadir * "hapmap3.chr." * string(chr) * ".pval.txt"
+    ordinalgwas(nm, bedfile, bimfile, 324; pvalfile=pvalfile)
+end
+```
+
+
+```julia
+# clean up
+isfile("ordinalgwas.null.txt") && rm("ordinalgwas.null.txt")
+isfile(datadir * "fittednullmodel.jld2") && rm(datadir * "fittednullmodel.jld2")
+for chr in 1:23
+    pvalfile = datadir * "hapmap3.chr." * string(chr) * ".pval.txt"
+    isfile(pvalfile) && rm(pvalfile)
+end
+for chr in 1:26
+    plinkfile = datadir * "hapmap3.chr." * string(chr)
+    isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
+    isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
+    isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
+end
+```

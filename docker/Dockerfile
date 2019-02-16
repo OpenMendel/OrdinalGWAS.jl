@@ -41,7 +41,7 @@ RUN git config --global url."https://".insteadOf git://
 
 # Julia
 ENV JULIA_VER_MAJ 1.0
-ENV JULIA_VER_MIN .1
+ENV JULIA_VER_MIN .3
 ENV JULIA_VER $JULIA_VER_MAJ$JULIA_VER_MIN
 
 RUN wget https://julialang-s3.julialang.org/bin/linux/x64/$JULIA_VER_MAJ/julia-$JULIA_VER-linux-x86_64.tar.gz \
@@ -54,8 +54,8 @@ ENV JULIA_PKGDIR /usr/local/julia/share/julia/site
 
 RUN julia -e 'using Pkg; \
     Pkg.add([ \
-    PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git", rev="juliav0.7"), \
-    PackageSpec(url="https://github.com/OpenMendel/PolrModels.jl.git", rev="master"), \
-    PackageSpec(url="https://github.com/OpenMendel/PolrGWAS.jl.git", rev="master") \
+    PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"), \
+    PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"), \
+    PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git") \
     ]); \
-    Pkg.test("PolrGWAS");'
+    Pkg.test("OrdinalGWAS");'

@@ -6,80 +6,150 @@ const plkfile = datadir * "/hapmap3"
 
 @testset "score test" begin
     @time ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score)
-    @test isfile("ordinalgwas.nullmodel.txt")
-    @test isfile("ordinalgwas.scoretest.txt")
-    scorepvals = CSV.read("ordinalgwas.scoretest.txt")[5][1:5]
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("ordinalgwas.pval.txt")
+    scorepvals = CSV.read("ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
-    rm("ordinalgwas.nullmodel.txt")
-    rm("ordinalgwas.scoretest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("ordinalgwas.pval.txt")
 end
 
 @testset "LRT test" begin
     @time ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:LRT)
-    @test isfile("ordinalgwas.nullmodel.txt")
-    @test isfile("ordinalgwas.lrttest.txt")
-    lrtpvals = CSV.read("ordinalgwas.lrttest.txt")[6][1:5]
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("ordinalgwas.pval.txt")
+    lrtpvals = CSV.read("ordinalgwas.pval.txt")[6][1:5]
     @test isapprox(lrtpvals, [1.0, 1.91858366e-3, 1.80505056e-5, 5.87338471e-6, 8.08102258e-3], rtol=1e-4)
-    rm("ordinalgwas.nullmodel.txt")
-    rm("ordinalgwas.lrttest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("ordinalgwas.pval.txt")
 end
 
 @testset "snpmodel" begin
     # dominant model 
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, snpmodel=DOMINANT_MODEL)
-    @test isfile("ordinalgwas.nullmodel.txt")
-    @test isfile("ordinalgwas.scoretest.txt")
-    scorepvals = CSV.read("ordinalgwas.scoretest.txt")[5][1:5]
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("ordinalgwas.pval.txt")
+    scorepvals = CSV.read("ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 0.14295, 0.000471942, 0.00555348, 0.000652844], rtol=1e-4)
-    rm("ordinalgwas.nullmodel.txt")
-    rm("ordinalgwas.scoretest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("ordinalgwas.pval.txt")
     # recessive model 
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, snpmodel=RECESSIVE_MODEL)
-    @test isfile("ordinalgwas.nullmodel.txt")
-    @test isfile("ordinalgwas.scoretest.txt")
-    scorepvals = CSV.read("ordinalgwas.scoretest.txt")[5][1:5]
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("ordinalgwas.pval.txt")
+    scorepvals = CSV.read("ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 0.00673612, 0.000279908, 4.15322e-5, 0.167642], rtol=1e-4)
-    rm("ordinalgwas.nullmodel.txt")
-    rm("ordinalgwas.scoretest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("ordinalgwas.pval.txt")
 end
 
 @testset "link" begin
-    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, link=ProbitLink(), outfile="opm")
-    @test isfile("opm.nullmodel.txt")
-    @test isfile("opm.scoretest.txt")
-    scorepvals = CSV.read("opm.scoretest.txt")[5][1:5]
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, link=ProbitLink(), pvalfile="opm.pval.txt")
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("opm.pval.txt")
+    scorepvals = CSV.read("opm.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 1.00769167e-2, 2.62725649e-5, 1.08974849e-5, 5.10288399e-3], rtol=1e-4)
-    rm("opm.nullmodel.txt")
-    rm("opm.scoretest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("opm.pval.txt")
 end
 
 @testset "mask" begin
-    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, colinds=1:5, outfile="first5snps")
-    @test isfile("first5snps.nullmodel.txt")
-    @test isfile("first5snps.scoretest.txt")
-    @test countlines("first5snps.scoretest.txt") == 6
-    scorepvals = CSV.read("first5snps.scoretest.txt")[5]
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, snpinds=1:5, pvalfile="first5snps.pval.txt")
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("first5snps.pval.txt")
+    @test countlines("first5snps.pval.txt") == 6
+    scorepvals = CSV.read("first5snps.pval.txt")[5]
     @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
-    rm("first5snps.nullmodel.txt")
-    rm("first5snps.scoretest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("first5snps.pval.txt")
 end
 
 @testset "test formula" begin
     # score test
-    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, outfile="GxE", testformula=@formula(trait ~ snp + snp & sex))
-    @test isfile("GxE.nullmodel.txt")
-    @test isfile("GxE.scoretest.txt")
-    scorepvals = CSV.read("GxE.scoretest.txt")[5][1:5]
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile="GxE.pval.txt", 
+    testformula=@formula(trait ~ snp + snp & sex))
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("GxE.pval.txt")
+    scorepvals = CSV.read("GxE.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 1.74460104e-2, 1.66707324e-4, 4.76376246e-5, 2.91384712e-2], rtol=1e-4)
-    rm("GxE.nullmodel.txt")
-    rm("GxE.scoretest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("GxE.pval.txt")
     # LRT, only first 5 SNPs
-    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, outfile="GxE", 
-    testformula=@formula(trait ~ snp + snp & sex), test=:LRT, colinds=1:5)
-    @test isfile("GxE.nullmodel.txt")
-    @test isfile("GxE.lrttest.txt")
-    lrtpvals = CSV.read("GxE.lrttest.txt")[end]
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile="GxE.pval.txt", 
+    testformula=@formula(trait ~ snp + snp & sex), test=:LRT, snpinds=1:5)
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("GxE.pval.txt")
+    lrtpvals = CSV.read("GxE.pval.txt")[end]
     @test isapprox(lrtpvals, [1.0, 7.22410973e-3, 1.01730983e-4, 1.88174211e-5, 2.88295705e-2], rtol=1e-4)
-    rm("GxE.nullmodel.txt")
-    rm("GxE.lrttest.txt")
+    rm("ordinalgwas.null.txt")
+    rm("GxE.pval.txt")
+end
+
+@testset "split, gz" begin
+    # split hapmap3 by chromosome
+    SnpArrays.split_plink(plkfile, :chromosome; prefix = datadir * "/hapmap3.chr.")
+    # compress to gz
+    for chr in 1:23
+        plinkfile = plkfile * ".chr." * string(chr)
+        SnpArrays.compress_plink(plinkfile)
+        @test isfile(plinkfile * ".bed.gz")
+        @test isfile(plinkfile * ".fam.gz")
+        @test isfile(plinkfile * ".bim.gz")
+    end
+    # fit null model
+    @time nm = ordinalgwas(@formula(trait ~ sex), covfile, nothing)
+    @test isfile("ordinalgwas.null.txt")
+    # gwas by chromosome, refit null model each time, use uncompressed Plink set
+    @time for chr in 1:23
+        plinkfile = plkfile * ".chr." * string(chr)
+        pvalfile = plkfile * ".chr." * string(chr) * ".pval.txt"
+        ordinalgwas(@formula(trait ~ sex), covfile, plinkfile, pvalfile = pvalfile)
+        @test isfile(pvalfile)
+        if chr == 1
+            pvals_chr1 = CSV.read(pvalfile)[5][1:5]
+            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
+        end
+        rm(plinkfile * ".pval.txt")
+    end
+    # gwas by chromosome, use fitted null model each time, use uncompressed Plink set
+    @time for chr in 1:23
+        plinkfile = plkfile * ".chr." * string(chr)
+        pvalfile = plkfile * ".chr." * string(chr) * ".pval.txt"
+        ordinalgwas(nm, plinkfile, pvalfile = pvalfile)
+        @test isfile(pvalfile)
+        if chr == 1
+            pvals_chr1 = CSV.read(pvalfile)[5][1:5]
+            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
+        end
+        rm(pvalfile)
+    end
+    # gwas by chromosome, use fitted null model each time, use compressed bed and bim files
+    @time for chr in 1:23
+        bedfile = plkfile * ".chr." * string(chr) * ".bed.gz"
+        bimfile = plkfile * ".chr." * string(chr) * ".bim.gz"
+        pvalfile = plkfile * ".chr." * string(chr) * ".pval.txt"
+        ordinalgwas(nm, bedfile, bimfile, 324; pvalfile = pvalfile)
+        @test isfile(pvalfile)
+        if chr == 1
+            pvals_chr1 = CSV.read(pvalfile)[5][1:5]
+            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
+        end
+        rm(pvalfile)
+    end
+    # clean up
+    # delete result files
+    isfile("ordinalgwas.null.txt") && rm("ordinalgwas.null.txt")
+    for chr in 1:26
+        plinkfile = plkfile * ".chr." * string(chr)
+        # delete uncompressed chromosome Plink files
+        isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
+        isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
+        isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
+        # delete compressed chromosome Plink files
+        isfile(plinkfile * ".bed.gz") && rm(plinkfile * ".bed.gz")
+        isfile(plinkfile * ".fam.gz") && rm(plinkfile * ".fam.gz")
+        isfile(plinkfile * ".bim.gz") && rm(plinkfile * ".bim.gz")
+        # delete pval files
+        isfile(plinkfile * ".pval.txt") && rm(plinkfile * ".pval.txt")
+    end
 end
