@@ -22,7 +22,7 @@ git:
 before_script: # install dependent unregistered packages
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
   - julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"), PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git")]);'
-after_script:  # TODO: change to after_success once https://github.com/JuliaLang/julia/issues/28306 is fixed
+after_success:  # TODO: change to after_success once https://github.com/JuliaLang/julia/issues/28306 is fixed
   # push coverage results to Codecov and Coveralls
   - julia -e 'using Pkg, OrdinalGWAS; cd(joinpath(dirname(pathof(OrdinalGWAS)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
 
@@ -36,4 +36,3 @@ jobs:
         - julia -e 'using OrdinalGWAS; include(joinpath(dirname(pathof(OrdinalGWAS)), "..", "docs", "make.jl"))'
       after_script: skip
       after_success: skip
-            
