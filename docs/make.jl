@@ -1,14 +1,14 @@
-using Documenter, PolrGWAS
+using Documenter, OrdinalGWAS
 
 ENV["DOCUMENTER_DEBUG"] = "true"
 
 makedocs(
     format = :html,
-    sitename = "PolrGWAS",
-    modules = [PolrGWAS]
+    sitename = "OrdinalGWAS",
+    modules = [OrdinalGWAS]
 )
 
 deploydocs(
-    repo   = "github.com/OpenMendel/PolrGWAS.jl.git",
+    repo   = "github.com/OpenMendel/OrdinalGWAS.jl.git",
     target = "build"
 )
