@@ -283,7 +283,7 @@ For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      162.015 ms (710982 allocations: 33.35 MiB)
+      162.665 ms (710982 allocations: 33.35 MiB)
 
 
 
@@ -383,7 +383,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.305909 seconds (881.81 k allocations: 42.526 MiB, 7.89% gc time)
+      0.296101 seconds (881.81 k allocations: 42.526 MiB, 4.20% gc time)
 
 
 
@@ -452,7 +452,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     21.404085 seconds (8.18 M allocations: 2.044 GiB, 1.85% gc time)
+     19.769862 seconds (8.18 M allocations: 2.044 GiB, 2.11% gc time)
 
 
 
@@ -512,7 +512,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.256595 seconds (758.61 k allocations: 35.808 MiB, 7.43% gc time)
+      0.246964 seconds (758.61 k allocations: 35.808 MiB, 10.78% gc time)
 
 
 
@@ -566,7 +566,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.208245 seconds (358.46 k allocations: 20.114 MiB, 3.50% gc time)
+      0.215692 seconds (358.45 k allocations: 20.114 MiB, 3.48% gc time)
 
 
 
@@ -842,12 +842,21 @@ run(`cat cluster_preparedata.jl`);
     
     # install and load Julia packages
     using Pkg
-    haskey(Pkg.installed(), "SnpArrays") || 
-    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"))
-    haskey(Pkg.installed(), "OrdinalMultinomialModels") || 
-    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"))
-    haskey(Pkg.installed(), "OrdinalGWAS") || 
-    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git"))
+    if haskey(Pkg.installed(), "SnpArrays")
+        Pkg.update("SnpArrays")
+    else
+        Pkg.add(PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"))
+    end
+    if haskey(Pkg.installed(), "OrdinalMultinomialModels")
+        Pkg.update("OrdinalMultinomialModels")
+    else
+        Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"))
+    end
+    if haskey(Pkg.installed(), "OrdinalGWAS")
+        Pkg.update("OrdinalGWAS")
+    else
+        Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git"))
+    end
     using OrdinalMultinomialModels, OrdinalGWAS, SnpArrays
     
     # split hapmap3 data according to chromosome

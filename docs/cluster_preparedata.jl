@@ -11,12 +11,21 @@
 
 # install and load Julia packages
 using Pkg
-haskey(Pkg.installed(), "SnpArrays") || 
-Pkg.add(PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"))
-haskey(Pkg.installed(), "OrdinalMultinomialModels") || 
-Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"))
-haskey(Pkg.installed(), "OrdinalGWAS") || 
-Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git"))
+if haskey(Pkg.installed(), "SnpArrays")
+    Pkg.update("SnpArrays")
+else
+    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"))
+end
+if haskey(Pkg.installed(), "OrdinalMultinomialModels")
+    Pkg.update("OrdinalMultinomialModels")
+else
+    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"))
+end
+if haskey(Pkg.installed(), "OrdinalGWAS")
+    Pkg.update("OrdinalGWAS")
+else
+    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git"))
+end
 using OrdinalMultinomialModels, OrdinalGWAS, SnpArrays
 
 # split hapmap3 data according to chromosome
