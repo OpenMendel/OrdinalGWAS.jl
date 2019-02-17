@@ -49,26 +49,26 @@ const datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
 
 
 
-    "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/"
+    "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/"
 
 
 
 
 ```julia
 # content of the data folder
-readdir(datadir)
+readdir(glob"*.*", datadir)
 ```
 
 
 
 
     6-element Array{String,1}:
-     "covariate.txt"
-     "hapmap3.bed"  
-     "hapmap3.bim"  
-     "hapmap3.fam"  
-     "hapmap3.map"  
-     "simtrait.jl"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/covariate.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bed"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bim"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.fam"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.map"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/simtrait.jl"  
 
 
 
@@ -113,7 +113,7 @@ The first argument specifies the null model without SNP effects, e.g., `@formula
 
 #### Covariate and trait file
 
-Covariates and phenotype are available in a csv file, e.g., `covariate.txt`, which has one header line for variable names. Variable `trait` is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable `sex` as the covariate in GWAS.
+Covariates and phenotype are provided in a csv file, e.g., `covariate.txt`, which has one header line for variable names. In this example, variable `trait` is the ordered categorical phenotypes coded as integers 1 to 4. We want to include variable `sex` as the covariate in GWAS.
 
 
 ```julia
@@ -145,10 +145,10 @@ readdir(glob"hapmap3.*", datadir)
 
 
     4-element Array{String,1}:
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.bed"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.bim"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.fam"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.map"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.map"
 
 
 
@@ -238,6 +238,16 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 ```
 will output the p-value file in compressed gz format.
 
+### Subsamples
+
+Use the keyword `covrowinds` to specify selected samples in the covarite file. Use the keyword `bedrowinds` to specify selected samples in the Plink bed file. For example, to use the first 300 samples in both covariate and bed file:
+```julia
+ordinalgwas(@formula(trait ~ sex), covfile, plkfile, covrowinds=1:300, bedrowinds=1:300)
+```
+!!! note
+
+    Users should always make sure that the selected samples in covariate file match exactly those in bed file. 
+
 ### Input non-genetic data as DataFrame
 
 Internally `ordinalgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `ordinalgwas` directly.
@@ -273,7 +283,7 @@ For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      162.955 ms (710982 allocations: 33.35 MiB)
+      168.147 ms (710982 allocations: 33.35 MiB)
 
 
 
@@ -373,7 +383,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.297344 seconds (881.64 k allocations: 42.516 MiB, 4.41% gc time)
+      0.284898 seconds (881.81 k allocations: 42.526 MiB, 4.39% gc time)
 
 
 
@@ -442,7 +452,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     19.454585 seconds (8.18 M allocations: 2.044 GiB, 2.25% gc time)
+     20.922376 seconds (8.18 M allocations: 2.044 GiB, 1.85% gc time)
 
 
 
@@ -502,7 +512,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.252297 seconds (758.61 k allocations: 35.808 MiB, 11.83% gc time)
+      0.252771 seconds (758.61 k allocations: 35.808 MiB, 11.06% gc time)
 
 
 
@@ -556,7 +566,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.209644 seconds (358.33 k allocations: 20.107 MiB, 3.97% gc time)
+      0.234024 seconds (358.45 k allocations: 20.114 MiB, 3.38% gc time)
 
 
 
@@ -671,43 +681,45 @@ readdir(glob"hapmap3.chr.*", datadir)
 
 
     75-element Array{String,1}:
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.1.bed" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.1.bim" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.1.fam" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.10.bed"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.10.bim"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.10.fam"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.11.bed"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.11.bim"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.11.fam"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.12.bed"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.12.bim"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.12.fam"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.13.bed"
-     ⋮                                                                         
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.6.bed" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.6.bim" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.6.fam" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.7.bed" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.7.bim" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.7.fam" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.8.bed" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.8.bim" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.8.fam" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.9.bed" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.9.bim" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.9.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.bed"
+     ⋮                                                                 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.fam" 
 
 
 
-Step 1: Fit the null model (and optionally save to file `fittednullmodel.jld2`). Setting third argument `plinkfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
+Step 1: Fit the null model (and optionally save to file `fittednullmodel.jls`). Setting third argument `plinkfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
 
 
 ```julia
 nm = ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", nothing)
 # # optional for cluster computing
-# using JLD2, FileIO
-# @save "../data/fittednullmodel.jld2" nm
+# using Serialization
+# open("fittednullmodel.jls", "w") do io
+#     Serialization.serialize(io, nm)
+# end
 ```
 
 
@@ -732,8 +744,10 @@ Step 2: GWAS for each chromosome. This step can be submitted as separate jobs on
 
 ```julia
 # # Optional for cluster computing: load fitted null model
-# using JLD2, FileIO, DataFrames
-# @load "../data/fittednullmodel.jld2" nm
+# using OrdinalGWAS, Serialization
+# nm = open("fittednullmodel.jls") do io
+#     Serialization.deserialize(io);
+# end
 
 # this part can be submitted as separate jobs
 for chr in 1:23
@@ -753,43 +767,45 @@ readdir(glob"*.pval.txt", datadir)
 
 
     23-element Array{String,1}:
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.1.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.10.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.11.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.12.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.13.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.14.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.15.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.16.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.17.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.18.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.19.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.2.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.20.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.21.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.22.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.23.pval.txt"
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.3.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.4.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.5.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.6.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.7.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.8.pval.txt" 
-     "/Users/huazhou/.julia/packages/OrdinalGWAS/9k2HI/data/hapmap3.chr.9.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.14.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.15.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.16.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.17.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.18.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.19.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.2.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.20.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.21.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.22.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.23.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.3.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.4.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.5.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.pval.txt" 
 
 
 
-In the rare situations when the multiple sets of Plink files lack the corresponding `fam` file or the corresponding bed and bim files have different filenames, users can explicitly supply bed filename, bim file name, and number of individuals. Replace Step 2 by 
+In the rare situations where the multiple sets of Plink files lack the `fam` file or the corresponding bed and bim files have different filenames, users can explicitly supply bed filename, bim file name, and number of individuals. Replace Step 2 by 
 
 Step 2': GWAS for each chromosome.
 
 
 ```julia
 # # Optional for cluster computing: load fitted null model
-# using JLD2, FileIO, DataFrames
-# @load "../data/fittednullmodel.jld2" nm
+# using OrdinalGWAS, Serialization
+# nm = open("fittednullmodel.jls") do io
+#     Serialization.deserialize(io);
+# end
 
-# this part can be submitted as separate job
+# this part can be submitted as separate jobs
 for chr in 1:23
     bedfile = datadir * "hapmap3.chr." * string(chr) * ".bed"
     bimfile = datadir * "hapmap3.chr." * string(chr) * ".bim"

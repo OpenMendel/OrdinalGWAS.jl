@@ -1,19 +1,26 @@
 """
     ordinalgwas(nullformula, covfile, plinkfile)
     ordinalgwas(nullformula, df, plinkfile)
+    ordinalgwas(fittednullmodel, plinkfile)
+    ordinalgwas(fittednullmodel, bedfile, bimfile, bedn)
 
 # Positional arguments 
 - `nullformula::Formula`: formula for the null model.
 - `covfile::AbstractString`: covariate file (csv) with one header line. One column 
     should be the ordered categorical phenotype coded as integers starting from 1.
-- `df::DataFrame`: DataFrame containing response and regressors.
+- `df::DataFrame`: DataFrame containing response and regressors for null model.
 - `plinkfile::AbstractString`: Plink file name without the bed, fam, or bim 
-    extensions. If `plinkfile==nothing`, only null model is fitted.
+    extensions. If `plinkfile==nothing`, only null model is fitted.  
+- `fittednullmodel::StatsModels.DataFrameRegressionModel`: the fitted null model 
+    output from `ordinalgwas(nullformula, covfile)` or `ordinalgwas(nullformula, df)`.
+- `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file.
+- `bimfile::Union{AbstractString,IOStream}`: path to Plink bim file.
+- `bedn::Integer`: number of samples in bed file.
 
 # Keyword arguments
-- `nullfile::AbstractString`: output file for the fitted null model; default is 
+- `nullfile::Union{AbstractString, IOStream}`: output file for the fitted null model; default is 
     `ordinalgwas.null.txt`. 
-- `pvalfile::AbstractString`: output file for the gwas p-values; default is 
+- `pvalfile::Union{AbstractString, IOStream}`: output file for the gwas p-values; default is 
     `ordinalgwas.pval.txt`. 
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  
@@ -51,7 +58,7 @@ function ordinalgwas(
     nullformula::Formula,
     nulldf::DataFrame,
     plinkfile::Union{Nothing, AbstractString} = nothing;
-    nullfile::AbstractString = "ordinalgwas.null.txt",
+    nullfile::Union{AbstractString, IOStream} = "ordinalgwas.null.txt",
     link::GLM.Link = LogitLink(),
     solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
     verbose::Bool = false,
@@ -74,7 +81,7 @@ function ordinalgwas(
     # keyword arguments
     testformula::Formula = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
     test::Symbol = :score,
-    pvalfile::AbstractString = "ordinalgwas.pval.txt",
+    pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt",
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     bedrowinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
@@ -130,12 +137,12 @@ function ordinalgwas(
 
 function ordinalgwas(
     fittednullmodel::StatsModels.DataFrameRegressionModel,
-    bedfile::AbstractString, # full path and bed file name
-    bimfile::AbstractString, # full path and bim file name
+    bedfile::Union{AbstractString, IOStream}, # full path and bed file name
+    bimfile::Union{AbstractString, IOStream}, # full path and bim file name
     bedn::Integer;           # number of samples in bed file
     testformula::Formula = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
     test::Symbol = :score,
-    pvalfile::AbstractString = "ordinalgwas.pval.txt", 
+    pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt", 
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpmask::BitVector = trues(SnpArrays.makestream(countlines, bimfile)),
     rowinds::AbstractVector{<:Integer} = 1:bedn, # row indices for SnpArray
