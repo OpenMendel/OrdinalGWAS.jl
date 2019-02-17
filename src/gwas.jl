@@ -10,7 +10,10 @@
     should be the ordered categorical phenotype coded as integers starting from 1.
 - `df::DataFrame`: DataFrame containing response and regressors for null model.
 - `plinkfile::AbstractString`: Plink file name without the bed, fam, or bim 
-    extensions. If `plinkfile==nothing`, only null model is fitted.  
+    extensions. If `plinkfile==nothing`, only null model is fitted. If `plinkfile` 
+    is provided, bed, bim, and fam file with same `plinkfile` prefix need to exist. 
+    Compressed file formats such as gz and bz2 are allowed. Check all allowed formats 
+    by `SnpArrays.ALLOWED_FORMAT`.  
 - `fittednullmodel::StatsModels.DataFrameRegressionModel`: the fitted null model 
     output from `ordinalgwas(nullformula, covfile)` or `ordinalgwas(nullformula, df)`.
 - `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file.

@@ -166,11 +166,11 @@ size(SnpArray(datadir * "hapmap3.bed"))
 
 
 
-Compressed Plink files are supported. For example, if Plink files are `hapmap3.bed.gz`, `hapmap3.bim.gz` and `hapmap3.fam.gz`, the same command should work.
+Compressed Plink files are supported. For example, if Plink files are `hapmap3.bed.gz`, `hapmap3.bim.gz` and `hapmap3.fam.gz`, the same command
 ```julia
 ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3")
 ```
-Check all supported compression format by
+still works. Check all supported compression format by
 
 
 ```julia
@@ -283,7 +283,7 @@ For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      168.147 ms (710982 allocations: 33.35 MiB)
+      162.015 ms (710982 allocations: 33.35 MiB)
 
 
 
@@ -383,7 +383,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.284898 seconds (881.81 k allocations: 42.526 MiB, 4.39% gc time)
+      0.305909 seconds (881.81 k allocations: 42.526 MiB, 7.89% gc time)
 
 
 
@@ -452,7 +452,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     20.922376 seconds (8.18 M allocations: 2.044 GiB, 1.85% gc time)
+     21.404085 seconds (8.18 M allocations: 2.044 GiB, 1.85% gc time)
 
 
 
@@ -512,7 +512,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.252771 seconds (758.61 k allocations: 35.808 MiB, 11.06% gc time)
+      0.256595 seconds (758.61 k allocations: 35.808 MiB, 7.43% gc time)
 
 
 
@@ -566,7 +566,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.234024 seconds (358.45 k allocations: 20.114 MiB, 3.38% gc time)
+      0.208245 seconds (358.46 k allocations: 20.114 MiB, 3.50% gc time)
 
 
 
@@ -664,9 +664,9 @@ Here
 
 The output files are written in `/path/to/data` directory.
 
-## Multiple Plink files
+## Multiple Plink file sets
 
-In large scale studies, genotypes data are split into multiple Plink files, e.g., by chromosomes. Then GWAS analysis can be done in parallel. This can be achieved by two steps.
+In large scale studies, genotypes data are split into multiple Plink files, e.g., by chromosome. Then GWAS analysis can be done in parallel. This can be achieved by two steps.
 
 Let's first create demo data by splitting hapmap3 according to chromosome:
 
@@ -710,16 +710,11 @@ readdir(glob"hapmap3.chr.*", datadir)
 
 
 
-Step 1: Fit the null model (and optionally save to file `fittednullmodel.jls`). Setting third argument `plinkfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
+Step 1: Fit the null model. Setting third argument `plinkfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
 
 
 ```julia
 nm = ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", nothing)
-# # optional for cluster computing
-# using Serialization
-# open("fittednullmodel.jls", "w") do io
-#     Serialization.serialize(io, nm)
-# end
 ```
 
 
@@ -739,16 +734,10 @@ nm = ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", nothing)
 
 
 
-Step 2: GWAS for each chromosome. This step can be submitted as separate jobs on a cluster.
+Step 2: GWAS for each chromosome.
 
 
 ```julia
-# # Optional for cluster computing: load fitted null model
-# using OrdinalGWAS, Serialization
-# nm = open("fittednullmodel.jls") do io
-#     Serialization.deserialize(io);
-# end
-
 # this part can be submitted as separate jobs
 for chr in 1:23
     plinkfile = datadir * "hapmap3.chr." * string(chr)
@@ -799,12 +788,6 @@ Step 2': GWAS for each chromosome.
 
 
 ```julia
-# # Optional for cluster computing: load fitted null model
-# using OrdinalGWAS, Serialization
-# nm = open("fittednullmodel.jls") do io
-#     Serialization.deserialize(io);
-# end
-
 # this part can be submitted as separate jobs
 for chr in 1:23
     bedfile = datadir * "hapmap3.chr." * string(chr) * ".bed"
@@ -830,3 +813,119 @@ for chr in 1:26
     isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
 end
 ```
+
+## Multiple Plink file sets on cluster
+
+We provide two scripts that successfully run on UCLA's Hoffman2 cluster using Julia v1.0.1 and PBS job schedulaer (`qsub`).
+
+* The first script [`cluster_preparedata.jl`](https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docs/cluster_preparedata.jl) creates a demo data set in current folder. Run
+```julia
+julia cluster_preparedata.jl
+```
+on head node.
+
+
+```julia
+run(`cat cluster_preparedata.jl`);
+```
+
+    #!/usr/local/bin/julia
+    #
+    # This script prepares a data set in current folder. 
+    # For each of chromosome 1-23, there is a set gzipped Plink files:
+    # hapmap3.chr.1.bed.gz, hapmap3.chr.1.bim.gz, hapmap3.chr.1.fam.gz
+    # hapmap3.chr.2.bed.gz, hapmap3.chr.2.bim.gz, hapmap3.chr.2.fam.gz
+    # ...
+    # hapmap3.chr.23.bed.gz, hapmap3.chr.23.bim.gz, hapmap3.chr.23.fam.gz
+    # There is also a csv file "covariate.txt" that contains trait and covariates.
+    #
+    
+    # install and load Julia packages
+    using Pkg
+    haskey(Pkg.installed(), "SnpArrays") || 
+    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"))
+    haskey(Pkg.installed(), "OrdinalMultinomialModels") || 
+    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"))
+    haskey(Pkg.installed(), "OrdinalGWAS") || 
+    Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git"))
+    using OrdinalMultinomialModels, OrdinalGWAS, SnpArrays
+    
+    # split hapmap3 data according to chromosome
+    datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
+    SnpArrays.split_plink(datadir * "hapmap3", :chromosome; prefix = "hapmap3.chr.")
+    # compresse Plink files for chromosome 1-23
+    for chr in 1:23
+        plinkfile = "hapmap3.chr." * string(chr)
+        SnpArrays.compress_plink(plinkfile)
+    end
+    # delete uncompressed chromosome Plink files
+    for chr in 1:26
+        plinkfile = "hapmap3.chr." * string(chr)
+        isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
+        isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
+        isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
+    end
+    # copy covariate.txt file
+    cp(datadir * "covariate.txt", joinpath(pwd(), "covariate.txt"))
+
+
+* The second script [`cluster_run.jl`](https://raw.githubusercontent.com/OpenMendel/OrdinalGWAS.jl/master/docs/cluster_run.jl) first fits the null model then submits a separate job for each chromosome. Run
+```julia
+julia cluster_run.jl
+```
+on head node.
+
+
+```julia
+run(`cat cluster_run.jl`);
+```
+
+    #!/usr/local/bin/julia
+    #
+    # This script demonstrates how to submit multiple OrdinalGWAS runs from multiple sets of
+    # Plink files on UCLA Hoffman2 cluster. It assumes that a demo data is available by
+    # running `julia cluster_preparedata.jl` at current folder.
+    #
+    
+    using OrdinalGWAS, Serialization
+    
+    # Step 1: fit null model and save result to file `fittednullmodel.jls`
+    nm = ordinalgwas(@formula(trait ~ sex), "covariate.txt", nothing)
+    open("fittednullmodel.jls", "w") do io
+        Serialization.serialize(io, nm)
+    end
+    
+    # Step 2: GWAS for each chromosome
+    for chr in 1:23
+        println("submit job for chromosome=$chr")
+        jcode = "using OrdinalGWAS, Serialization;
+        nm = open(deserialize, \"fittednullmodel.jls\");
+        bedfile = \"hapmap3.chr.\" * string($chr) * \".bed.gz\";
+        bimfile = \"hapmap3.chr.\" * string($chr) * \".bim.gz\";
+        pvalfile = \"hapmap3.chr.\" * string($chr) * \".pval.txt\";
+        ordinalgwas(nm, bedfile, bimfile, 324; pvalfile=pvalfile);"
+        # prepare sh file for qsub
+        open("tmp.sh", "w") do io
+            println(io, "#!/bin/bash")
+            println(io, "#\$ -cwd")
+            println(io, "# error = Merged with joblog")
+            println(io, "#\$ -o joblog.\$JOB_ID")
+            println(io, "#\$ -j y")
+            println(io, "#\$ -l h_rt=0:30:00,h_data=2G") # request runtime and memory
+            println(io, "#\$ -pe shared 2") # request # shared-memory nodes
+            println(io, "# Email address to notify")
+            println(io, "#\$ -M \$USER@mail")
+            println(io, "# Notify when")
+            println(io, "#\$ -m a")
+            println(io)
+            println(io, "# load the job environment:")
+            println(io, ". /u/local/Modules/default/init/modules.sh")
+            println(io, "module load julia/1.0.1") # available Julia version
+            println(io)
+            println(io, "# run julia code")
+            println(io, "julia -e '$jcode' > output.\$JOB_ID 2>&1")
+        end
+        # submit job
+        run(`qsub tmp.sh`)
+    end
+
