@@ -3,7 +3,7 @@ using Documenter, OrdinalGWAS
 ENV["DOCUMENTER_DEBUG"] = "true"
 
 makedocs(
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "OrdinalGWAS",
     modules = [OrdinalGWAS]
 )
