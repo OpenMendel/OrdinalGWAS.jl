@@ -370,7 +370,7 @@ Users are advised to impute genotypes using more sophiscated methods before GWAS
 
 ## SNP and/or sample masks
 
-In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `colinds` and `rowinds` keywords of `ordinalgwas` function.
+In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `snpinds`, `covrowinds` and `bedrowinds` keywords of `ordinalgwas` function. 
 
 For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05
 
@@ -440,7 +440,7 @@ rm("commonvariant.null.txt")
 rm("commonvariant.pval.txt")
 ```
 
-User should be particularly careful when using the `bedrowinds` keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
+`covrowinds` specify the samples in the covariate file and `bedrowinds` for SnpArray. User should be particularly careful when these two keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
 
 ## Likelihood ratio test (LRT)
 
