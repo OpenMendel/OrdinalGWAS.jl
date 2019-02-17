@@ -53,7 +53,7 @@ end
     rm("opm.pval.txt")
 end
 
-@testset "mask" begin
+@testset "snp mask" begin
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, snpinds=1:5, pvalfile="first5snps.pval.txt")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("first5snps.pval.txt")
@@ -62,6 +62,17 @@ end
     @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
     rm("ordinalgwas.null.txt")
     rm("first5snps.pval.txt")
+end
+
+@testset "sub samples" begin
+    # only use first 300 samples
+    @time ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, covrowinds=1:300, bedrowinds=1:300)
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("ordinalgwas.pval.txt")
+    scorepvals = CSV.read("ordinalgwas.pval.txt")[5][1:5]
+    @test isapprox(scorepvals, [1.0, 0.00355969, 0.000123604, 5.2213e-6, 0.00758234], rtol=1e-4)
+    rm("ordinalgwas.null.txt")
+    rm("ordinalgwas.pval.txt")
 end
 
 @testset "test formula" begin
