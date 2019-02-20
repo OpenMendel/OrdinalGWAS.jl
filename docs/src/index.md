@@ -283,14 +283,14 @@ For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      162.665 ms (710982 allocations: 33.35 MiB)
+      171.646 ms (710982 allocations: 33.35 MiB)
 
 
 
 ```julia
 # clean up
-rm("ordinalgwas.null.txt")
-rm("ordinalgwas.pval.txt")
+rm("ordinalgwas.null.txt", force=true)
+rm("ordinalgwas.pval.txt", force=true)
 ```
 
 ## Link functions
@@ -347,8 +347,8 @@ run(`head opm.pval.txt`);
 
 
 ```julia
-rm("opm.null.txt")
-rm("opm.pval.txt")
+rm("opm.null.txt", force=true)
+rm("opm.pval.txt", force=true)
 ```
 
 ## SNP models
@@ -383,7 +383,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.296101 seconds (881.81 k allocations: 42.526 MiB, 4.20% gc time)
+      0.293415 seconds (881.80 k allocations: 42.525 MiB, 4.73% gc time)
 
 
 
@@ -436,8 +436,8 @@ countlines("commonvariant.pval.txt"), count(snpinds)
 
 ```julia
 # clean up
-rm("commonvariant.null.txt")
-rm("commonvariant.pval.txt")
+rm("commonvariant.null.txt", force=true)
+rm("commonvariant.pval.txt", force=true)
 ```
 
 `covrowinds` specify the samples in the covariate file and `bedrowinds` for SnpArray. User should be particularly careful when these two keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
@@ -452,7 +452,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     19.769862 seconds (8.18 M allocations: 2.044 GiB, 2.11% gc time)
+     20.038929 seconds (8.18 M allocations: 2.044 GiB, 2.05% gc time)
 
 
 
@@ -494,8 +494,8 @@ run(`head lrt.pval.txt`);
 
 ```julia
 # clean up
-rm("lrt.pval.txt")
-rm("lrt.null.txt")
+rm("lrt.pval.txt", force=true)
+rm("lrt.null.txt", force=true)
 ```
 
 In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. 
@@ -512,7 +512,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.246964 seconds (758.61 k allocations: 35.808 MiB, 10.78% gc time)
+      0.244142 seconds (758.61 k allocations: 35.808 MiB, 8.09% gc time)
 
 
 
@@ -566,7 +566,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.215692 seconds (358.45 k allocations: 20.114 MiB, 3.48% gc time)
+      0.224991 seconds (358.46 k allocations: 20.114 MiB, 3.67% gc time)
 
 
 
@@ -590,9 +590,9 @@ run(`cat lrt.pval.txt`);
 
 ```julia
 # clean up
-rm("ordinalgwas.null.txt")
-rm("score.pval.txt")
-rm("lrt.pval.txt")
+rm("ordinalgwas.null.txt", force=true)
+rm("score.pval.txt", force=true)
+rm("lrt.pval.txt", force=true)
 ```
 
 ## GxE or other interactions
@@ -800,17 +800,17 @@ end
 
 ```julia
 # clean up
-isfile("ordinalgwas.null.txt") && rm("ordinalgwas.null.txt")
+rm("ordinalgwas.null.txt", force=true)
 isfile(datadir * "fittednullmodel.jld2") && rm(datadir * "fittednullmodel.jld2")
 for chr in 1:23
     pvalfile = datadir * "hapmap3.chr." * string(chr) * ".pval.txt"
-    isfile(pvalfile) && rm(pvalfile)
+    rm(pvalfile, force=true)
 end
 for chr in 1:26
     plinkfile = datadir * "hapmap3.chr." * string(chr)
-    isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
-    isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
-    isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
+    rm(plinkfile * ".bed", force=true)
+    rm(plinkfile * ".fam", force=true)
+    rm(plinkfile * ".bim", force=true)
 end
 ```
 
@@ -870,9 +870,9 @@ run(`cat cluster_preparedata.jl`);
     # delete uncompressed chromosome Plink files
     for chr in 1:26
         plinkfile = "hapmap3.chr." * string(chr)
-        isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
-        isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
-        isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
+        rm(plinkfile * ".bed", force=true)
+        rm(plinkfile * ".bim", force=true)
+        rm(plinkfile * ".fam", force=true)
     end
     # copy covariate.txt file
     cp(datadir * "covariate.txt", joinpath(pwd(), "covariate.txt"))

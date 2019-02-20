@@ -39,9 +39,9 @@ end
 # delete uncompressed chromosome Plink files
 for chr in 1:26
     plinkfile = "hapmap3.chr." * string(chr)
-    isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
-    isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
-    isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
+    rm(plinkfile * ".bed", force=true)
+    rm(plinkfile * ".bim", force=true)
+    rm(plinkfile * ".fam", force=true)
 end
 # copy covariate.txt file
 cp(datadir * "covariate.txt", joinpath(pwd(), "covariate.txt"))

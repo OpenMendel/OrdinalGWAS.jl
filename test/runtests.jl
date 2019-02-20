@@ -10,8 +10,8 @@ const plkfile = datadir * "/hapmap3"
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("ordinalgwas.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
 end
 
 @testset "LRT test" begin
@@ -20,8 +20,8 @@ end
     @test isfile("ordinalgwas.pval.txt")
     lrtpvals = open(CSV.read, "ordinalgwas.pval.txt")[6][1:5]
     @test isapprox(lrtpvals, [1.0, 1.91858366e-3, 1.80505056e-5, 5.87338471e-6, 8.08102258e-3], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("ordinalgwas.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
 end
 
 @testset "snpmodel" begin
@@ -31,16 +31,16 @@ end
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 0.14295, 0.000471942, 0.00555348, 0.000652844], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("ordinalgwas.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
     # recessive model 
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, snpmodel=RECESSIVE_MODEL)
     @test isfile("ordinalgwas.null.txt")
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 0.00673612, 0.000279908, 4.15322e-5, 0.167642], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("ordinalgwas.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
 end
 
 @testset "link" begin
@@ -49,8 +49,8 @@ end
     @test isfile("opm.pval.txt")
     scorepvals = open(CSV.read, "opm.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 1.00769167e-2, 2.62725649e-5, 1.08974849e-5, 5.10288399e-3], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("opm.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("opm.pval.txt", force=true)
 end
 
 @testset "snp mask" begin
@@ -60,8 +60,8 @@ end
     @test countlines("first5snps.pval.txt") == 6
     scorepvals = open(CSV.read, "first5snps.pval.txt")[5]
     @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("first5snps.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("first5snps.pval.txt", force=true)
 end
 
 @testset "sub samples" begin
@@ -71,8 +71,8 @@ end
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 0.00355969, 0.000123604, 5.2213e-6, 0.00758234], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("ordinalgwas.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
 end
 
 @testset "test formula" begin
@@ -83,8 +83,8 @@ end
     @test isfile("GxE.pval.txt")
     scorepvals = open(CSV.read, "GxE.pval.txt")[5][1:5]
     @test isapprox(scorepvals, [1.0, 1.74460104e-2, 1.66707324e-4, 4.76376246e-5, 2.91384712e-2], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("GxE.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("GxE.pval.txt", force=true)
     # LRT, only first 5 SNPs
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile="GxE.pval.txt", 
     testformula=@formula(trait ~ snp + snp & sex), test=:LRT, snpinds=1:5)
@@ -92,8 +92,8 @@ end
     @test isfile("GxE.pval.txt")
     lrtpvals = open(CSV.read, "GxE.pval.txt")[end]
     @test isapprox(lrtpvals, [1.0, 7.22410973e-3, 1.01730983e-4, 1.88174211e-5, 2.88295705e-2], rtol=1e-4)
-    rm("ordinalgwas.null.txt")
-    rm("GxE.pval.txt")
+    rm("ordinalgwas.null.txt", force=true)
+    rm("GxE.pval.txt", force=true)
 end
 
 @testset "split, gz" begin
@@ -120,7 +120,7 @@ end
             pvals_chr1 = open(CSV.read, pvalfile)[5][1:5]
             @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
         end
-        rm(plinkfile * ".pval.txt")
+        rm(plinkfile * ".pval.txt", force=true)
     end
     # gwas by chromosome, use fitted null model each time, use uncompressed Plink set
     @time for chr in 1:23
@@ -132,7 +132,7 @@ end
             pvals_chr1 = open(CSV.read, pvalfile)[5][1:5]
             @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
         end
-        rm(pvalfile)
+        rm(pvalfile, force=true)
     end
     # gwas by chromosome, use fitted null model each time, use compressed bed and bim files
     @time for chr in 1:23
@@ -145,7 +145,7 @@ end
             pvals_chr1 = open(CSV.read, pvalfile)[5][1:5]
             @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
         end
-        rm(pvalfile)
+        rm(pvalfile, force=true)
     end
     # clean up
     # delete result files
@@ -153,14 +153,14 @@ end
     for chr in 1:26
         plinkfile = plkfile * ".chr." * string(chr)
         # delete uncompressed chromosome Plink files
-        isfile(plinkfile * ".bed") && rm(plinkfile * ".bed")
-        isfile(plinkfile * ".fam") && rm(plinkfile * ".fam")
-        isfile(plinkfile * ".bim") && rm(plinkfile * ".bim")
+        rm(plinkfile * ".bed", force=true)
+        rm(plinkfile * ".fam", force=true)
+        rm(plinkfile * ".bim", force=true)
         # delete compressed chromosome Plink files
-        isfile(plinkfile * ".bed.gz") && rm(plinkfile * ".bed.gz")
-        isfile(plinkfile * ".fam.gz") && rm(plinkfile * ".fam.gz")
-        isfile(plinkfile * ".bim.gz") && rm(plinkfile * ".bim.gz")
+        rm(plinkfile * ".bed.gz", force=true)
+        rm(plinkfile * ".fam.gz", force=true)
+        rm(plinkfile * ".bim.gz", force=true)
         # delete pval files
-        isfile(plinkfile * ".pval.txt") && rm(plinkfile * ".pval.txt")
+        rm(plinkfile * ".pval.txt", force=true)
     end
 end
