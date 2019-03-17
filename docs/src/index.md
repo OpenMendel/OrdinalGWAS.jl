@@ -7,9 +7,9 @@ OrdinalGWAS.jl is a Julia package for performing genome-wide association studies
 
 This package requires Julia v0.7 or later and two other unregistered packages SnpArrays.jl and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
 ```julia
-(v1.0) pkg> add https://github.com/OpenMendel/SnpArrays.jl.git
-(v1.0) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git
-(v1.0) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl.git
+(v1.1) pkg> add https://github.com/OpenMendel/SnpArrays.jl
+(v1.1) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
+(v1.1) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
 ```
 
 
@@ -18,14 +18,14 @@ This package requires Julia v0.7 or later and two other unregistered packages Sn
 versioninfo()
 ```
 
-    Julia Version 1.0.3
-    Commit 099e826241 (2018-12-18 01:34 UTC)
+    Julia Version 1.1.0
+    Commit 80516ca202 (2019-01-21 21:24 UTC)
     Platform Info:
       OS: macOS (x86_64-apple-darwin14.5.0)
       CPU: Intel(R) Core(TM) i7-6920HQ CPU @ 2.90GHz
       WORD_SIZE: 64
       LIBM: libopenlibm
-      LLVM: libLLVM-6.0.0 (ORCJIT, skylake)
+      LLVM: libLLVM-6.0.1 (ORCJIT, skylake)
     Environment:
       JULIA_EDITOR = code
 
@@ -49,7 +49,7 @@ const datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
 
 
 
-    "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/"
+    "/Users/huazhou/.julia/dev/OrdinalGWAS/data/"
 
 
 
@@ -63,12 +63,12 @@ readdir(glob"*.*", datadir)
 
 
     6-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/covariate.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bed"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bim"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.fam"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.map"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/simtrait.jl"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/covariate.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bed"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bim"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.fam"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.map"  
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/simtrait.jl"  
 
 
 
@@ -145,10 +145,10 @@ readdir(glob"hapmap3.*", datadir)
 
 
     4-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.map"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.map"
 
 
 
@@ -283,7 +283,7 @@ For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      171.646 ms (710982 allocations: 33.35 MiB)
+      145.716 ms (609601 allocations: 30.95 MiB)
 
 
 
@@ -383,7 +383,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.293415 seconds (881.80 k allocations: 42.525 MiB, 4.73% gc time)
+      0.334001 seconds (859.74 k allocations: 44.024 MiB, 9.86% gc time)
 
 
 
@@ -452,7 +452,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     20.038929 seconds (8.18 M allocations: 2.044 GiB, 2.05% gc time)
+     20.787611 seconds (8.41 M allocations: 2.059 GiB, 1.92% gc time)
 
 
 
@@ -512,7 +512,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.244142 seconds (758.61 k allocations: 35.808 MiB, 8.09% gc time)
+      0.232430 seconds (672.58 k allocations: 34.373 MiB, 11.71% gc time)
 
 
 
@@ -566,7 +566,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.224991 seconds (358.46 k allocations: 20.114 MiB, 3.67% gc time)
+      0.240900 seconds (461.18 k allocations: 24.444 MiB, 3.04% gc time)
 
 
 
@@ -681,32 +681,32 @@ readdir(glob"hapmap3.chr.*", datadir)
 
 
     75-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.bed"
-     ⋮                                                                 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bed"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bim"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.fam"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.bed"
+     ⋮                                                              
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.fam" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bed" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bim" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.fam" 
 
 
 
@@ -756,29 +756,29 @@ readdir(glob"*.pval.txt", datadir)
 
 
     23-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.1.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.10.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.11.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.12.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.13.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.14.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.15.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.16.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.17.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.18.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.19.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.2.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.20.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.21.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.22.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.23.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.3.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.4.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.5.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.6.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.7.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.8.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS.jl/data/hapmap3.chr.9.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.14.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.15.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.16.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.17.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.18.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.19.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.2.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.20.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.21.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.22.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.23.pval.txt"
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.3.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.4.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.5.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.pval.txt" 
+     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.pval.txt" 
 
 
 

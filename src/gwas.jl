@@ -7,7 +7,8 @@
 # Positional arguments 
 - `nullformula::Formula`: formula for the null model.
 - `covfile::AbstractString`: covariate file (csv) with one header line. One column 
-    should be the ordered categorical phenotype coded as integers starting from 1.
+    should be the ordinal phenotype coded as integers starting from 1.  For example, 
+    ordinal phenotypes can be coded as 1, 2, 3, 4 but not 0, 1, 2, 3.  
 - `df::DataFrame`: DataFrame containing response and regressors for null model.
 - `plinkfile::AbstractString`: Plink file name without the bed, fam, or bim 
     extensions. If `plinkfile==nothing`, only null model is fitted. If `plinkfile` 
@@ -16,13 +17,13 @@
     by `SnpArrays.ALLOWED_FORMAT`.  
 - `fittednullmodel::StatsModels.DataFrameRegressionModel`: the fitted null model 
     output from `ordinalgwas(nullformula, covfile)` or `ordinalgwas(nullformula, df)`.
-- `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file.
-- `bimfile::Union{AbstractString,IOStream}`: path to Plink bim file.
+- `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file with full file name.
+- `bimfile::Union{AbstractString,IOStream}`: path to Plink bim file with full file name.
 - `bedn::Integer`: number of samples in bed file.
 
 # Keyword arguments
-- `nullfile::Union{AbstractString, IOStream}`: output file for the fitted null model; default is 
-    `ordinalgwas.null.txt`. 
+- `nullfile::Union{AbstractString, IOStream}`: output file for the fitted null model; 
+    default is `ordinalgwas.null.txt`. 
 - `pvalfile::Union{AbstractString, IOStream}`: output file for the gwas p-values; default is 
     `ordinalgwas.pval.txt`. 
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
@@ -114,15 +115,6 @@ function ordinalgwas(
     end
     nbedrows == nobs(fittednullmodel) || 
         throw(ArgumentError("number of samples in bedrowinds does not match null model"))
-    # create SNP mask vector
-    if snpinds == nothing
-        snpmask = trues(SnpArrays.makestream(countlines, bimfile))
-    elseif eltype(snpinds) == Bool
-        snpmask = snpinds
-    else
-        snpmask = falses(SnpArrays.makestream(countlines, bimfile))
-        snpmask[snpinds] .= true
-    end
     # validate testing method
     test = Symbol(lowercase(string(test)))
     test == :score || test == :lrt || throw(ArgumentError("unrecognized test $test"))
@@ -132,8 +124,8 @@ function ordinalgwas(
         test = test, 
         pvalfile = pvalfile,
         snpmodel = snpmodel, 
-        snpmask = snpmask, 
-        rowinds = rowinds, 
+        snpinds = snpinds, 
+        bedrowinds = rowinds, 
         solver = solver, 
         verbose = verbose)
     end
@@ -147,8 +139,8 @@ function ordinalgwas(
     test::Symbol = :score,
     pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt", 
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
-    snpmask::BitVector = trues(SnpArrays.makestream(countlines, bimfile)),
-    rowinds::AbstractVector{<:Integer} = 1:bedn, # row indices for SnpArray
+    snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
+    bedrowinds::AbstractVector{<:Integer} = 1:bedn, # row indices for SnpArray
     solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
     verbose::Bool = false
     )
@@ -160,6 +152,15 @@ function ordinalgwas(
     mfalt = ModelFrame(testformula, testdf)
     mfalt.terms.intercept = false # drop intercept
     Z = similar(ModelMatrix(mfalt).m)
+    # create SNP mask vector
+    if snpinds == nothing
+        snpmask = trues(SnpArrays.makestream(countlines, bimfile))
+    elseif eltype(snpinds) == Bool
+        snpmask = snpinds
+    else
+        snpmask = falses(SnpArrays.makestream(countlines, bimfile))
+        snpmask[snpinds] .= true
+    end
     # carry out score or LRT test SNP by SNP
     snponly = testformula.rhs == :snp
     cc = SnpArrays.counts(genomat, dims=1) # column counts of genomat
@@ -177,9 +178,9 @@ function ordinalgwas(
                         pval = 1.0
                     else
                         if snponly
-                            copyto!(ts.Z, @view(genomat[rowinds, j]), impute=true, model=snpmodel)
+                            copyto!(ts.Z, @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
                         else # snp + other terms
-                            copyto!(testdf[:snp], @view(genomat[rowinds, j]), impute=true, model=snpmodel)
+                            copyto!(testdf[:snp], @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
                             mfalt = ModelFrame(testformula, testdf)
                             mfalt.terms.intercept = false # drop intercept
                             ts.Z[:] = ModelMatrix(mfalt).m
@@ -217,14 +218,19 @@ function ordinalgwas(
                         pval = 1.0
                     else
                         if snponly
-                            copyto!(@view(Xaug[:, fittednullmodel.model.p+1]), @view(genomat[rowinds, j]), impute=true, model=snpmodel)
+                            copyto!(@view(Xaug[:, fittednullmodel.model.p+1]), 
+                                @view(genomat[bedrowinds, j]), 
+                                impute=true, model=snpmodel)
                         else # snp + other terms
-                            copyto!(testdf[:snp], @view(genomat[rowinds, j]), impute=true, model=snpmodel)
+                            copyto!(testdf[:snp], @view(genomat[bedrowinds, j]), 
+                                impute=true, model=snpmodel)
                             mfalt = ModelFrame(testformula, testdf)
                             mfalt.terms.intercept = false # drop intercept
                             Xaug[:, fittednullmodel.model.p+1:end] = ModelMatrix(mfalt).m
                         end
-                        altmodel = polr(Xaug, fittednullmodel.model.Y, fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
+                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                            fittednullmodel.model.link, solver, 
+                            wts = fittednullmodel.model.wts)
                         copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
                         pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
                     end
