@@ -167,11 +167,12 @@ function ordinalgwas(
     if test == :score
         ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
         SnpArrays.makestream(pvalfile, "w") do io
-            println(io, "chr,pos,snpid,maf,pval")
+            println(io, "chr,pos,snpid,maf,hwepval,pval")
             SnpArrays.makestream(bimfile) do bimio
                 for j in eachindex(snpmask)
                     row = readline(bimio)
                     snpmask[j] || continue
+                    hwepval = SnpArrays.hwe(cc[1, j], cc[3, j], cc[4, j])
                     maf = (cc[3, j] + 2cc[4, j]) / 2(cc[1, j] + cc[3, j] + cc[4, j])
                     maf > 0.5 && (maf = 1 - maf)
                     if maf == 0 # mono-allelic
@@ -188,7 +189,7 @@ function ordinalgwas(
                         pval = polrtest(ts)
                     end
                     snpj = split(row)
-                    println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$pval")
+                    println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$hwepval,$pval")
                 end
             end
         end
@@ -199,9 +200,9 @@ function ordinalgwas(
         γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
         SnpArrays.makestream(pvalfile, "w") do io
             if snponly
-                println(io, "chr,pos,snpid,maf,effect,pval")
+                println(io, "chr,pos,snpid,maf,hwepval,effect,pval")
             else
-                print(io, "chr,pos,snpid,maf,")
+                print(io, "chr,pos,snpid,maf,hwepval,")
                 for j in 1:q
                     print(io, "effect$j,")
                 end
@@ -213,6 +214,7 @@ function ordinalgwas(
                     snpmask[j] || continue
                     maf = (cc[3, j] + 2cc[4, j]) / 2(cc[1, j] + cc[3, j] + cc[4, j])
                     maf > 0.5 && (maf = 1 - maf)
+                    hwepval = SnpArrays.hwe(cc[1, j], cc[3, j], cc[4, j])
                     if maf == 0 # mono-allelic
                         fill!(γ̂, 0)
                         pval = 1.0
@@ -236,9 +238,9 @@ function ordinalgwas(
                     end
                     snpj = split(row)
                     if snponly
-                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$(γ̂[1]),$pval")
+                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$hwepval,$(γ̂[1]),$pval")
                     else
-                        print(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,")
+                        print(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$hwepval,")
                         for j in 1:q
                             print(io, "$(γ̂[j]),")
                         end
