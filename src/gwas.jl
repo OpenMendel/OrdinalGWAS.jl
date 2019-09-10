@@ -463,8 +463,8 @@ function ordinalsnpsetgwas(
                         end
                         snpj = split(rowj)
                         snpj_s = split(rowj_s)
-                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),
-                        $(snpj_s[1]),$(snpj_s[4]),$(snpj_s[2]),$pval")
+                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(snpj_s[1]),",
+                        "$(snpj_s[4]),$(snpj_s[2]),$pval")
                     end
                 end
             end
