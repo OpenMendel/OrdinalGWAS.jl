@@ -83,7 +83,7 @@ function ordinalgwas(
     fittednullmodel::StatsModels.TableRegressionModel,
     plinkfile::AbstractString;
     # keyword arguments
-    testformula::FormulaTerm = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
+    testformula::FormulaTerm = fittednullmodel.mf.f.lhs ~ Term(:snp),
     test::Symbol = :score,
     pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt",
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
@@ -135,7 +135,7 @@ function ordinalgwas(
     bedfile::Union{AbstractString, IOStream}, # full path and bed file name
     bimfile::Union{AbstractString, IOStream}, # full path and bim file name
     bedn::Integer;           # number of samples in bed file
-    testformula::FormulaTerm = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
+    testformula::FormulaTerm = fittednullmodel.mf.f.lhs ~ Term(:snp),
     test::Symbol = :score,
     pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt", 
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
@@ -147,11 +147,12 @@ function ordinalgwas(
     # create SnpArray
     genomat = SnpArrays.SnpArray(bedfile, bedn)
     # extra columns in design matrix to be tested
-    testdf = fittednullmodel.mf.df # TODO: not type stable here
-    testdf[:snp] = zeros(size(fittednullmodel.mf.df, 1))
-    mfalt = ModelFrame(testformula, testdf)
-    mfalt.terms.intercept = false # drop intercept
-    Z = similar(ModelMatrix(mfalt).m)
+    testdf = DataFrame(fittednullmodel.mf.data) # TODO: not type stable here
+    testdf[:snp] = zeros(size(fittednullmodel.mm, 1))
+    #mfalt = ModelFrame(testformula, testdf)
+    #mfalt.terms.intercept = false # drop intercept
+    #Z = similar(ModelMatrix(mfalt).m)
+    Z = similar(modelmatrix(testformula, testdf))
     # create SNP mask vector
     if snpinds == nothing
         snpmask = trues(SnpArrays.makestream(countlines, bimfile))
@@ -162,7 +163,7 @@ function ordinalgwas(
         snpmask[snpinds] .= true
     end
     # carry out score or LRT test SNP by SNP
-    snponly = testformula.rhs == :snp
+    snponly = testformula.rhs == Term(:snp)
     cc = SnpArrays.counts(genomat, dims=1) # column counts of genomat
     if test == :score
         ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
@@ -182,9 +183,10 @@ function ordinalgwas(
                             copyto!(ts.Z, @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
                         else # snp + other terms
                             copyto!(testdf[:snp], @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
-                            mfalt = ModelFrame(testformula, testdf)
-                            mfalt.terms.intercept = false # drop intercept
-                            ts.Z[:] = ModelMatrix(mfalt).m
+                            #mfalt = ModelFrame(testformula, testdf)
+                            #mfalt.terms.intercept = false # drop intercept
+                            #ts.Z[:] = ModelMatrix(mfalt).m
+                            ts.Z[:] = modelmatrix(testformula, testdf)
                         end
                         pval = polrtest(ts)
                     end
@@ -226,9 +228,10 @@ function ordinalgwas(
                         else # snp + other terms
                             copyto!(testdf[:snp], @view(genomat[bedrowinds, j]), 
                                 impute=true, model=snpmodel)
-                            mfalt = ModelFrame(testformula, testdf)
-                            mfalt.terms.intercept = false # drop intercept
-                            Xaug[:, fittednullmodel.model.p+1:end] = ModelMatrix(mfalt).m
+                            #mfalt = ModelFrame(testformula, testdf)
+                            #mfalt.terms.intercept = false # drop intercept
+                            #Xaug[:, fittednullmodel.model.p+1:end] = ModelMatrix(mfalt).m
+                            Xaug[:, fittednullmodel.model.p+1:end] = modelmatrix(testformula, testdf)
                         end
                         altmodel = polr(Xaug, fittednullmodel.model.Y, 
                             fittednullmodel.model.link, solver, 
@@ -429,7 +432,7 @@ function ordinalsnpsetgwas(
         setlength = -1
     end
     if setlength > 0 #single snp analysis or window
-        Z = zeros(size(fittednullmodel.mf.df, 1), setlength) # column counts of genomat
+        Z = zeros(size(fittednullmodel.mm, 1), setlength) # column counts of genomat
         totalsnps = SnpArrays.makestream(countlines, bimfile)
         if test == :score
             ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
@@ -448,7 +451,7 @@ function ordinalsnpsetgwas(
                             #length of Z will be different
                             #global Z = zeros(size(fittednullmodel.mf.df, 1), q)
                             #global ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
-                            Z = zeros(size(fittednullmodel.mf.df, 1), q)
+                            Z = zeros(size(fittednullmodel.mm, 1), q)
                             ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
                         end
                         for i in 1:(q - 2) #
@@ -484,7 +487,7 @@ function ordinalsnpsetgwas(
                             endj = totalsnps
                             q = totalsnps - j + 1
                             Xaug = [fittednullmodel.model.X zeros(size(
-                                fittednullmodel.mf.df, 1), q)]
+                                fittednullmodel.mm, 1), q)]
                         end
                         for i in 1:(q - 2)
                             readline(bimio)
@@ -520,7 +523,7 @@ function ordinalsnpsetgwas(
                 snpset_id = snpset_ids[j]
                 snpinds = findall(snpsetFile[:snpset_id] .== snpset_id)
                 q = length(snpinds)
-                Z = zeros(size(fittednullmodel.mf.df, 1), q)
+                Z = zeros(size(fittednullmodel.mm, 1), q)
                 γ̂ = Vector{Float64}(undef, q)
                 Xaug = [fittednullmodel.model.X Z]
                 if all(@view(mafs[snpinds]) .== 0) # all mono-allelic, unlikely but just in case
@@ -559,7 +562,7 @@ function ordinalsnpsetgwas(
             else
                 q = length(snpset)
                 γ̂ = Vector{Float64}(undef, q)
-                Z = zeros(size(fittednullmodel.mf.df, 1), q)
+                Z = zeros(size(fittednullmodel.mm, 1), q)
                 if test == :score
                     ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
                     copyto!(ts.Z, @view(genomat[bedrowinds, snpset]), impute=true, model=snpmodel)
@@ -684,14 +687,14 @@ function ordinalgwasGxE(
     )
     #covdf = fittednullmodel.mf.df
     #covdf[:snp] = zeros(size(covdf, 1))
-    Xaug = [fittednullmodel.model.X zeros(size(fittednullmodel.mf.df, 1))]
-    Xaug2 = [fittednullmodel.model.X zeros(size(fittednullmodel.mf.df, 1), 2)] #or get Xaug to point to part of it
+    Xaug = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1))]
+    Xaug2 = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1), 2)] #or get Xaug to point to part of it
     # create SnpArray
     genomat = SnpArrays.SnpArray(bedfile, bedn)
     cc = SnpArrays.counts(genomat, dims=1) 
     mafs = SnpArrays.maf(genomat)
-    envvar = fittednullmodel.mf.df[e]
-    testvec = zeros(size(fittednullmodel.mf.df, 1), 1)
+    envvar = DataFrame(fittednullmodel.mf.data)[e]
+    testvec = zeros(size(fittednullmodel.mm, 1), 1)
     # create SNP mask vector
     if snpinds == nothing
         snpmask = trues(SnpArrays.makestream(countlines, bimfile))
