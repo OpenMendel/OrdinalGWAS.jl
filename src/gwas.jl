@@ -15,7 +15,7 @@
     is provided, bed, bim, and fam file with same `plinkfile` prefix need to exist. 
     Compressed file formats such as gz and bz2 are allowed. Check all allowed formats 
     by `SnpArrays.ALLOWED_FORMAT`.  
-- `fittednullmodel::StatsModels.DataFrameRegressionModel`: the fitted null model 
+- `fittednullmodel::StatsModels.TableRegressionModel`: the fitted null model 
     output from `ordinalgwas(nullformula, covfile)` or `ordinalgwas(nullformula, df)`.
 - `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file with full file name.
 - `bimfile::Union{AbstractString,IOStream}`: path to Plink bim file with full file name.
@@ -80,7 +80,7 @@ end
 
 function ordinalgwas(
     # positional arguments
-    fittednullmodel::StatsModels.DataFrameRegressionModel,
+    fittednullmodel::StatsModels.TableRegressionModel,
     plinkfile::AbstractString;
     # keyword arguments
     testformula::FormulaTerm = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
@@ -131,7 +131,7 @@ function ordinalgwas(
 end
 
 function ordinalgwas(
-    fittednullmodel::StatsModels.DataFrameRegressionModel,
+    fittednullmodel::StatsModels.TableRegressionModel,
     bedfile::Union{AbstractString, IOStream}, # full path and bed file name
     bimfile::Union{AbstractString, IOStream}, # full path and bim file name
     bedn::Integer;           # number of samples in bed file
@@ -273,7 +273,7 @@ end
     is provided, bed, bim, and fam file with same `plinkfile` prefix need to exist. 
     Compressed file formats such as gz and bz2 are allowed. Check all allowed formats 
     by `SnpArrays.ALLOWED_FORMAT`.  
-- `fittednullmodel::StatsModels.DataFrameRegressionModel`: the fitted null model 
+- `fittednullmodel::StatsModels.TableRegressionModel`: the fitted null model 
     output from `ordinalgwas(nullformula, covfile)` or `ordinalgwas(nullformula, df)`.
 - `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file with full file name.
 - `bimfile::Union{AbstractString,IOStream}`: path to Plink bim file with full file name.
@@ -343,7 +343,7 @@ end
 
 function ordinalsnpsetgwas(
     # positional arguments
-    fittednullmodel::StatsModels.DataFrameRegressionModel,
+    fittednullmodel::StatsModels.TableRegressionModel,
     plinkfile::AbstractString;
     # keyword arguments
     snpset::Union{Nothing, Integer, AbstractString, AbstractVector{<:Integer}} = nothing,
@@ -393,7 +393,7 @@ end
 
 
 function ordinalsnpsetgwas(
-    fittednullmodel::StatsModels.DataFrameRegressionModel,
+    fittednullmodel::StatsModels.TableRegressionModel,
     bedfile::Union{AbstractString, IOStream}, # full path and bed file name
     bimfile::Union{AbstractString, IOStream}, # full path and bim file name
     bedn::Integer;           # number of samples in bed file
@@ -669,7 +669,7 @@ end
 
 function ordinalgwasGxE(
     nullformula::FormulaTerm,
-    fittednullmodel::StatsModels.DataFrameRegressionModel,
+    fittednullmodel::StatsModels.TableRegressionModel,
     bedfile::Union{AbstractString, IOStream}, # full path and bed file name
     bimfile::Union{AbstractString, IOStream}, # full path and bim file name
     bedn::Integer,           # number of samples in bed file
