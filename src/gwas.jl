@@ -5,7 +5,7 @@
     ordinalgwas(fittednullmodel, bedfile, bimfile, bedn)
 
 # Positional arguments 
-- `nullformula::Formula`: formula for the null model.
+- `nullformula::FormulaTerm`: formula for the null model.
 - `covfile::AbstractString`: covariate file (csv) with one header line. One column 
     should be the ordinal phenotype coded as integers starting from 1.  For example, 
     ordinal phenotypes can be coded as 1, 2, 3, 4 but not 0, 1, 2, 3.  
@@ -29,7 +29,7 @@
 - `covtype::Vector{DataType}`: type information for `covfile`. This is useful
     when `CSV.read(covarfile)` has parsing errors.  
 - `covrowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for covariate file.  
-- `testformula::Formula`: formula for test unit. Default is `@formula(trait ~ 0 + snp)`.
+- `testformula::FormulaTerm`: formula for test unit. Default is `@formula(trait ~ 0 + snp)`.
 - `test::Symbol`: `:score` (default) or `:lrt`.  
 - `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
     or `CloglogLink()`.
@@ -43,7 +43,7 @@
 """
 function ordinalgwas(
     # positional arguments
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     covfile::AbstractString,
     plinkfile::Union{Nothing, AbstractString} = nothing;
     # keyword arguments
@@ -59,7 +59,7 @@ function ordinalgwas(
 end
 
 function ordinalgwas(
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     nulldf::DataFrame,
     plinkfile::Union{Nothing, AbstractString} = nothing;
     nullfile::Union{AbstractString, IOStream} = "ordinalgwas.null.txt",
@@ -83,7 +83,7 @@ function ordinalgwas(
     fittednullmodel::StatsModels.DataFrameRegressionModel,
     plinkfile::AbstractString;
     # keyword arguments
-    testformula::Formula = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
+    testformula::FormulaTerm = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
     test::Symbol = :score,
     pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt",
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
@@ -135,7 +135,7 @@ function ordinalgwas(
     bedfile::Union{AbstractString, IOStream}, # full path and bed file name
     bimfile::Union{AbstractString, IOStream}, # full path and bim file name
     bedn::Integer;           # number of samples in bed file
-    testformula::Formula = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
+    testformula::FormulaTerm = @eval(@formula($(fittednullmodel.mf.terms.eterms[1]) ~ snp)),
     test::Symbol = :score,
     pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt", 
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
@@ -263,7 +263,7 @@ end
     ordinalsnpsetgwas(fittednullmodel, bedfile, bimfile, bedn)
 
 # Positional arguments 
-- `nullformula::Formula`: formula for the null model.
+- `nullformula::FormulaTerm`: formula for the null model.
 - `covfile::AbstractString`: covariate file (csv) with one header line. One column 
     should be the ordinal phenotype coded as integers starting from 1.  For example, 
     ordinal phenotypes can be coded as 1, 2, 3, 4 but not 0, 1, 2, 3.  
@@ -306,7 +306,7 @@ end
 """
 function ordinalsnpsetgwas(
     # positional arguments
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     covfile::AbstractString,
     plinkfile::Union{Nothing, AbstractString} = nothing;
     # keyword arguments
@@ -322,7 +322,7 @@ function ordinalsnpsetgwas(
 end
 
 function ordinalsnpsetgwas(
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     nulldf::DataFrame,
     plinkfile::Union{Nothing, AbstractString} = nothing;
     nullfile::Union{AbstractString, IOStream} = "ordinalgwas.null.txt",
@@ -594,7 +594,7 @@ end
 #tests selected GxE effects with the snp in the null model. It will be slow so not recommended for all snps.
 function ordinalgwasGxE(
     # positional arguments
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     covfile::AbstractString,
     plinkfile::Union{AbstractString},
     e::Union{AbstractString,Symbol};
@@ -613,7 +613,7 @@ function ordinalgwasGxE(
 end
 
 function ordinalgwasGxE(
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     covdf::DataFrame,
     plinkfile::Union{AbstractString},
     e::Union{AbstractString,Symbol};
@@ -668,7 +668,7 @@ function ordinalgwasGxE(
 end
 
 function ordinalgwasGxE(
-    nullformula::Formula,
+    nullformula::FormulaTerm,
     fittednullmodel::StatsModels.DataFrameRegressionModel,
     bedfile::Union{AbstractString, IOStream}, # full path and bed file name
     bimfile::Union{AbstractString, IOStream}, # full path and bim file name
