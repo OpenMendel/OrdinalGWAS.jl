@@ -148,7 +148,7 @@ function ordinalgwas(
     genomat = SnpArrays.SnpArray(bedfile, bedn)
     # extra columns in design matrix to be tested
     testdf = DataFrame(fittednullmodel.mf.data) # TODO: not type stable here
-    testdf[:snp] = zeros(size(fittednullmodel.mm, 1))
+    testdf[!, :snp] = zeros(size(fittednullmodel.mm, 1))
     #mfalt = ModelFrame(testformula, testdf)
     #mfalt.terms.intercept = false # drop intercept
     #Z = similar(ModelMatrix(mfalt).m)
@@ -182,7 +182,7 @@ function ordinalgwas(
                         if snponly
                             copyto!(ts.Z, @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
                         else # snp + other terms
-                            copyto!(testdf[:snp], @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
+                            copyto!(testdf[!, :snp], @view(genomat[bedrowinds, j]), impute=true, model=snpmodel)
                             #mfalt = ModelFrame(testformula, testdf)
                             #mfalt.terms.intercept = false # drop intercept
                             #ts.Z[:] = ModelMatrix(mfalt).m
@@ -226,7 +226,7 @@ function ordinalgwas(
                                 @view(genomat[bedrowinds, j]), 
                                 impute=true, model=snpmodel)
                         else # snp + other terms
-                            copyto!(testdf[:snp], @view(genomat[bedrowinds, j]), 
+                            copyto!(testdf[!, :snp], @view(genomat[bedrowinds, j]), 
                                 impute=true, model=snpmodel)
                             #mfalt = ModelFrame(testformula, testdf)
                             #mfalt.terms.intercept = false # drop intercept
@@ -421,9 +421,9 @@ function ordinalsnpsetgwas(
         snpsetFile = CSV.read(snpset, header = [:snpset_id, :snp_id], delim = " ")
         #make sure it matches bim file
         biminfo = CSV.read(bimfile, header = [:chr, :snp_id, :c3, :bp, :c5, :c6], delim = "\t")
-        snpsetFile[:snp_id] == biminfo[:snp_id] || throw(ArgumentError("snp order in snpset file
+        snpsetFile[!, :snp_id] == biminfo[!, :snp_id] || throw(ArgumentError("snp order in snpset file
         must match (in the same order) bimfile")) 
-        snpset_ids = unique(snpsetFile[:snpset_id])
+        snpset_ids = unique(snpsetFile[!, :snpset_id])
         nSets = length(snpset_ids)
         setlength = 0
     elseif isa(snpset, Integer)
@@ -521,7 +521,7 @@ function ordinalsnpsetgwas(
                 "snpsetid,nsnps,l2normeffect,pval")
             for j in eachindex(snpset_ids)
                 snpset_id = snpset_ids[j]
-                snpinds = findall(snpsetFile[:snpset_id] .== snpset_id)
+                snpinds = findall(snpsetFile[!, :snpset_id] .== snpset_id)
                 q = length(snpinds)
                 Z = zeros(size(fittednullmodel.mm, 1), q)
                 γ̂ = Vector{Float64}(undef, q)
@@ -737,7 +737,7 @@ function ordinalgwasGxE(
     genomat = SnpArrays.SnpArray(bedfile, bedn)
     cc = SnpArrays.counts(genomat, dims=1) 
     mafs = SnpArrays.maf(genomat)
-    envvar = DataFrame(fittednullmodel.mf.data)[e]
+    envvar = DataFrame(fittednullmodel.mf.data)[!, e]
     testvec = zeros(size(fittednullmodel.mm, 1), 1)
     # create SNP mask vector
     if snpinds == nothing
