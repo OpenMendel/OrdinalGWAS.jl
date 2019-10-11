@@ -595,6 +595,50 @@ end
 
 #GxE
 #tests selected GxE effects with the snp in the null model. It will be slow so not recommended for all snps.
+"""
+    ordinalgwasGxE(nullformula, covfile, plinkfile, e)
+    ordinalgwasGxE(nullformula, df, plinkfile, e)
+    ordinalgwasGxE(fittednullmodel, plinkfile, e)
+    ordinalgwasGxE(fittednullmodel, bedfile, bimfile, bedn, e)
+
+# Positional arguments 
+- `nullformula::FormulaTerm`: formula for the null model.
+- `covfile::AbstractString`: covariate file (csv) with one header line. One column 
+    should be the ordinal phenotype coded as integers starting from 1.  For example, 
+    ordinal phenotypes can be coded as 1, 2, 3, 4 but not 0, 1, 2, 3.  
+- `df::DataFrame`: DataFrame containing response and regressors for null model.
+- `plinkfile::AbstractString`: Plink file name without the bed, fam, or bim 
+    extensions. If `plinkfile==nothing`, only null model is fitted. If `plinkfile` 
+    is provided, bed, bim, and fam file with same `plinkfile` prefix need to exist. 
+    Compressed file formats such as gz and bz2 are allowed. Check all allowed formats 
+    by `SnpArrays.ALLOWED_FORMAT`.  
+- `e::Union{AbstractString,Symbol}`: Enviromental variable to be used to test the GxE interaction.
+For instance, for testing `sex & snp` interaction, use `:sex` or `"sex"`.
+- `fittednullmodel::StatsModels.TableRegressionModel`: the fitted null model 
+    output from `ordinalgwas(nullformula, covfile)` or `ordinalgwas(nullformula, df)`.
+- `bedfile::Union{AbstractString,IOStream}`: path to Plink bed file with full file name.
+- `bimfile::Union{AbstractString,IOStream}`: path to Plink bim file with full file name.
+- `bedn::Integer`: number of samples in bed file.
+
+# Keyword arguments
+- `nullfile::Union{AbstractString, IOStream}`: output file for the fitted null model; 
+    default is `ordinalgwas.null.txt`. 
+- `pvalfile::Union{AbstractString, IOStream}`: output file for the gwas p-values; default is 
+    `ordinalgwas.pval.txt`. 
+- `covtype::Vector{DataType}`: type information for `covfile`. This is useful
+    when `CSV.read(covarfile)` has parsing errors.  
+- `covrowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for covariate file.  
+- `test::Symbol`: `:score` (default) or `:lrt`.  
+- `link::GLM.Link`: `LogitLink()` (default), `ProbitLink()`, `CauchitLink()`,
+    or `CloglogLink()`.
+- `snpmodel`: `ADDITIVE_MODEL` (default), `DOMINANT_MODEL`, or `RECESSIVE_MODEL`.
+- `snpinds::Union{Nothing,AbstractVector{<:Integer}}`: SNP indices for bed file.
+- `bedrowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for bed file.
+- `solver`: an optimization solver supported by MathProgBase. Default is 
+    `NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)`. Another common choice is 
+    `IpoptSolver(print_level=0)`.
+- `verbose::Bool`: default is `false`.
+"""
 function ordinalgwasGxE(
     # positional arguments
     nullformula::FormulaTerm,

@@ -1,4 +1,3 @@
-
 # OrdinalGWAS.jl
 
 OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
@@ -18,16 +17,14 @@ This package requires Julia v0.7 or later and two other unregistered packages Sn
 versioninfo()
 ```
 
-    Julia Version 1.1.0
-    Commit 80516ca202 (2019-01-21 21:24 UTC)
+    Julia Version 1.2.0
+    Commit c6da87ff4b (2019-08-20 00:03 UTC)
     Platform Info:
-      OS: macOS (x86_64-apple-darwin14.5.0)
-      CPU: Intel(R) Core(TM) i7-6920HQ CPU @ 2.90GHz
+      OS: macOS (x86_64-apple-darwin18.6.0)
+      CPU: Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz
       WORD_SIZE: 64
       LIBM: libopenlibm
-      LLVM: libLLVM-6.0.1 (ORCJIT, skylake)
-    Environment:
-      JULIA_EDITOR = code
+      LLVM: libLLVM-6.0.1 (ORCJIT, haswell)
 
 
 
@@ -49,7 +46,7 @@ const datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
 
 
 
-    "/Users/huazhou/.julia/dev/OrdinalGWAS/data/"
+    "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/"
 
 
 
@@ -62,13 +59,14 @@ readdir(glob"*.*", datadir)
 
 
 
-    6-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/covariate.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bed"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bim"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.fam"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.map"  
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/simtrait.jl"  
+    7-element Array{String,1}:
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/covariate.txt"        
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bed"          
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bim"          
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"          
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.map"          
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap_snpsetfile.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait.jl"          
 
 
 
@@ -84,17 +82,19 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
-    Formula: trait ~ +sex
+    trait ~ sex
     
     Coefficients:
-          Estimate Std.Error  t value Pr(>|t|)
-    θ1    -1.48564  0.358891 -4.13952    <1e-4
-    θ2   -0.569479  0.341044 -1.66981   0.0959
-    θ3    0.429815  0.339642  1.26549   0.2066
-    β1    0.424656  0.213914  1.98517   0.0480
-
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
 
 
 
@@ -145,10 +145,10 @@ readdir(glob"hapmap3.*", datadir)
 
 
     4-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.map"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.map"
 
 
 
@@ -201,17 +201,19 @@ SnpArrays.ALLOWED_FORMAT
 run(`cat ordinalgwas.null.txt`);
 ```
 
-    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
-    Formula: trait ~ +sex
+    trait ~ sex
     
     Coefficients:
-          Estimate Std.Error  t value Pr(>|t|)
-    θ1    -1.48564  0.358891 -4.13952    <1e-4
-    θ2   -0.569479  0.341044 -1.66981   0.0959
-    θ3    0.429815  0.339642  1.26549   0.2066
-    β1    0.424656  0.213914  1.98517   0.0480
-
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
 
 * `ordinalgwas.pval.txt` tallies the SNPs and their pvalues. 
 
@@ -220,16 +222,16 @@ run(`cat ordinalgwas.null.txt`);
 run(`head ordinalgwas.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,pval
-    1,554484,rs10458597,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.004565312839540994
-    1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
-    1,1168108,rs11260566,0.19158878504672894,1.2168672367668912e-5
-    1,1375074,rs1312568,0.441358024691358,0.008206860046175221
-    1,1588771,rs35154105,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.5111981332544
-    1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-    1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
+    chr,pos,snpid,maf,hwepval,pval
+    1,554484,rs10458597,0.0,1.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.004565312839540994
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,3.108283828554874e-5
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.2168672367668889e-5
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.008206860046175225
+    1,1588771,rs35154105,0.0,1.0,1.0
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332544
+    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.2997282957184783
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.1713331245805063
 
 
 Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
@@ -264,7 +266,7 @@ For example, following code checks that the first 2 columns of the `covariate.tx
 ```julia
 covdf = CSV.read(datadir * "covariate.txt")
 plkfam = CSV.read(datadir * "hapmap3.fam", header=0, delim=' ')
-all(covdf[1] .== plkfam[1]) && all(covdf[2] .== plkfam[2])
+all(covdf[!, 1] .== plkfam[!, 1]) && all(covdf[!, 2] .== plkfam[!, 2])
 ```
 
 
@@ -283,7 +285,7 @@ For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      145.716 ms (609601 allocations: 30.95 MiB)
+      201.963 ms (639651 allocations: 32.71 MiB)
 
 
 
@@ -312,17 +314,19 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,ProbitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,ProbitLink},Array{Float64,2}}
     
-    Formula: trait ~ +sex
+    trait ~ sex
     
     Coefficients:
-          Estimate Std.Error  t value Pr(>|t|)
-    θ1   -0.866156  0.210677 -4.11129    <1e-4
-    θ2   -0.359878  0.205817 -1.74854   0.0813
-    θ3    0.247054  0.205382   1.2029   0.2299
-    β1    0.251058  0.128225  1.95795   0.0511
-
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -0.866156   0.210677  -4.11129    <1e-4 
+    intercept2|3  -0.359878   0.205817  -1.74854    0.0813
+    intercept3|4   0.247054   0.205382   1.2029     0.2299
+    sex            0.251058   0.128225   1.95795    0.0511
+    ──────────────────────────────────────────────────────
 
 
 
@@ -333,16 +337,16 @@ The estimates in null model and p-values are slightly different from those in pr
 run(`head opm.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,pval
-    1,554484,rs10458597,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.010076916742300138
-    1,967643,rs2710875,0.32407407407407407,2.6272564941853933e-5
-    1,1168108,rs11260566,0.19158878504672894,1.0897484851078458e-5
-    1,1375074,rs1312568,0.441358024691358,0.005102883990438149
-    1,1588771,rs35154105,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.48653776297859236
-    1,1990452,rs2678939,0.4537037037037037,0.33231290090455434
-    1,2194615,rs7553178,0.22685185185185186,0.25915513977197435
+    chr,pos,snpid,maf,hwepval,pval
+    1,554484,rs10458597,0.0,1.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.010076916742300138
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,2.6272564941853933e-5
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.089748485107844e-5
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.005102883990438149
+    1,1588771,rs35154105,0.0,1.0,1.0
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.48653776297859236
+    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.33231290090455434
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.2591551397719743
 
 
 
@@ -383,23 +387,25 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.334001 seconds (859.74 k allocations: 44.024 MiB, 9.86% gc time)
+      0.202024 seconds (562.98 k allocations: 28.824 MiB, 5.82% gc time)
 
 
 
 
 
-    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
-    Formula: trait ~ +sex
+    trait ~ sex
     
     Coefficients:
-          Estimate Std.Error  t value Pr(>|t|)
-    θ1    -1.48564  0.358891 -4.13952    <1e-4
-    θ2   -0.569479  0.341044 -1.66981   0.0959
-    θ3    0.429815  0.339642  1.26549   0.2066
-    β1    0.424656  0.213914  1.98517   0.0480
-
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
 
 
 
@@ -408,16 +414,16 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
 run(`head commonvariant.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,pval
-    1,758311,rs12562034,0.07763975155279501,0.004565312839540994
-    1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
-    1,1168108,rs11260566,0.19158878504672894,1.2168672367668912e-5
-    1,1375074,rs1312568,0.441358024691358,0.008206860046175221
-    1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-    1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
-    1,2396747,rs13376356,0.1448598130841121,0.5320416198875456
-    1,2823603,rs1563468,0.4830246913580247,0.225191391783573
-    1,3025087,rs6690373,0.2538699690402477,0.7018469417717486
+    chr,pos,snpid,maf,hwepval,pval
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.004565312839540994
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,3.108283828554874e-5
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.2168672367668889e-5
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.008206860046175225
+    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.2997282957184783
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.1713331245805063
+    1,2396747,rs13376356,0.1448598130841121,0.905307921507814,0.5320416198875456
+    1,2823603,rs1563468,0.4830246913580247,4.2306553724392545e-9,0.225191391783573
+    1,3025087,rs6690373,0.2538699690402477,9.23864188719278e-8,0.7018469417717486
 
 
 
@@ -452,23 +458,25 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     20.787611 seconds (8.41 M allocations: 2.059 GiB, 1.92% gc time)
+     27.804879 seconds (8.59 M allocations: 2.106 GiB, 1.77% gc time)
 
 
 
 
 
-    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
-    Formula: trait ~ +sex
+    trait ~ sex
     
     Coefficients:
-          Estimate Std.Error  t value Pr(>|t|)
-    θ1    -1.48564  0.358891 -4.13952    <1e-4
-    θ2   -0.569479  0.341044 -1.66981   0.0959
-    θ3    0.429815  0.339642  1.26549   0.2066
-    β1    0.424656  0.213914  1.98517   0.0480
-
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
 
 
 
@@ -479,16 +487,16 @@ Note the extra `effect` column in pvalfile, which is the effect size (regression
 run(`head lrt.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,effect,pval
-    1,554484,rs10458597,0.0,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,-1.0057833719544331,0.0019185836579804134
-    1,967643,rs2710875,0.32407407407407407,-0.6488560566295055,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,-0.9157225669357879,5.873384712685568e-6
-    1,1375074,rs1312568,0.441358024691358,-0.33181366525772593,0.008081022577832324
-    1,1588771,rs35154105,0.0,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,-0.7338026388701573,0.5169027130129711
-    1,1990452,rs2678939,0.4537037037037037,-0.13586499231819726,0.29946402200912603
-    1,2194615,rs7553178,0.22685185185185186,-0.2512075640440123,0.16151069094439868
+    chr,pos,snpid,maf,hwepval,effect,pval
+    1,554484,rs10458597,0.0,1.0,0.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,-1.0057833719544331,0.0019185836579804134
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,-0.6488560566295055,1.805050556976241e-5
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,-0.9157225669357879,5.873384712685568e-6
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,-0.33181366525772593,0.008081022577832324
+    1,1588771,rs35154105,0.0,1.0,0.0,1.0
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388701573,0.5169027130129711
+    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,-0.13586499231819726,0.29946402200912603
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,-0.2512075640440123,0.16151069094439868
 
 
 
@@ -512,7 +520,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.232430 seconds (672.58 k allocations: 34.373 MiB, 11.71% gc time)
+      0.272130 seconds (668.77 k allocations: 34.251 MiB, 10.04% gc time)
 
 
 
@@ -520,23 +528,23 @@ For large data sets, a practical solution is to perform score test first, then r
 run(`head score.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,pval
-    1,554484,rs10458597,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.004565312839540994
-    1,967643,rs2710875,0.32407407407407407,3.1082838285548695e-5
-    1,1168108,rs11260566,0.19158878504672894,1.2168672367668912e-5
-    1,1375074,rs1312568,0.441358024691358,0.008206860046175221
-    1,1588771,rs35154105,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.5111981332544
-    1,1990452,rs2678939,0.4537037037037037,0.29972829571847825
-    1,2194615,rs7553178,0.22685185185185186,0.1713331245805063
+    chr,pos,snpid,maf,hwepval,pval
+    1,554484,rs10458597,0.0,1.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.004565312839540994
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,3.108283828554874e-5
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.2168672367668889e-5
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.008206860046175225
+    1,1588771,rs35154105,0.0,1.0,1.0
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332544
+    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.2997282957184783
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.1713331245805063
 
 
 **Step 2**: Sort score test p-values and find top 10 SNPs.
 
 
 ```julia
-scorepvals = CSV.read("score.pval.txt")[5] # p-values in 5th column
+scorepvals = CSV.read("score.pval.txt")[!, 5] # p-values in 5th column
 tophits = sortperm(scorepvals)[1:10] # indices of 10 SNPs with smallest p-values
 scorepvals[tophits] # smallest 10 p-values
 ```
@@ -544,17 +552,17 @@ scorepvals[tophits] # smallest 10 p-values
 
 
 
-    10-element Array{Union{Missing, Float64},1}:
-     1.3080149099181335e-6
-     6.536722765052079e-6 
-     9.664742185669054e-6 
-     1.2168672367668912e-5
-     1.802746001833127e-5 
-     2.0989542284213636e-5
-     2.6844521269963608e-5
-     3.1082838285548695e-5
-     4.1010912875160476e-5
-     4.2966265138454806e-5
+    10-element Array{Float64,1}:
+     1.9481897837873706e-72
+     1.9481897837874264e-72
+     1.9481897837874264e-72
+     1.9481897837874264e-72
+     1.948189783787482e-72 
+     1.948189783787482e-72 
+     3.216959988402954e-72 
+     3.216959988402954e-72 
+     3.216959988403046e-72 
+     3.216959988403046e-72 
 
 
 
@@ -566,7 +574,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.240900 seconds (461.18 k allocations: 24.444 MiB, 3.04% gc time)
+      0.036746 seconds (61.81 k allocations: 3.704 MiB)
 
 
 
@@ -574,17 +582,17 @@ scorepvals[tophits] # smallest 10 p-values
 run(`cat lrt.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,effect,pval
-    1,967643,rs2710875,0.32407407407407407,-0.6488560566295055,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,-0.9157225669357879,5.873384712685568e-6
-    3,36821790,rs4678553,0.23456790123456794,0.7424952268973518,1.1303825016262592e-5
-    4,11017683,rs16881446,0.27554179566563464,-0.7870581482955515,1.1105427468799613e-5
-    5,3739190,rs12521166,0.0679012345679012,1.1468852997925316,4.781288229657399e-5
-    6,7574576,rs1885466,0.17746913580246915,0.8750621092263019,7.272346896740631e-6
-    6,52474721,rs2073183,0.1826625386996904,0.7790794914858663,5.069394513906121e-5
-    7,41152376,rs28880,0.3379629629629629,-0.814633902445351,9.180126530294943e-7
-    7,84223996,rs4128623,0.07870370370370372,1.0022229316338573,6.587895464657512e-5
-    23,121048059,rs1937165,0.4380804953560371,0.5392313636256612,1.9754643855522616e-5
+    chr,pos,snpid,maf,hwepval,effect,pval
+    2,111915648,rs1004117,0.009287925696594423,3.216959988402954e-72,0.29754964794084027,0.5418602577787199
+    9,45757243,rs2772909,0.0092592592592593,1.9481897837873706e-72,1.2617886438731196,0.06079130674507882
+    9,102275751,rs17853384,0.003095975232198178,3.216959988403046e-72,0.4668871230700536,0.5300792023608788
+    16,28673672,rs3874769,0.003095975232198178,3.216959988403046e-72,0.46650749274735515,0.530436201884302
+    16,44943958,rs4640368,0.006172839506172867,1.9481897837874264e-72,0.17634494923727342,0.7866349302676543
+    17,23519525,rs34876265,0.0030864197530864335,1.948189783787482e-72,-5.2012149325995,0.3138904865441721
+    19,42449922,rs2918343,0.009287925696594423,3.216959988402954e-72,0.6394911477064131,0.15203146280636515
+    21,43185761,rs8130793,0.006172839506172867,1.9481897837874264e-72,-4.636834541616616,0.1536110542875311
+    23,137700451,rs7061097,0.0030864197530864335,1.948189783787482e-72,0.24982571474992607,0.7343368996308214
+    26,410,rs28412942,0.006172839506172867,1.9481897837874264e-72,-4.6368345416179055,0.1536110542875311
 
 
 
@@ -612,16 +620,16 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 run(`head GxE.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,pval
-    1,554484,rs10458597,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.017446010412254197
-    1,967643,rs2710875,0.32407407407407407,0.0001667073239489097
-    1,1168108,rs11260566,0.19158878504672894,4.763762457893366e-5
-    1,1375074,rs1312568,0.441358024691358,0.029138471242993652
-    1,1588771,rs35154105,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.2964363114944328
-    1,1990452,rs2678939,0.4537037037037037,0.37924580479348785
-    1,2194615,rs7553178,0.22685185185185186,0.325582269932396
+    chr,pos,snpid,maf,hwepval,pval
+    1,554484,rs10458597,0.0,1.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.01744601041225423
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,0.0001667073239489097
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,4.763762457893383e-5
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.02913847124299368
+    1,1588771,rs35154105,0.0,1.0,1.0
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.29643631149443217
+    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.37924580479348796
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.325582269932396
 
 
 
@@ -629,6 +637,211 @@ run(`head GxE.pval.txt`);
 # clean up
 rm("ordinalgwas.null.txt")
 rm("GxE.pval.txt")
+```
+
+For some applications, the user may want to simply test the GxE interaction effeect. This requires fitting the snp in the null model and is quite slower, but the command `ordinalgwasGxE()` can be used test the interaction effect.
+To do this you must specify the environmental variable. 
+
+For documentation of the `ordinalgwasGxE` function, type `?ordinalgwasGxE` in Julia REPL.
+```@docs
+ordinalgwasGxE
+```
+
+
+```julia
+ordinalgwasGxE(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+    :sex, pvalfile = "gxe_snp.pval.txt", snpinds=1:5, test=:score)
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    trait ~ sex
+    
+    Coefficients:
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
+
+
+
+
+```julia
+run(`head gxe_snp.pval.txt`);
+```
+
+    chr,pos,snpid,maf,hwepval,snpeffectnull,pval
+    1,554484,rs10458597,0.0,1.0,0.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,-1.0057833719544331,0.6377422425977491
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,-0.6488560566295055,0.9667114198051628
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,-0.9157225669357879,0.26352674694121003
+    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,-0.33181366525772593,0.7811133315582837
+
+
+
+```julia
+# clean up
+rm("gxe_snp.pval.txt", force=true)
+```
+
+## SNP-set testing
+
+In many applications, we want to test SNP-set. The function `ordinalsnpsetgwas()` can be used to do this. The snpset can be specified as either a window (test every X snps), a filename that specifies an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's identical to the bimfile, or an AbstractVector that allows you to specify the snps you want to perform one joint snpset test for.
+
+For documentation of the `ordinalsnpsetgwas` function, type `?ordinalsnpsetgwas` in Julia REPL.
+```@docs
+ordinalsnpsetgwas
+```
+
+In following example, we perform a snpset test on the 50th to 55th snps. 
+
+
+```julia
+ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+    pvalfile = "snpset.pval.txt", snpset = 50:55)
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    trait ~ sex
+    
+    Coefficients:
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
+
+
+
+
+```julia
+run(`head snpset.pval.txt`);
+```
+
+    The joint pvalue of snps indexed at 50:55 is 0.36471265366639605
+
+
+
+```julia
+# clean up
+rm("snpset.pval.txt", force=true)
+rm("ordinalgwas.null.txt", force=true)
+```
+
+In the following example we run a snpset test on the annotated snpset file.
+
+
+```julia
+ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+    pvalfile = "snpset.pval.txt", snpset = datadir * "/hapmap_snpsetfile.txt")
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    trait ~ sex
+    
+    Coefficients:
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
+
+
+
+
+```julia
+run(`head snpset.pval.txt`);
+```
+
+    snpsetid,nsnps,pval
+    gene1,93,1.72133946991466e-5
+    gene2,93,0.03692497684330217
+    gene3,93,0.7478549371392197
+    gene4,92,0.027650798223816195
+    gene5,93,0.6119581594582347
+    gene6,93,0.029184642230868463
+    gene7,93,0.3916007348891039
+    gene8,93,0.1253957410986018
+    gene9,93,0.7085635621609013
+
+
+
+```julia
+# clean up
+rm("snpset.pval.txt", force=true)
+rm("ordinalgwas.null.txt", force=true)
+```
+
+In the following example we run a snpset test on every 15 snps.
+
+
+```julia
+ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+    pvalfile = "snpset.pval.txt", snpset=15)
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    trait ~ sex
+    
+    Coefficients:
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
+
+
+
+
+```julia
+run(`head snpset.pval.txt`);
+```
+
+    startchr,startpos,startsnpid,endchr,endpos,endsnpid,pval
+    1,554484,rs10458597,1,3431124,rs12093117,1.9394189465782687e-13
+    1,3633945,rs10910017,1,6514524,rs932112,0.11077869162820388
+    1,6715827,rs441515,1,9534606,rs4926480,0.2742450817971269
+    1,9737551,rs12047054,1,12559747,rs4845907,0.49346113650468615
+    1,12760427,rs848577,1,16021797,rs6679870,0.15447358658305502
+    1,16228774,rs1972359,1,19100349,rs9426794,0.1544232917025094
+    1,19301516,rs4912046,1,22122176,rs9426785,0.474987334946532
+    1,22323074,rs2235529,1,25166528,rs4648890,0.41246096621475836
+    1,25368553,rs7527379,1,28208168,rs12140070,0.1645813527877886
+
+
+
+```julia
+# clean up
+rm("snpset.pval.txt", force=true)
+rm("ordinalgwas.null.txt", force=true)
 ```
 
 ## Plotting Results
@@ -681,32 +894,32 @@ readdir(glob"hapmap3.chr.*", datadir)
 
 
     75-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bed"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bim"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.fam"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.bed"
-     ⋮                                                              
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.fam" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bed" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bim" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.fam" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bed" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bim" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.fam" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bed"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bim"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.fam"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bed"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bim"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.fam"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bed"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bim"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.fam"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.bed"
+     ⋮                                                                        
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bed" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bim" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.fam" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bed" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bim" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.fam" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bed" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bim" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.fam" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bed" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bim" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.fam" 
 
 
 
@@ -720,17 +933,19 @@ nm = ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", nothing)
 
 
 
-    StatsModels.DataFrameRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
     
-    Formula: trait ~ +sex
+    trait ~ sex
     
     Coefficients:
-          Estimate Std.Error  t value Pr(>|t|)
-    θ1    -1.48564  0.358891 -4.13952    <1e-4
-    θ2   -0.569479  0.341044 -1.66981   0.0959
-    θ3    0.429815  0.339642  1.26549   0.2066
-    β1    0.424656  0.213914  1.98517   0.0480
-
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
+    intercept3|4   0.429815   0.339642   1.26549    0.2066
+    sex            0.424656   0.213914   1.98517    0.0480
+    ──────────────────────────────────────────────────────
 
 
 
@@ -756,29 +971,29 @@ readdir(glob"*.pval.txt", datadir)
 
 
     23-element Array{String,1}:
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.14.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.15.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.16.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.17.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.18.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.19.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.2.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.20.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.21.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.22.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.23.pval.txt"
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.3.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.4.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.5.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.pval.txt" 
-     "/Users/huazhou/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.14.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.15.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.16.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.17.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.18.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.19.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.2.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.20.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.21.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.22.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.23.pval.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.3.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.4.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.5.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.pval.txt" 
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.pval.txt" 
 
 
 
@@ -938,3 +1153,8 @@ run(`cat cluster_run.jl`);
         run(`qsub tmp.sh`)
     end
 
+
+
+```julia
+
+```
