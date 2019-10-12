@@ -278,14 +278,14 @@ all(covdf[!, 1] .== plkfam[!, 1]) && all(covdf[!, 2] .== plkfam[!, 2])
 
 ### Timing
 
-For this moderate-sized data set, `ordinalgwas` takes less than 0.2 second.
+For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
 
 
 ```julia
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      201.963 ms (639651 allocations: 32.71 MiB)
+      210.824 ms (639565 allocations: 32.70 MiB)
 
 
 
@@ -387,7 +387,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.202024 seconds (562.98 k allocations: 28.824 MiB, 5.82% gc time)
+      0.384494 seconds (946.69 k allocations: 49.160 MiB, 3.73% gc time)
 
 
 
@@ -446,7 +446,7 @@ rm("commonvariant.null.txt", force=true)
 rm("commonvariant.pval.txt", force=true)
 ```
 
-`covrowinds` specify the samples in the covariate file and `bedrowinds` for SnpArray. User should be particularly careful when these two keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
+`covrowinds` specify the samples in the covariate file and `bedrowinds` for SnpArray. User should be particularly careful when using these two keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
 
 ## Likelihood ratio test (LRT)
 
@@ -458,7 +458,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     27.804879 seconds (8.59 M allocations: 2.106 GiB, 1.77% gc time)
+     27.756967 seconds (8.59 M allocations: 2.106 GiB, 1.77% gc time)
 
 
 
@@ -520,7 +520,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.272130 seconds (668.77 k allocations: 34.251 MiB, 10.04% gc time)
+      0.338187 seconds (668.69 k allocations: 34.240 MiB, 6.17% gc time)
 
 
 
@@ -544,7 +544,7 @@ run(`head score.pval.txt`);
 
 
 ```julia
-scorepvals = CSV.read("score.pval.txt")[!, 5] # p-values in 5th column
+scorepvals = CSV.read("score.pval.txt")[!, 6] # p-values in 5th column
 tophits = sortperm(scorepvals)[1:10] # indices of 10 SNPs with smallest p-values
 scorepvals[tophits] # smallest 10 p-values
 ```
@@ -553,16 +553,16 @@ scorepvals[tophits] # smallest 10 p-values
 
 
     10-element Array{Float64,1}:
-     1.9481897837873706e-72
-     1.9481897837874264e-72
-     1.9481897837874264e-72
-     1.9481897837874264e-72
-     1.948189783787482e-72 
-     1.948189783787482e-72 
-     3.216959988402954e-72 
-     3.216959988402954e-72 
-     3.216959988403046e-72 
-     3.216959988403046e-72 
+     1.3080149099181303e-6
+     6.536722765052079e-6 
+     9.66474218566903e-6  
+     1.2168672367668889e-5
+     1.8027460018331254e-5
+     2.0989542284213636e-5
+     2.6844521269963608e-5
+     3.108283828554874e-5 
+     4.1010912875160476e-5
+     4.2966265138454725e-5
 
 
 
@@ -574,7 +574,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.036746 seconds (61.81 k allocations: 3.704 MiB)
+      0.345620 seconds (512.98 k allocations: 27.686 MiB, 4.47% gc time)
 
 
 
@@ -583,16 +583,16 @@ run(`cat lrt.pval.txt`);
 ```
 
     chr,pos,snpid,maf,hwepval,effect,pval
-    2,111915648,rs1004117,0.009287925696594423,3.216959988402954e-72,0.29754964794084027,0.5418602577787199
-    9,45757243,rs2772909,0.0092592592592593,1.9481897837873706e-72,1.2617886438731196,0.06079130674507882
-    9,102275751,rs17853384,0.003095975232198178,3.216959988403046e-72,0.4668871230700536,0.5300792023608788
-    16,28673672,rs3874769,0.003095975232198178,3.216959988403046e-72,0.46650749274735515,0.530436201884302
-    16,44943958,rs4640368,0.006172839506172867,1.9481897837874264e-72,0.17634494923727342,0.7866349302676543
-    17,23519525,rs34876265,0.0030864197530864335,1.948189783787482e-72,-5.2012149325995,0.3138904865441721
-    19,42449922,rs2918343,0.009287925696594423,3.216959988402954e-72,0.6394911477064131,0.15203146280636515
-    21,43185761,rs8130793,0.006172839506172867,1.9481897837874264e-72,-4.636834541616616,0.1536110542875311
-    23,137700451,rs7061097,0.0030864197530864335,1.948189783787482e-72,0.24982571474992607,0.7343368996308214
-    26,410,rs28412942,0.006172839506172867,1.9481897837874264e-72,-4.6368345416179055,0.1536110542875311
+    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,-0.6488560566295055,1.805050556976241e-5
+    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,-0.9157225669357879,5.873384712685568e-6
+    3,36821790,rs4678553,0.23456790123456794,0.10946682163244979,0.7424952268973518,1.1303825016262592e-5
+    4,11017683,rs16881446,0.27554179566563464,0.8942746118760273,-0.7870581482955515,1.1105427468799613e-5
+    5,3739190,rs12521166,0.0679012345679012,0.18613647746093892,1.1468852997925316,4.781288229657399e-5
+    6,7574576,rs1885466,0.17746913580246915,0.762068717898719,0.8750621092263019,7.272346896740631e-6
+    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858663,5.069394513906121e-5
+    7,41152376,rs28880,0.3379629629629629,0.8052368892744095,-0.814633902445351,9.180126530294943e-7
+    7,84223996,rs4128623,0.07870370370370372,0.021834717346756814,1.0022229316338573,6.587895464657512e-5
+    23,121048059,rs1937165,0.4380804953560371,3.959609737265111e-16,0.5392313636256612,1.9754643855522616e-5
 
 
 
@@ -639,8 +639,8 @@ rm("ordinalgwas.null.txt")
 rm("GxE.pval.txt")
 ```
 
-For some applications, the user may want to simply test the GxE interaction effeect. This requires fitting the snp in the null model and is quite slower, but the command `ordinalgwasGxE()` can be used test the interaction effect.
-To do this you must specify the environmental variable. 
+For some applications, the user may want to simply test the GxE interaction effect. This requires fitting the SNP in the null model and is quite slower, but the command `ordinalgwasGxE()` can be used test the interaction effect.
+To do this you must specify the environmental variable in the command, either as a symbol, such as ":age" or as a string "age". 
 
 For documentation of the `ordinalgwasGxE` function, type `?ordinalgwasGxE` in Julia REPL.
 ```@docs
@@ -693,14 +693,14 @@ rm("gxe_snp.pval.txt", force=true)
 
 ## SNP-set testing
 
-In many applications, we want to test SNP-set. The function `ordinalsnpsetgwas()` can be used to do this. The snpset can be specified as either a window (test every X snps), a filename that specifies an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's identical to the bimfile, or an AbstractVector that allows you to specify the snps you want to perform one joint snpset test for.
+In many applications, we want to test a SNP-set. The function `ordinalsnpsetgwas()` can be used to do this. The snpset can be specified as either a window (test every X snps), a filename that specifies an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's identical to the bimfile, or an AbstractVector that allows you to specify the snps you want to perform one joint snpset test for.
 
 For documentation of the `ordinalsnpsetgwas` function, type `?ordinalsnpsetgwas` in Julia REPL.
 ```@docs
 ordinalsnpsetgwas
 ```
 
-In following example, we perform a snpset test on the 50th to 55th snps. 
+In following example, we perform a SNP-set test on the 50th to 55th snps. 
 
 
 ```julia
@@ -742,7 +742,24 @@ rm("snpset.pval.txt", force=true)
 rm("ordinalgwas.null.txt", force=true)
 ```
 
-In the following example we run a snpset test on the annotated snpset file.
+In the following example we run a SNP-set test on the annotated SNP-set file.
+
+
+```julia
+run(`head ../data/hapmap_snpsetfile.txt`);
+```
+
+    gene1 rs10458597
+    gene1 rs12562034
+    gene1 rs2710875
+    gene1 rs11260566
+    gene1 rs1312568
+    gene1 rs35154105
+    gene1 rs16824508
+    gene1 rs2678939
+    gene1 rs7553178
+    gene1 rs13376356
+
 
 
 ```julia
@@ -793,7 +810,7 @@ rm("snpset.pval.txt", force=true)
 rm("ordinalgwas.null.txt", force=true)
 ```
 
-In the following example we run a snpset test on every 15 snps.
+In the following example we run a SNP-set test on every 15 SNPs.
 
 
 ```julia
@@ -889,6 +906,11 @@ Let's first create demo data by splitting hapmap3 according to chromosome:
 SnpArrays.split_plink(datadir * "hapmap3", :chromosome; prefix=datadir * "hapmap3.chr.")
 readdir(glob"hapmap3.chr.*", datadir)
 ```
+
+    ┌ Warning: `getindex(df::DataFrame, col_ind::ColumnIndex)` is deprecated, use `df[!, col_ind]` instead.
+    │   caller = #split_plink#77(::String, ::typeof(split_plink), ::SnpData, ::Symbol) at snpdata.jl:94
+    └ @ SnpArrays /Users/christophergerman/.julia/packages/SnpArrays/d0iJw/src/snpdata.jl:94
+
 
 
 
