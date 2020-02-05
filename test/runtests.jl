@@ -149,6 +149,7 @@ end
     @test isfile("snpset.pval.txt")
     scorepvals = open("snpset.pval.txt")
     scorepval = split(readline(scorepvals))[end]
+    close(scorepvals)
     @test isapprox(parse(Float64, scorepval), 0.3647126536663949, rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
@@ -159,6 +160,7 @@ end
     @test isfile("snpset.pval.txt")
     lrtpvals = open("snpset.pval.txt")
     lrtpval = split(readline(lrtpvals))[end]
+    close(lrtpvals)
     @test isapprox(parse(Float64, lrtpval), 7.525696044086955e-15, rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
