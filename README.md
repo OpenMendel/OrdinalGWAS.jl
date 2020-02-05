@@ -24,7 +24,7 @@ pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl.git
 
 The methods and applications of this software package are detailed in the following publication:
 
-*German, CA, Sinsheimer, JS, Klimentidis, YC, Zhou, H, Zhou, JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1-13. https://doi.org/10.1002/gepi.22276*
+*German CA, Sinsheimer JS, Klimentidis YC, Zhou H, Zhou JJ. Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 2019; 1-13. https://doi.org/10.1002/gepi.22276*
 
 If you use [OpenMendel](https://openmendel.github.io) analysis packages in your research, please cite the following reference in the resulting publications:
 
