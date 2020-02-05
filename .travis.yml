@@ -12,6 +12,7 @@ julia:
 matrix:
   allow_failures:
     - julia: nightly  
+    - os: windows
 addons:
     apt_packages:
         - gfortran
