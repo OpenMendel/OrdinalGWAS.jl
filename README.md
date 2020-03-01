@@ -13,11 +13,11 @@ OrdinalGWAS.jl supports Julia v1.0 or later. See documentation for usage.
 OrdinalGWAS.jl is not yet registered. It requires [SnpArrays.jl](https://github.com/OpenMendel/SnpArrays.jl) and [OrdinalMultinomialModels.jl](https://github.com/OpenMendel/OrdinalMultinomialModels.jl) which are also not yet registered, so it will require the following steps to install. 
 
 ```{julia}
-pkg> add https://github.com/OpenMendel/SnpArrays.jl.git
+pkg> add https://github.com/OpenMendel/SnpArrays.jl
 
-pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git
+pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
 
-pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl.git
+pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
 ```
 
 ## Citation
