@@ -654,7 +654,7 @@ function ordinalgwasGxE(
         CSV.read(io; types=covtype)
     end
     e = Symbol(string(e))
-    e in names(covdf) || throw(ArgumentError("$e not in covariate file/dataframe"))
+    string(e) in names(covdf) || throw(ArgumentError("$e not in covariate file/dataframe"))
     ordinalgwasGxE(nullformula, covrowinds == nothing ? covdf : covdf[covrowinds, :], 
         plinkfile, e; kwargs...)
 end
@@ -675,7 +675,7 @@ function ordinalgwasGxE(
     )
     # fit and output null model
     e = Symbol(string(e))
-    e in names(covdf) || throw(ArgumentError("$e not in covariate file/dataframe"))
+    string(e) in names(covdf) || throw(ArgumentError("$e not in covariate file/dataframe"))
     if isfile(plinkfile * ".bed")
         bedfile = plinkfile * ".bed"
     else
