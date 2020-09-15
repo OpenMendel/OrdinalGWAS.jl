@@ -4,6 +4,9 @@ const datadir = joinpath(dirname(@__FILE__), "..", "data")
 const covfile = datadir * "/covariate.txt"
 const plkfile = datadir * "/hapmap3"
 const snpsetfile = datadir * "/hapmap_snpsetfile.txt"
+const vcfcovfile = datadir * "/vcf_example.csv"
+const vcffile = datadir * "/vcf_test"
+
 
 @testset "score test" begin
     @time ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score)
@@ -11,6 +14,15 @@ const snpsetfile = datadir * "/hapmap_snpsetfile.txt"
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[!, 6][1:5]
     @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
+
+    # VCF
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+    vcftype = :DS, geneticrowinds = 1:190, snpinds = [86; 656], 
+    test = :score, covrowinds = 1:190)
+    scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[!, end][1:2]
+    @test isapprox(scorepvals, [0.00762272, 0.000668338], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -21,6 +33,14 @@ end
     @test isfile("ordinalgwas.pval.txt")
     lrtpvals = open(CSV.read, "ordinalgwas.pval.txt")[!, 7][1:5]
     @test isapprox(lrtpvals, [1.0, 1.91858366e-3, 1.80505056e-5, 5.87338471e-6, 8.08102258e-3], rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("ordinalgwas.pval.txt", force=true)
+
+    # VCF
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+    vcftype = :DS, snpinds = [86; 656], test = :LRT)
+    lrtpvals = open(CSV.read, "ordinalgwas.pval.txt")[!, end][1:2]
+    @test isapprox(lrtpvals, [0.00869695, 0.000538464], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -67,7 +87,7 @@ end
 
 @testset "sub samples" begin
     # only use first 300 samples
-    @time ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, covrowinds=1:300, bedrowinds=1:300)
+    @time ordinalgwas(@formula(trait ~ sex), covfile, plkfile, test=:score, covrowinds=1:300, geneticrowinds=1:300)
     @test isfile("ordinalgwas.null.txt")
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[!, 6][1:5]
@@ -119,6 +139,33 @@ end
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
+    # VCF
+    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+    vcftype = :DS, pvalfile = "snpset.pval.txt",
+    snpset=250, test=:score)
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("snpset.pval.txt")
+    scorepvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
+    @test isapprox(scorepvals, [0.6435068072069543
+    0.9753164848244174
+    0.3221168520087339
+    0.310759779128217
+    0.1741386270145462], rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("snpset.pval.txt", force=true)
+
+    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+    vcftype = :DS, pvalfile = "snpset.pval.txt",
+    snpset=25, test=:LRT)
+    lrtpvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
+    @test isapprox(lrtpvals, [1.0
+    0.9999996378252629
+    1.0
+    0.9999999999996334
+    0.9999999976994737], rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("snpset.pval.txt", force=true)
+
     #snpset file
     #score test
     ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
@@ -140,6 +187,8 @@ end
      0.000163268, 0.0867508], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
+
+    # add vcf test to test snp annotation file.
 
     #specific snp (one snpset)
     #score test
@@ -164,6 +213,27 @@ end
     @test isapprox(parse(Float64, lrtpval), 7.525696044086955e-15, rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
+
+    # VCF
+    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+    vcftype = :DS, pvalfile = "snpset.pval.txt",
+    snpset=85:90, test=:score)
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("snpset.pval.txt")
+    scorepvals = open("snpset.pval.txt")
+    scorepval = split(readline(scorepvals))[end]
+    close(scorepvals)
+    @test isapprox(parse(Float64, scorepval), 0.0965927460813927, rtol=1e-4)
+
+    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+    vcftype = :DS, pvalfile = "snpset.pval.txt",
+    snpset=85:90, test=:lrt)
+    lrtpvals = open("snpset.pval.txt")
+    lrtpval = split(readline(lrtpvals))[end]
+    close(lrtpvals)
+    @test isapprox(parse(Float64, lrtpval), 0.0732485446883825, rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("snpset.pval.txt", force=true)
 end
 
 @testset "GxE snp in null" begin
@@ -180,6 +250,23 @@ end
     lrtpvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
     @test isapprox(lrtpvals, [1.0, 0.6279730133445315, 0.9671662821946985,
     0.26693502209463904, 0.7810214899265426], rtol=1e-4)
+    rm("gxe_snp.pval.txt", force=true)
+
+    # VCF
+    ordinalgwasGxE(@formula(y ~ sex), vcfcovfile, vcffile, :sex; geneticformat = "VCF", 
+    vcftype = :DS, pvalfile = "gxe_snp.pval.txt",
+    snpinds=1:5, test=:score)
+    scorepvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
+    @test isapprox(scorepvals, [0.45861769035708144, 1.0, 0.03804677528312195,
+     0.18254151103030725, 0.34454453512541156], rtol=1e-4)
+    rm("gxe_snp.pval.txt", force=true)
+    ordinalgwasGxE(@formula(y ~ sex), vcfcovfile, vcffile, :sex; geneticformat = "VCF", 
+    vcftype = :DS, pvalfile = "gxe_snp.pval.txt",
+    snpinds=1:5, test=:lrt)
+    @test isfile("gxe_snp.pval.txt")
+    lrtpvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
+    @test isapprox(lrtpvals, [0.526667096902957, 1.0, 0.008073040021982156, 
+    0.10590569987122991, 0.3557829099471382], rtol=1e-4)
     rm("gxe_snp.pval.txt", force=true)
 end
 

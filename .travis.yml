@@ -6,11 +6,8 @@ os:
   - windows
 julia:
   - 1.0
-  - 1.4
+  - 1.5
   - nightly
-addons:
-    apt_packages:
-        - gfortran
 notifications:
   email: false
 git:
@@ -18,7 +15,7 @@ git:
 
 before_script: # install dependent unregistered packages
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"), PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git")]);'
+  - julia -e 'using Pkg; Pkg.add([PackageSpec(url="https://github.com/OpenMendel/SnpArrays.jl.git"), PackageSpec(url="https://github.com/OpenMendel/OrdinalMultinomialModels.jl.git"),PackageSpec(url="https://github.com/OpenMendel/VCFTools.jl.git")]);'
 
 after_script:  # TODO: change to after_success once https://github.com/JuliaLang/julia/issues/28306 is fixed
   # push coverage results to Codecov and Coveralls
@@ -30,7 +27,7 @@ jobs:
     - os: windows
   include:
     - stage: "Documentation"
-      julia: 1.4
+      julia: 1.5
       os: linux
       script:
         - julia -e 'using Pkg; Pkg.add("Documenter")'
