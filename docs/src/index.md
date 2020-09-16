@@ -2,13 +2,19 @@
 
 OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
 
+The methods and applications of this software package are detailed in the following publication:
+
+*German CA, Sinsheimer JS, Klimentidis YC, Zhou H, Zhou JJ. (2020) Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 44:248-260. https://doi.org/10.1002/gepi.22276*
+
+OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/) and [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format)  (both dosage and genotype data) file formats. We plan to add [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) support in the future. 
+
 ## Installation
 
-This package requires Julia v0.7 or later and two other unregistered packages SnpArrays.jl and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL
+This package requires Julia v1.4 or later and two other unregistered packages SnpArrays.jl and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
 ```julia
-(v1.1) pkg> add https://github.com/OpenMendel/SnpArrays.jl
-(v1.1) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
-(v1.1) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
 ```
 
 
@@ -17,25 +23,25 @@ This package requires Julia v0.7 or later and two other unregistered packages Sn
 versioninfo()
 ```
 
-    Julia Version 1.2.0
-    Commit c6da87ff4b (2019-08-20 00:03 UTC)
+    Julia Version 1.5.0
+    Commit 96786e22cc (2020-08-01 23:44 UTC)
     Platform Info:
-      OS: macOS (x86_64-apple-darwin18.6.0)
+      OS: macOS (x86_64-apple-darwin18.7.0)
       CPU: Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz
       WORD_SIZE: 64
       LIBM: libopenlibm
-      LLVM: libLLVM-6.0.1 (ORCJIT, haswell)
+      LLVM: libLLVM-9.0.1 (ORCJIT, haswell)
 
 
 
 ```julia
 # for use in this tutorial
-using BenchmarkTools, CSV, Glob, OrdinalGWAS, SnpArrays
+using BenchmarkTools, CSV, Glob, SnpArrays, OrdinalGWAS
 ```
 
-## Example data set
+## Example data sets
 
-`data` folder of the package contains an example data set. In general, user can locate this folder by command
+The `data` folder of the package contains the example data sets for use with PLINK and VCF Files. In general, the user can locate this folder by command:
 
 
 ```julia
@@ -59,20 +65,30 @@ readdir(glob"*.*", datadir)
 
 
 
-    7-element Array{String,1}:
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/covariate.txt"        
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bed"          
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bim"          
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"          
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.map"          
+    10-element Array{String,1}:
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/covariate.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.map"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap_snpsetfile.txt"
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait.jl"          
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait.jl"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait_vcf.jl"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/vcf_example.csv"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/vcf_test.vcf.gz"
 
+
+
+The `hapmap3` files `covariate.txt` file correspond to data examples using PLINK formatted files (.bed, .bim, .fam). 
+
+The `vcf_test.vcf.gz` and `vcf_example.csv` files are for an example analysis using VCF formatted files. 
 
 
 ## Basic usage
 
-The following command performs GWAS using the [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit). The output is the fitted null model.
+The following command performs GWAS using the [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) for the hapmap3 PLINK files. The output is the fitted null model.
+
+The default type of GWAS performed is a single-snp significance genome-wide scan, this can be changed by the keyword `analysistype` (default is "singlesnp"). Other types of analyses are gone over later. 
 
 
 ```julia
@@ -90,7 +106,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -109,7 +125,7 @@ The first argument specifies the null model without SNP effects, e.g., `@formula
 
 ### Input files
 
-`ordinalgwas` expects two input files: one for responses plus covariates (second argument), the other the Plink files for genotypes (third argument).
+`ordinalgwas` expects two input files: one for responses plus covariates (second argument), the other the genetic file(s) for dosages/genotypes (third argument).
 
 #### Covariate and trait file
 
@@ -132,9 +148,15 @@ run(`head $(datadir)covariate.txt`);
     2436,NA19713,0,0,2,3
 
 
-#### Plink file
+#### Genetic file(s)
 
-Genotype data is available as binary Plink files.
+OrdinalGWAS supports PLINK files and VCF Files.
+
+Genotype data is available as binary PLINK files.
+
+OrdinalGWAS can use dosage or genotype data from VCF Files. 
+
+By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later).
 
 
 ```julia
@@ -166,7 +188,7 @@ size(SnpArray(datadir * "hapmap3.bed"))
 
 
 
-Compressed Plink files are supported. For example, if Plink files are `hapmap3.bed.gz`, `hapmap3.bim.gz` and `hapmap3.fam.gz`, the same command
+Compressed PLINK and VCF files are supported. For example, if Plink files are `hapmap3.bed.gz`, `hapmap3.bim.gz` and `hapmap3.fam.gz`, the same command
 ```julia
 ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3")
 ```
@@ -181,12 +203,12 @@ SnpArrays.ALLOWED_FORMAT
 
 
     6-element Array{String,1}:
-     "gz"  
+     "gz"
      "zlib"
-     "zz"  
-     "xz"  
-     "zst" 
-     "bz2" 
+     "zz"
+     "xz"
+     "zst"
+     "bz2"
 
 
 
@@ -209,7 +231,7 @@ run(`cat ordinalgwas.null.txt`);
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -224,14 +246,14 @@ run(`head ordinalgwas.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.004565312839540994
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,3.108283828554874e-5
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.2168672367668889e-5
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.008206860046175225
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.0045653128395339235
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553067e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367651365e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174567
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332544
-    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.2997282957184783
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.1713331245805063
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332529945
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.2997282957184678
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048358
 
 
 Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
@@ -240,11 +262,63 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 ```
 will output the p-value file in compressed gz format.
 
+### VCF Formatted Files
+
+By default, OrdinalGWAS.jl will assume you are imputting PLINK files. It also supports VCF Files. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
+* `geneticformat`: Choices are "VCF" or "PLINK". If you are using a VCF file, use `geneticformat = "VCF"`.
+* `vcftype`: Choices are :GT (for genotypes) or :DS (for dosages). This tells OrdinalGWAS which type of data to extract from the VCF file.
+
+Using a VCF File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages. 
+
+The following shows how to run an analysis with a VCF file using the dosage information. 
+
+
+```julia
+ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv", datadir * "vcf_test"; geneticformat = "VCF",
+    vcftype = :DS)
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    y ~ sex
+    
+    Coefficients:
+    ───────────────────────────────────────────────────────
+                   Estimate  Std.Error    t value  Pr(>|t|)
+    ───────────────────────────────────────────────────────
+    intercept1|2  -1.10106    0.205365  -5.36147     <1e-6
+    intercept2|3   0.370894   0.188822   1.96425     0.0510
+    intercept3|4   1.74736    0.232756   7.50726     <1e-11
+    sex            0.22796    0.262237   0.869289    0.3858
+    ───────────────────────────────────────────────────────
+
+
+
+
+```julia
+run(`head ordinalgwas.pval.txt`);
+```
+
+    chr,pos,snpid,pval
+    22,20000086,rs138720731,0.6435068072069543
+    22,20000146,rs73387790,1.0
+    22,20000199,rs183293480,0.9378258278500582
+    22,20000291,rs185807825,0.21907288710091155
+    22,20000428,rs55902548,0.0027904024468849236
+    22,20000683,rs142720028,1.0
+    22,20000771,rs114690707,0.2303491015874968
+    22,20000793,rs189842693,0.15612228776953194
+    22,20000810,rs147349046,0.1741386270145462
+
+
 ### Subsamples
 
-Use the keyword `covrowinds` to specify selected samples in the covarite file. Use the keyword `bedrowinds` to specify selected samples in the Plink bed file. For example, to use the first 300 samples in both covariate and bed file:
+Use the keyword `covrowinds` to specify selected samples in the covarite file. Use the keyword `geneticrowinds` to specify selected samples in the Plink bed file or VCF File. For example, to use the first 300 samples in both covariate and bed file:
 ```julia
-ordinalgwas(@formula(trait ~ sex), covfile, plkfile, covrowinds=1:300, bedrowinds=1:300)
+ordinalgwas(@formula(trait ~ sex), covfile, geneticfile, covrowinds=1:300, geneticrowinds=1:300)
 ```
 !!! note
 
@@ -254,11 +328,11 @@ ordinalgwas(@formula(trait ~ sex), covfile, plkfile, covrowinds=1:300, bedrowind
 
 Internally `ordinalgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `ordinalgwas` directly.
 ```julia
-ordinalgwas(@formula(trait ~ sex), df, plinkfile)
+ordinalgwas(@formula(trait ~ sex), df, geneticfile)
 ```
 !!! note
 
-    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file. 
+    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file/VCF File. 
 
 For example, following code checks that the first 2 columns of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
 
@@ -285,7 +359,7 @@ For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      210.824 ms (639565 allocations: 32.70 MiB)
+      174.585 ms (500740 allocations: 46.36 MiB)
 
 
 
@@ -322,7 +396,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -0.866156   0.210677  -4.11129    <1e-4 
+    intercept1|2  -0.866156   0.210677  -4.11129    <1e-4
     intercept2|3  -0.359878   0.205817  -1.74854    0.0813
     intercept3|4   0.247054   0.205382   1.2029     0.2299
     sex            0.251058   0.128225   1.95795    0.0511
@@ -339,14 +413,14 @@ run(`head opm.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.010076916742300138
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,2.6272564941853933e-5
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.089748485107844e-5
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.005102883990438149
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.010076916742300138
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,2.6272564941853933e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.089748485107844e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.005102883990438149
     1,1588771,rs35154105,0.0,1.0,1.0
     1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.48653776297859236
-    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.33231290090455434
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.2591551397719743
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.33231290090455434
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.2591551397719743
 
 
 
@@ -374,7 +448,7 @@ Users are advised to impute genotypes using more sophiscated methods before GWAS
 
 ## SNP and/or sample masks
 
-In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `snpinds`, `covrowinds` and `bedrowinds` keywords of `ordinalgwas` function. 
+In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `snpinds`, `covrowinds` and `geneticrowinds` keywords of `ordinalgwas` function. 
 
 For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05
 
@@ -387,7 +461,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.384494 seconds (946.69 k allocations: 49.160 MiB, 3.73% gc time)
+      0.556833 seconds (1.09 M allocations: 75.565 MiB, 9.02% gc time)
 
 
 
@@ -401,7 +475,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -415,15 +489,15 @@ run(`head commonvariant.pval.txt`);
 ```
 
     chr,pos,snpid,maf,hwepval,pval
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.004565312839540994
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,3.108283828554874e-5
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.2168672367668889e-5
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.008206860046175225
-    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.2997282957184783
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.1713331245805063
-    1,2396747,rs13376356,0.1448598130841121,0.905307921507814,0.5320416198875456
-    1,2823603,rs1563468,0.4830246913580247,4.2306553724392545e-9,0.225191391783573
-    1,3025087,rs6690373,0.2538699690402477,9.23864188719278e-8,0.7018469417717486
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.0045653128395339235
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553067e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367651365e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174567
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.2997282957184678
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048358
+    1,2396747,rs13376356,0.1448598130841121,0.9053079215078139,0.5320416198875121
+    1,2823603,rs1563468,0.4830246913580247,4.23065537243926e-9,0.2251913917835687
+    1,3025087,rs6690373,0.2538699690402477,9.238641887192776e-8,0.7018469417717329
 
 
 
@@ -446,7 +520,7 @@ rm("commonvariant.null.txt", force=true)
 rm("commonvariant.pval.txt", force=true)
 ```
 
-`covrowinds` specify the samples in the covariate file and `bedrowinds` for SnpArray. User should be particularly careful when using these two keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
+`covrowinds` specify the samples in the covariate file and `geneticrowinds` for PLINK or VCF File. User should be particularly careful when using these two keyword. Selected rows in SnpArray should exactly match the samples in the null model. Otherwise the results are meaningless.
 
 ## Likelihood ratio test (LRT)
 
@@ -458,7 +532,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     27.756967 seconds (8.59 M allocations: 2.106 GiB, 1.77% gc time)
+     27.974898 seconds (4.92 M allocations: 1.871 GiB, 1.42% gc time)
 
 
 
@@ -472,7 +546,7 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -489,14 +563,14 @@ run(`head lrt.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,effect,pval
     1,554484,rs10458597,0.0,1.0,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,-1.0057833719544331,0.0019185836579804134
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,-0.6488560566295055,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,-0.9157225669357879,5.873384712685568e-6
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,-0.33181366525772593,0.008081022577832324
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954433,0.0019185836579805327
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,1.805050556976241e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,5.8733847126869666e-6
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.3318136652577225,0.008081022577828709
     1,1588771,rs35154105,0.0,1.0,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388701573,0.5169027130129711
-    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,-0.13586499231819726,0.29946402200912603
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,-0.2512075640440123,0.16151069094439868
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388700143,0.5169027130145593
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,-0.1358649923181975,0.2994640220091515
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,-0.2512075640440123,0.1615106909444108
 
 
 
@@ -506,11 +580,11 @@ rm("lrt.pval.txt", force=true)
 rm("lrt.null.txt", force=true)
 ```
 
-In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes about 20 seconds. About 100 fold difference in run time. 
+In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes over 20 seconds. Over 100 fold difference in run time. 
 
 ## Score test for screening, LRT for power 
 
-For large data sets, a practical solution is to perform score test first, then re-do LRT for the most promising SNPs according to score test p-values.
+For large data sets, a practical solution is to perform the score test first across all SNPs, then re-do LRT for the most promising SNPs according to score test p-values.
 
 **Step 1**: Perform score test GWAS, results in `score.pval.txt`.
 
@@ -520,7 +594,7 @@ For large data sets, a practical solution is to perform score test first, then r
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.338187 seconds (668.69 k allocations: 34.240 MiB, 6.17% gc time)
+      0.208436 seconds (500.74 k allocations: 46.365 MiB, 6.69% gc time)
 
 
 
@@ -530,14 +604,14 @@ run(`head score.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.004565312839540994
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,3.108283828554874e-5
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,1.2168672367668889e-5
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.008206860046175225
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.0045653128395339235
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553067e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367651365e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174567
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332544
-    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.2997282957184783
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.1713331245805063
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332529945
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.2997282957184678
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048358
 
 
 **Step 2**: Sort score test p-values and find top 10 SNPs.
@@ -553,16 +627,16 @@ scorepvals[tophits] # smallest 10 p-values
 
 
     10-element Array{Float64,1}:
-     1.3080149099181303e-6
-     6.536722765052079e-6 
-     9.66474218566903e-6  
-     1.2168672367668889e-5
-     1.8027460018331254e-5
-     2.0989542284213636e-5
-     2.6844521269963608e-5
-     3.108283828554874e-5 
-     4.1010912875160476e-5
-     4.2966265138454725e-5
+     1.3080149099170256e-6
+     6.536722765044632e-6
+     9.66474218566254e-6
+     1.2168672367651365e-5
+     1.802746001831697e-5
+     2.098954228420851e-5
+     2.6844521269924864e-5
+     3.108283828553067e-5
+     4.101091287505281e-5
+     4.296626513829614e-5
 
 
 
@@ -574,7 +648,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.345620 seconds (512.98 k allocations: 27.686 MiB, 4.47% gc time)
+      0.432419 seconds (710.56 k allocations: 38.627 MiB, 4.06% gc time)
 
 
 
@@ -583,16 +657,16 @@ run(`cat lrt.pval.txt`);
 ```
 
     chr,pos,snpid,maf,hwepval,effect,pval
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,-0.6488560566295055,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,-0.9157225669357879,5.873384712685568e-6
-    3,36821790,rs4678553,0.23456790123456794,0.10946682163244979,0.7424952268973518,1.1303825016262592e-5
-    4,11017683,rs16881446,0.27554179566563464,0.8942746118760273,-0.7870581482955515,1.1105427468799613e-5
-    5,3739190,rs12521166,0.0679012345679012,0.18613647746093892,1.1468852997925316,4.781288229657399e-5
-    6,7574576,rs1885466,0.17746913580246915,0.762068717898719,0.8750621092263019,7.272346896740631e-6
-    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858663,5.069394513906121e-5
-    7,41152376,rs28880,0.3379629629629629,0.8052368892744095,-0.814633902445351,9.180126530294943e-7
-    7,84223996,rs4128623,0.07870370370370372,0.021834717346756814,1.0022229316338573,6.587895464657512e-5
-    23,121048059,rs1937165,0.4380804953560371,3.959609737265111e-16,0.5392313636256612,1.9754643855522616e-5
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,1.805050556976241e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,5.8733847126869666e-6
+    3,36821790,rs4678553,0.23456790123456794,0.1094668216324497,0.7424952268973513,1.1303825016263261e-5
+    4,11017683,rs16881446,0.27554179566563464,0.8942746118760274,-0.7870581482955528,1.1105427468798282e-5
+    5,3739190,rs12521166,0.0679012345679012,0.18613647746093887,1.1468852997925316,4.7812882296576845e-5
+    6,7574576,rs1885466,0.17746913580246915,0.7620687178987191,0.8750621092263029,7.272346896741059e-6
+    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858657,5.069394513906423e-5
+    7,41152376,rs28880,0.3379629629629629,0.8052368892744096,-0.814633902445351,9.180126530295469e-7
+    7,84223996,rs4128623,0.07870370370370372,0.0218347173467568,1.0022229316338584,6.587895464657512e-5
+    23,121048059,rs1937165,0.4380804953560371,3.959609737265113e-16,0.5392313636256602,1.9754643855524994e-5
 
 
 
@@ -604,6 +678,8 @@ rm("lrt.pval.txt", force=true)
 ```
 
 ## GxE or other interactions
+
+### Testing jointly G + GxE 
 
 In many applications, we want to test SNP effect and/or its interaction with other terms. `testformula` keyword specifies the test unit **besides** the covariates in `nullformula`. 
 
@@ -622,14 +698,14 @@ run(`head GxE.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,0.01744601041225423
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,0.0001667073239489097
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,4.763762457893383e-5
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,0.02913847124299368
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.01744601041224166
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,0.00016670732394878798
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,4.763762457892512e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.029138471242989357
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.29643631149443217
-    1,1990452,rs2678939,0.4537037037037037,5.0769595770843126e-11,0.37924580479348796
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457782,0.325582269932396
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.29643631147339955
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.3792458047933984
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.32558226993239914
 
 
 
@@ -639,18 +715,15 @@ rm("ordinalgwas.null.txt")
 rm("GxE.pval.txt")
 ```
 
-For some applications, the user may want to simply test the GxE interaction effect. This requires fitting the SNP in the null model and is quite slower, but the command `ordinalgwasGxE()` can be used test the interaction effect.
-To do this you must specify the environmental variable in the command, either as a symbol, such as ":age" or as a string "age". 
+### Testing only GxE interaction term
 
-For documentation of the `ordinalgwasGxE` function, type `?ordinalgwasGxE` in Julia REPL.
-```@docs
-ordinalgwasGxE
-```
+For some applications, the user may want to simply test the GxE interaction effect. This requires fitting the SNP in the null model and is much slower, but the command `ordinalgwas()` with keyword `analysistype = "gxe"` can be used test the interaction effect.
+The environmental variable must be specified in the command using the keyword argument `e`, either as a symbol, such as `:age` or as a string `"age"`. 
 
 
 ```julia
-ordinalgwasGxE(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
-    :sex, pvalfile = "gxe_snp.pval.txt", snpinds=1:5, test=:score)
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "gxe",
+    e = :sex, pvalfile = "gxe_snp.pval.txt", snpinds=1:5, test=:score)
 ```
 
 
@@ -664,7 +737,7 @@ ordinalgwasGxE(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapm
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -679,10 +752,10 @@ run(`head gxe_snp.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,snpeffectnull,pval
     1,554484,rs10458597,0.0,1.0,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.40987633326666817,-1.0057833719544331,0.6377422425977491
-    1,967643,rs2710875,0.32407407407407407,4.0762491007057454e-7,-0.6488560566295055,0.9667114198051628
-    1,1168108,rs11260566,0.19158878504672894,0.12856822794469086,-0.9157225669357879,0.26352674694121003
-    1,1375074,rs1312568,0.441358024691358,2.537601965061486e-19,-0.33181366525772593,0.7811133315582837
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954433,0.6377422425978654
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,0.9667114197304877
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,0.26352674694101197
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.3318136652577225,0.7811133315580838
 
 
 
@@ -693,18 +766,18 @@ rm("gxe_snp.pval.txt", force=true)
 
 ## SNP-set testing
 
-In many applications, we want to test a SNP-set. The function `ordinalsnpsetgwas()` can be used to do this. The snpset can be specified as either a window (test every X snps), a filename that specifies an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's identical to the bimfile, or an AbstractVector that allows you to specify the snps you want to perform one joint snpset test for.
+In many applications, we want to test a SNP-set. The function with keyword `analysistype = "snpset"` can be used to do this. To specify the type of snpset test, use the `snpset` keyword argument. 
 
-For documentation of the `ordinalsnpsetgwas` function, type `?ordinalsnpsetgwas` in Julia REPL.
-```@docs
-ordinalsnpsetgwas
-```
+The snpset can be specified as either:
+- a window (test every X snps) => `snpset = X`
+- an annotated file.  This requires `snpset = filename` where filename is an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's identical to the bimfile.
+- a joint test on only a specific set of snps. `snpset = AbstractVector` where the vector specifies the snps you want to perform one joint snpset test for. The vector can either be a vector of integers where the elements are the indicies of the SNPs to test, a vector of booleans, where true represents that you want to select that SNP index, or a range indicating the indicies of the SNPs to test. 
 
 In following example, we perform a SNP-set test on the 50th to 55th snps. 
 
 
 ```julia
-ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "snpset",
     pvalfile = "snpset.pval.txt", snpset = 50:55)
 ```
 
@@ -719,7 +792,7 @@ ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "h
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -732,7 +805,7 @@ ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "h
 run(`head snpset.pval.txt`);
 ```
 
-    The joint pvalue of snps indexed at 50:55 is 0.36471265366639605
+    The joint pvalue of snps indexed at 50:55 is 0.3647126536663951
 
 
 
@@ -763,7 +836,7 @@ run(`head ../data/hapmap_snpsetfile.txt`);
 
 
 ```julia
-ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "snpset",
     pvalfile = "snpset.pval.txt", snpset = datadir * "/hapmap_snpsetfile.txt")
 ```
 
@@ -778,7 +851,7 @@ ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "h
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -792,15 +865,15 @@ run(`head snpset.pval.txt`);
 ```
 
     snpsetid,nsnps,pval
-    gene1,93,1.72133946991466e-5
-    gene2,93,0.03692497684330217
-    gene3,93,0.7478549371392197
-    gene4,92,0.027650798223816195
-    gene5,93,0.6119581594582347
-    gene6,93,0.029184642230868463
-    gene7,93,0.3916007348891039
-    gene8,93,0.1253957410986018
-    gene9,93,0.7085635621609013
+    gene1,93,1.7213394698772864e-5
+    gene2,93,0.03692497684155587
+    gene3,93,0.747854937139295
+    gene4,92,0.027650798223454214
+    gene5,93,0.6119581594570236
+    gene6,93,0.029184642230087553
+    gene7,93,0.3916007348852898
+    gene8,93,0.12539574109850588
+    gene9,93,0.7085635621607916
 
 
 
@@ -814,7 +887,7 @@ In the following example we run a SNP-set test on every 15 SNPs.
 
 
 ```julia
-ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "snpset",
     pvalfile = "snpset.pval.txt", snpset=15)
 ```
 
@@ -829,7 +902,7 @@ ordinalsnpsetgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "h
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4 
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -843,15 +916,15 @@ run(`head snpset.pval.txt`);
 ```
 
     startchr,startpos,startsnpid,endchr,endpos,endsnpid,pval
-    1,554484,rs10458597,1,3431124,rs12093117,1.9394189465782687e-13
-    1,3633945,rs10910017,1,6514524,rs932112,0.11077869162820388
-    1,6715827,rs441515,1,9534606,rs4926480,0.2742450817971269
-    1,9737551,rs12047054,1,12559747,rs4845907,0.49346113650468615
-    1,12760427,rs848577,1,16021797,rs6679870,0.15447358658305502
-    1,16228774,rs1972359,1,19100349,rs9426794,0.1544232917025094
-    1,19301516,rs4912046,1,22122176,rs9426785,0.474987334946532
-    1,22323074,rs2235529,1,25166528,rs4648890,0.41246096621475836
-    1,25368553,rs7527379,1,28208168,rs12140070,0.1645813527877886
+    1,554484,rs10458597,1,3431124,rs12093117,1.9394189465435142e-13
+    1,3633945,rs10910017,1,6514524,rs932112,0.11077869162800538
+    1,6715827,rs441515,1,9534606,rs4926480,0.2742450817956197
+    1,9737551,rs12047054,1,12559747,rs4845907,0.4934611365046796
+    1,12760427,rs848577,1,16021797,rs6679870,0.15447358658245436
+    1,16228774,rs1972359,1,19100349,rs9426794,0.15442329170231675
+    1,19301516,rs4912046,1,22122176,rs9426785,0.4749873349462109
+    1,22323074,rs2235529,1,25166528,rs4648890,0.41246096621458994
+    1,25368553,rs7527379,1,28208168,rs12140070,0.16458135278649874
 
 
 
@@ -863,7 +936,7 @@ rm("ordinalgwas.null.txt", force=true)
 
 ## Plotting Results
 
-To plot the GWAS results, use the [MendelPlots.jl package](https://openmendel.github.io/MendelPlots.jl/latest/).
+To plot the GWAS results, we recommend using the [MendelPlots.jl package](https://openmendel.github.io/MendelPlots.jl/latest/).
 
 ## Docker
 
@@ -945,7 +1018,7 @@ readdir(glob"hapmap3.chr.*", datadir)
 
 
 
-Step 1: Fit the null model. Setting third argument `plinkfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
+Step 1: Fit the null model. Setting third argument `geneticfile` to `nothing` instructs `ordinalgwas` function to fit the null model only.
 
 
 ```julia

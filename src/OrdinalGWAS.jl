@@ -6,9 +6,7 @@ using LinearAlgebra
 using CSV, DataFrames, Distributions, Reexport, SnpArrays, VCFTools, GeneticVariation
 @reexport using OrdinalMultinomialModels
 
-export ordinalgwas, 
-ordinalsnpsetgwas,
-ordinalgwasGxE
+export ordinalgwas
 
 include("gwas.jl")
 

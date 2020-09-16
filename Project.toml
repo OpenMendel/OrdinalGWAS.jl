@@ -21,7 +21,7 @@ OrdinalMultinomialModels = ">=0.3.0"
 SnpArrays = ">=0.1.0"
 DataFrames = ">=0.21.0"
 StatsModels = ">=0.6.0"
-julia = "1"
+julia = "1.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

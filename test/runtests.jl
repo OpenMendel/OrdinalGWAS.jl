@@ -6,6 +6,7 @@ const plkfile = datadir * "/hapmap3"
 const snpsetfile = datadir * "/hapmap_snpsetfile.txt"
 const vcfcovfile = datadir * "/vcf_example.csv"
 const vcffile = datadir * "/vcf_test"
+const vcfsnpsetfile = datadir * "/snpsetfile_vcf.txt"
 
 
 @testset "score test" begin
@@ -19,7 +20,7 @@ const vcffile = datadir * "/vcf_test"
 
     # VCF
     ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
-    vcftype = :DS, geneticrowinds = 1:190, snpinds = [86; 656], 
+        vcftype = :DS, geneticrowinds = 1:190, snpinds = [86; 656], 
     test = :score, covrowinds = 1:190)
     scorepvals = open(CSV.read, "ordinalgwas.pval.txt")[!, end][1:2]
     @test isapprox(scorepvals, [0.00762272, 0.000668338], rtol=1e-4)
@@ -38,9 +39,9 @@ end
 
     # VCF
     ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
-    vcftype = :DS, snpinds = [86; 656], test = :LRT)
+        vcftype = :GT, snpinds = [86; 656], test = :LRT)
     lrtpvals = open(CSV.read, "ordinalgwas.pval.txt")[!, end][1:2]
-    @test isapprox(lrtpvals, [0.00869695, 0.000538464], rtol=1e-4)
+    @test isapprox(lrtpvals, [0.00955468405473856, 0.0007086063489553798], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -99,7 +100,7 @@ end
 @testset "test formula" begin
     # score test
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile="GxE.pval.txt", 
-    testformula=@formula(trait ~ snp + snp & sex))
+        testformula=@formula(trait ~ snp + snp & sex))
     @test isfile("ordinalgwas.null.txt")
     @test isfile("GxE.pval.txt")
     scorepvals = open(CSV.read, "GxE.pval.txt")[!, 6][1:5]
@@ -108,7 +109,7 @@ end
     rm("GxE.pval.txt", force=true)
     # LRT, only first 5 SNPs
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile="GxE.pval.txt", 
-    testformula=@formula(trait ~ snp + snp & sex), test=:LRT, snpinds=1:5)
+        testformula=@formula(trait ~ snp + snp & sex), test=:LRT, snpinds=1:5)
     @test isfile("ordinalgwas.null.txt")
     @test isfile("GxE.pval.txt")
     lrtpvals = open(CSV.read, "GxE.pval.txt")[!, end]
@@ -120,8 +121,8 @@ end
 @testset "snpset" begin
     #window
     #score test
-    ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
-    snpset=250)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
+        snpset=250, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     scorepvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
@@ -129,8 +130,8 @@ end
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
     #lrt 
-    ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
-    snpset=25, test=:LRT)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
+        snpset=25, test=:LRT, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     lrtpvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
@@ -140,9 +141,9 @@ end
     rm("snpset.pval.txt", force=true)
 
     # VCF
-    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
-    vcftype = :DS, pvalfile = "snpset.pval.txt",
-    snpset=250, test=:score)
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "snpset.pval.txt",
+    snpset=250, test=:score, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     scorepvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
@@ -154,9 +155,9 @@ end
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
-    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
-    vcftype = :DS, pvalfile = "snpset.pval.txt",
-    snpset=25, test=:LRT)
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "snpset.pval.txt",
+    snpset=25, test=:LRT, analysistype = "snpset")
     lrtpvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
     @test isapprox(lrtpvals, [1.0
     0.9999996378252629
@@ -168,8 +169,8 @@ end
 
     #snpset file
     #score test
-    ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
-    snpset = snpsetfile)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
+        snpset = snpsetfile, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     scorepvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
@@ -178,8 +179,8 @@ end
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
     #lrt 
-    ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
-    snpset = snpsetfile, test = :lrt)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
+        snpset = snpsetfile, test = :lrt, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     lrtpvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
@@ -188,12 +189,33 @@ end
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
-    # add vcf test to test snp annotation file.
+    # VCF
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "snpset.pval.txt",
+        snpset = vcfsnpsetfile, test = :score, analysistype = "snpset")
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("snpset.pval.txt")
+    scorepvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
+    @test isapprox(scorepvals, [0.06814002639277685, 0.5566664123188036, 
+    0.520381855174413, 0.07557764137466122, 0.5620803022597403], rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("snpset.pval.txt", force=true)
+
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "snpset.pval.txt",
+        snpset = vcfsnpsetfile, test = :lrt, analysistype = "snpset")
+    @test isfile("ordinalgwas.null.txt")
+    @test isfile("snpset.pval.txt")
+    lrtpvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
+    @test isapprox(lrtpvals, [0.09069975735216675, 0.6465153355309161, 
+    0.6307411986741357, 0.06275888993714969, 0.50252192003468], rtol=1e-4)
+    rm("ordinalgwas.null.txt", force=true)
+    rm("snpset.pval.txt", force=true)
 
     #specific snp (one snpset)
     #score test
-    ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
-    snpset = 50:55)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
+        snpset = 50:55, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     scorepvals = open("snpset.pval.txt")
@@ -203,8 +225,8 @@ end
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
     #lrt 
-    ordinalsnpsetgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
-    snpset = collect(1:15), test=:LRT)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, pvalfile = "snpset.pval.txt",
+        snpset = collect(1:15), test=:LRT, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     lrtpvals = open("snpset.pval.txt")
@@ -215,9 +237,9 @@ end
     rm("snpset.pval.txt", force=true)
 
     # VCF
-    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
-    vcftype = :DS, pvalfile = "snpset.pval.txt",
-    snpset=85:90, test=:score)
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "snpset.pval.txt",
+        snpset=85:90, test=:score, analysistype = "snpset")
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     scorepvals = open("snpset.pval.txt")
@@ -225,9 +247,9 @@ end
     close(scorepvals)
     @test isapprox(parse(Float64, scorepval), 0.0965927460813927, rtol=1e-4)
 
-    ordinalsnpsetgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
-    vcftype = :DS, pvalfile = "snpset.pval.txt",
-    snpset=85:90, test=:lrt)
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "snpset.pval.txt",
+        snpset=85:90, test=:lrt, analysistype = "snpset")
     lrtpvals = open("snpset.pval.txt")
     lrtpval = split(readline(lrtpvals))[end]
     close(lrtpvals)
@@ -237,15 +259,16 @@ end
 end
 
 @testset "GxE snp in null" begin
-    ordinalgwasGxE(@formula(trait ~ sex), covfile, plkfile, :sex, pvalfile = "gxe_snp.pval.txt",
-    snpinds=1:5, test=:score)
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, e = :sex, pvalfile = "gxe_snp.pval.txt",
+        snpinds=1:5, test=:score, analysistype = "gxe")
     @test isfile("gxe_snp.pval.txt")
     scorepvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
     @test isapprox(scorepvals, [1.0, 0.637742242597749, 0.9667114198051628,
     0.26352674694121003, 0.7811133315582837], rtol=1e-4)
     rm("gxe_snp.pval.txt", force=true)
-    ordinalgwasGxE(@formula(trait ~ sex), covfile, plkfile, "sex", pvalfile = "gxe_snp.pval.txt",
-    snpinds=1:5, test=:LRT)
+
+    ordinalgwas(@formula(trait ~ sex), covfile, plkfile, e = "sex", pvalfile = "gxe_snp.pval.txt",
+        snpinds=1:5, test=:LRT, analysistype = "gxe")
     @test isfile("gxe_snp.pval.txt")
     lrtpvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
     @test isapprox(lrtpvals, [1.0, 0.6279730133445315, 0.9671662821946985,
@@ -253,16 +276,17 @@ end
     rm("gxe_snp.pval.txt", force=true)
 
     # VCF
-    ordinalgwasGxE(@formula(y ~ sex), vcfcovfile, vcffile, :sex; geneticformat = "VCF", 
-    vcftype = :DS, pvalfile = "gxe_snp.pval.txt",
-    snpinds=1:5, test=:score)
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile, e = :sex; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "gxe_snp.pval.txt",
+        snpinds=1:5, test=:score, analysistype = "gxe")
     scorepvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
     @test isapprox(scorepvals, [0.45861769035708144, 1.0, 0.03804677528312195,
      0.18254151103030725, 0.34454453512541156], rtol=1e-4)
     rm("gxe_snp.pval.txt", force=true)
-    ordinalgwasGxE(@formula(y ~ sex), vcfcovfile, vcffile, :sex; geneticformat = "VCF", 
-    vcftype = :DS, pvalfile = "gxe_snp.pval.txt",
-    snpinds=1:5, test=:lrt)
+
+    ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile, e = :sex; geneticformat = "VCF", 
+        vcftype = :DS, pvalfile = "gxe_snp.pval.txt",
+        snpinds=1:5, test=:lrt, analysistype = "gxe")
     @test isfile("gxe_snp.pval.txt")
     lrtpvals = open(CSV.read, "gxe_snp.pval.txt")[!, end][1:5]
     @test isapprox(lrtpvals, [0.526667096902957, 1.0, 0.008073040021982156, 
