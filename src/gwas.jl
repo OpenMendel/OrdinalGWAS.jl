@@ -10,7 +10,7 @@
     should be the ordinal phenotype coded as integers starting from 1.  For example, 
     ordinal phenotypes can be coded as 1, 2, 3, 4 but not 0, 1, 2, 3.  
 - `df::DataFrame`: DataFrame containing response and regressors for null model.
-- `geneticfile::AbstractString`: File containing genetic information for GWAS.
+- `geneticfile::Union{Nothing, AbstractString}`: File containing genetic information for GWAS.
     This includes a PLINK file name without the .bed, .fam, or .bim 
     extensions or a VCF file without the .vcf extension. If `geneticfile==nothing`, 
     only null model is fitted. If `geneticfile` is provided, bed, bim, and fam file (or vcf) with 
@@ -26,10 +26,8 @@
 
 # Keyword arguments
 - `analysistype`::AbstractString: Type of analysis to conduct. Default is `singlesnp`. Other options are `snpset` and `gxe`.
-- `geneticformat`::Union{AbstractString}: Type of file used for the genetic analysis. 
-`"PLINK"` and `"VCF"` are currently supported. Default is PLINK.
-- `vcftype`::Union{Symbol, Nothing}: Data to extract from the VCF file for the GWAS analysis. 
-`:DS` for dosage or `:GT` for genotypes. Default is nothing.
+- `geneticformat`::AbstractString: Type of file used for the genetic analysis. `"PLINK"` and `"VCF"` are currently supported. Default is PLINK.
+- `vcftype`::Union{Symbol, Nothing}: Data to extract from the VCF file for the GWAS analysis. `:DS` for dosage or `:GT` for genotypes. Default is nothing.
 - `nullfile::Union{AbstractString, IOStream}`: output file for the fitted null model; 
     default is `ordinalgwas.null.txt`. 
 - `pvalfile::Union{AbstractString, IOStream}`: output file for the gwas p-values; default is 
@@ -63,14 +61,14 @@
 The following is an example of basic GWAS with PLINK files:
 ```julia
 plinkfile = "plinkexample"
-covfile = "covexample
+covfile = "covexample"
 ordinalgwas(@formula(trait ~ sex), covfile, plkfile)
 ```
 
 The following is an example of basic GWAS with a VCF file using dosages then genotypes:
 ```julia
 vcffile = "vcfexample"
-covfile = "covexample
+covfile = "covexample"
 ordinalgwas(@formula(trait ~ sex), covfile, vcffile; 
     geneticfile = "VCF", vcftype = :DS)
 
@@ -943,7 +941,7 @@ function ordinalgwas(
     return fittednullmodel
 end
 
-# VCF uses different coding ifor additive, dominant, recessive models than SnpArrays
+# VCFTools uses different coding for additive, dominant, recessive models than SnpArrays
 modelingdict = Dict(
     Val{1}() => :additive,
     Val{2}() => :dominant,
