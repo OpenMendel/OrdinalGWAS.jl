@@ -152,11 +152,13 @@ run(`head $(datadir)covariate.txt`);
 
 OrdinalGWAS supports PLINK files and VCF Files.
 
-Genotype data is available as binary PLINK files.
+- Genotype data is available as binary PLINK files.
 
-OrdinalGWAS can use dosage or genotype data from VCF Files. 
+- OrdinalGWAS can use dosage or genotype data from VCF Files. 
 
-By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later).
+!!! note
+
+    By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later).
 
 
 ```julia
@@ -264,7 +266,7 @@ will output the p-value file in compressed gz format.
 
 ### VCF Formatted Files
 
-By default, OrdinalGWAS.jl will assume you are imputting PLINK files. It also supports VCF Files. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
+By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports VCF Files. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
 * `geneticformat`: Choices are "VCF" or "PLINK". If you are using a VCF file, use `geneticformat = "VCF"`.
 * `vcftype`: Choices are :GT (for genotypes) or :DS (for dosages). This tells OrdinalGWAS which type of data to extract from the VCF file.
 
