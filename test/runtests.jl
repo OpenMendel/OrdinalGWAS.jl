@@ -147,11 +147,9 @@ end
     @test isfile("ordinalgwas.null.txt")
     @test isfile("snpset.pval.txt")
     scorepvals = open(CSV.read, "snpset.pval.txt")[!, end][1:5]
-    @test isapprox(scorepvals, [0.6435068072069543
-    0.9753164848244174
-    0.3221168520087339
-    0.310759779128217
-    0.1741386270145462], rtol=1e-4)
+    @test isapprox(scorepvals, [0.4278366599084349, 
+    0.42781616067453476, 0.4519573757701432, 
+    0.4278763804444088, 0.4345883185481474], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 

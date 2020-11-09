@@ -518,8 +518,9 @@ function ordinalgwas(
             @error("GxE analysis indicated but not environmental variable keyword argument: `e` set.")
         Xaug = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1))]
         Xaug2 = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1), 2)]
-        envvar = DataFrame(fittednullmodel.mf.data)[!, e]
-        testvec = zeros(size(fittednullmodel.mm, 1), 1)
+        envvar = modelmatrix(FormulaTerm(fittednullmodel.mf.f.lhs, Term(Symbol(e))),
+                 DataFrame(fittednullmodel.mf.data))
+        testvec = Matrix{Float64}(undef, size(envvar))
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
@@ -776,7 +777,7 @@ function ordinalgwas(
                         record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
                     end
                     if test == :score
-                        copyto!(ts.Z, @view(gholder[vcfrowinds]))
+                        copyto!(ts.Z, @view(gholder[vcfrowinds, :]))
                         pval = polrtest(ts)
                         println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
                         "$(rec_chr[end]),$(rec_pos[end]),$(rec_ids[end][end]),$pval")
@@ -884,8 +885,9 @@ function ordinalgwas(
         Xaug2 = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1), 2)] #or get Xaug to point to part of it
 
         # create array for environmental variable and testing 
-        envvar = DataFrame(fittednullmodel.mf.data)[!, e]
-        testvec = zeros(size(fittednullmodel.mm, 1), 1)
+        envvar = modelmatrix(FormulaTerm(fittednullmodel.mf.f.lhs, Term(Symbol(e))),
+                 DataFrame(fittednullmodel.mf.data))
+        testvec = Matrix{Float64}(undef, size(envvar))
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
