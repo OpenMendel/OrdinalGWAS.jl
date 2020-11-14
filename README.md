@@ -15,6 +15,8 @@ OrdinalGWAS.jl is not yet registered. It requires [SnpArrays.jl](https://github.
 ```{julia}
 pkg> add https://github.com/OpenMendel/SnpArrays.jl
 
+pkg> add https://github.com/OpenMendel/VCFTools.jl
+
 pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
 
 pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
