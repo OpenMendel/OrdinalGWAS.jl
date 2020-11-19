@@ -31,6 +31,8 @@ versioninfo()
       WORD_SIZE: 64
       LIBM: libopenlibm
       LLVM: libLLVM-9.0.1 (ORCJIT, haswell)
+    Environment:
+      JULIA_NUM_THREADS = 4
 
 
 
@@ -158,7 +160,7 @@ OrdinalGWAS supports PLINK files and VCF Files.
 
 !!! note
 
-    By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later).
+By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later).
 
 
 ```julia
@@ -1251,7 +1253,10 @@ run(`cat cluster_run.jl`);
     end
 
 
+## Proportional Odds Assumption
 
-```julia
+The ordered multinomial model used in this package is a cumulative logit model where one effect size is estimated for each covariate. Using the logit link yields the commonly used proportional odds model which assumes the proportional odds assumption holds for your data/model. The proportional odds assumption assumes that the effect of a covariate $\boldsymbol{\beta}$ is constant across different groupings of the ordinal outcome i.e.
 
-```
+The SNP's effect (on the odds ratio) is the same for the odds ratio of mild vs {medium, severe} as it is for the odds ratio of {mild, medium} vs severe. 
+
+The consequences/neccesity of this assumption has been thoroughly discussed, as an example see [this blog post](https://www.fharrell.com/post/po/). In simualtions, we did not find violation of this to increase type I error. As stated in the post, when the assumption is violated (meaning there are different effect sizes for different groupings), the estimated effect size is like a weighted average of the different effect sizes. Formal tests for proportional odds are likely to reject the assumption for large n (see p. 306, Categorical Data Analysis 3rd edition by Agresti). Violation of this assumption means the effect size $\boldsymbol{\beta}$ differs across outcome strata, but should not imply a significant finding is not significant.
