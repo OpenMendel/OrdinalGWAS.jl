@@ -6,7 +6,7 @@ The methods and applications of this software package are detailed in the follow
 
 *German CA, Sinsheimer JS, Klimentidis YC, Zhou H, Zhou JJ. (2020) Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 44:248-260. [https://doi.org/10.1002/gepi.22276](https://doi.org/10.1002/gepi.22276)*
 
-OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/) and [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format)  (both dosage and genotype data) file formats. We plan to add [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) support in the future. 
+OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/) and [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format)  (both dosage and genotype data) file formats. We plan to add [PGEN](https://www.cog-genomics.org/plink/2.0/formats#pgen) and [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) support in the future. 
 
 ## Installation
 
