@@ -1,25 +1,22 @@
 # OrdinalGWAS.jl
 
-OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
+OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). 
 
 The methods and applications of this software package are detailed in the following publication:
 
 *German CA, Sinsheimer JS, Klimentidis YC, Zhou H, Zhou JJ. (2020) Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 44:248-260. [https://doi.org/10.1002/gepi.22276](https://doi.org/10.1002/gepi.22276)*
 
-OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/) and [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format)  (both dosage and genotype data) file formats. We plan to add [PGEN](https://www.cog-genomics.org/plink/2.0/formats#pgen) and [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) support in the future. 
+OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format) (both dosage and genotype data) file formats, and [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) file formats. We plan to add [PGEN](https://www.cog-genomics.org/plink/2.0/formats#pgen) support in the future. 
 
 ## Installation
 
-OrdinalGWAS.jl is not yet registered. It requires [SnpArrays.jl](https://github.com/OpenMendel/SnpArrays.jl), [VCFTools.jl](https://github.com/OpenMendel/VCFTools.jl) and [OrdinalMultinomialModels.jl](https://github.com/OpenMendel/OrdinalMultinomialModels.jl) which are also not yet registered, so it will require the following steps to install. 
-
-```{julia}
-pkg> add https://github.com/OpenMendel/SnpArrays.jl
-
-pkg> add https://github.com/OpenMendel/VCFTools.jl
-
-pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
-
-pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
+This package requires Julia v1.4 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
+```julia
+(@v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/VCFTools.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/BGEN.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
+(@v1.5) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
 ```
 
 
@@ -28,8 +25,8 @@ pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
 versioninfo()
 ```
 
-    Julia Version 1.5.0
-    Commit 96786e22cc (2020-08-01 23:44 UTC)
+    Julia Version 1.5.2
+    Commit 539f3ce943 (2020-09-23 23:17 UTC)
     Platform Info:
       OS: macOS (x86_64-apple-darwin18.7.0)
       CPU: Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz
@@ -72,15 +69,23 @@ readdir(glob"*.*", datadir)
 
 
 
-    10-element Array{String,1}:
+    18-element Array{String,1}:
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_ex.csv"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_snpsetfile.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_test.bgen"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_test.bgen.bgi"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/covariate.txt"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.map"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap_snpsetfile.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/ordinalgwas.null.txt"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/ordinalgwas.pval.txt"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait.jl"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait_bgen.jl"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait_vcf.jl"
+     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/snpsetfile_vcf.txt"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/vcf_example.csv"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/vcf_test.vcf.gz"
 
@@ -273,7 +278,7 @@ will output the p-value file in compressed gz format.
 
 ### VCF Formatted Files
 
-By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports VCF Files. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
+By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports VCF (and BGEN) Files. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
 * `geneticformat`: Choices are "VCF" or "PLINK". If you are using a VCF file, use `geneticformat = "VCF"`.
 * `vcftype`: Choices are :GT (for genotypes) or :DS (for dosages). This tells OrdinalGWAS which type of data to extract from the VCF file.
 
@@ -321,6 +326,60 @@ run(`head ordinalgwas.pval.txt`);
     22,20000771,rs114690707,0.2303491015874968
     22,20000793,rs189842693,0.15612228776953194
     22,20000810,rs147349046,0.1741386270145462
+
+
+### BGEN Formatted Files
+
+By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports BGEN Files. To use BGEN files in any of the analysis options detailed in this documentation, you simply need to add the following keyword option to the `ordinalgwas` function:
+* `geneticformat`: Choices are "VCF" or "PLINK" or "BGEN". If you are using a BGEN file, use `geneticformat = "BGEN"`.
+
+Using a BGEN File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages.
+
+!!! note
+
+    BGEN files can contain an optional index file (`.bgi` file) that allows the variants to be specified in order of position. OrdinalGWAS will automatically look for a file in the same directory as the `BGENFILENAME` with the name `BGENFILENAME.bgi`. The BGEN file is read either in the `.bgi` file order if `BGENFILENAME.bgi` is supplied in the same directory as the BGEN file, otherwise it will use the order in the BGEN file. This is important in analyses specifying `snpinds` as well as annotation groupings. You must make sure this matches the way the BGEN file will be read in. 
+
+The following shows how to run an analysis with a BGEN file using the dosage information. 
+
+
+```julia
+ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv", datadir * "bgen_test"; geneticformat = "BGEN")
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    
+    y ~ sex
+    
+    Coefficients:
+    ──────────────────────────────────────────────────────
+                   Estimate  Std.Error   t value  Pr(>|t|)
+    ──────────────────────────────────────────────────────
+    intercept1|2  -1.08828    0.128371  -8.47759    <1e-15
+    intercept2|3   0.434834   0.118541   3.66821    0.0003
+    intercept3|4   1.80196    0.145367  12.396      <1e-30
+    sex            0.461387   0.162676   2.83623    0.0048
+    ──────────────────────────────────────────────────────
+
+
+
+
+```julia
+run(`head ordinalgwas.pval.txt`);
+```
+
+    chr,pos,snpid,varid,pval
+    01,1001,RSID_101,SNPID_101,0.12449777715285536
+    01,2000,RSID_2,SNPID_2,0.0005572706985571726
+    01,2001,RSID_102,SNPID_102,0.000499698235061772
+    01,3000,RSID_3,SNPID_3,0.5866179001423883
+    01,3001,RSID_103,SNPID_103,0.5866179001423883
+    01,4000,RSID_4,SNPID_4,0.35228232701118806
+    01,4001,RSID_104,SNPID_104,0.352282327011188
+    01,5000,RSID_5,SNPID_5,0.8349949740712312
+    01,5001,RSID_105,SNPID_105,0.8347200986428936
 
 
 ### Subsamples
@@ -779,7 +838,7 @@ In many applications, we want to test a SNP-set. The function with keyword `anal
 
 The snpset can be specified as either:
 - a window (test every X snps) => `snpset = X`
-- an annotated file.  This requires `snpset = filename` where filename is an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's identical to the bimfile.
+- an annotated file.  This requires `snpset = filename` where filename is an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's (rsid) identical to the bimfile, or in the case of a BGEN format, the order the data will be read (see BGEN above for more details).
 - a joint test on only a specific set of snps. `snpset = AbstractVector` where the vector specifies the snps you want to perform one joint snpset test for. The vector can either be a vector of integers where the elements are the indicies of the SNPs to test, a vector of booleans, where true represents that you want to select that SNP index, or a range indicating the indicies of the SNPs to test. 
 
 In following example, we perform a SNP-set test on the 50th to 55th snps. 
