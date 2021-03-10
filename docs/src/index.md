@@ -25,8 +25,8 @@ This package requires Julia v1.4 or later and four other unregistered packages S
 versioninfo()
 ```
 
-    Julia Version 1.5.2
-    Commit 539f3ce943 (2020-09-23 23:17 UTC)
+    Julia Version 1.5.3
+    Commit 788b2c77c1 (2020-11-09 13:37 UTC)
     Platform Info:
       OS: macOS (x86_64-apple-darwin18.7.0)
       CPU: Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz
@@ -170,7 +170,7 @@ OrdinalGWAS supports PLINK files and VCF Files.
 
 !!! note
 
-By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later).
+    By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later). Similarly, BGEN must be specified as the `geneticformat` if using a BGEN file. 
 
 
 ```julia
@@ -272,13 +272,70 @@ run(`head ordinalgwas.pval.txt`);
 
 Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", pvalfile="ordinalgwas.pval.txt.gz")
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
+    pvalfile="ordinalgwas.pval.txt.gz")
 ```
 will output the p-value file in compressed gz format.
 
-### VCF Formatted Files
+### Subsamples
 
-By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports VCF (and BGEN) Files. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
+Use the keyword `covrowinds` to specify selected samples in the covarite file. Use the keyword `geneticrowinds` to specify selected samples in the Plink bed file or VCF File. For example, to use the first 300 samples in both covariate and bed file:
+```julia
+ordinalgwas(@formula(trait ~ sex), covfile, geneticfile, 
+    covrowinds=1:300, geneticrowinds=1:300)
+```
+!!! note
+
+    Users should always make sure that the selected samples in covariate file match exactly those in bed file. 
+
+### Input non-genetic data as DataFrame
+
+Internally `ordinalgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `ordinalgwas` directly.
+```julia
+ordinalgwas(@formula(trait ~ sex), df, geneticfile)
+```
+!!! note
+
+    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file/VCF File/BGEN file. 
+
+For example, following code checks that the first 2 columns of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
+
+
+```julia
+covdf = CSV.read(datadir * "covariate.txt")
+plkfam = CSV.read(datadir * "hapmap3.fam", header=0, delim=' ')
+all(covdf[!, 1] .== plkfam[!, 1]) && all(covdf[!, 2] .== plkfam[!, 2])
+```
+
+
+
+
+    true
+
+
+
+### Timing
+
+For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
+
+
+```julia
+@btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
+```
+
+      174.585 ms (500740 allocations: 46.36 MiB)
+
+
+
+```julia
+# clean up
+rm("ordinalgwas.null.txt", force=true)
+rm("ordinalgwas.pval.txt", force=true)
+```
+
+## VCF Formatted Files
+
+By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports VCF (and BGEN) Files. `vcf.gz` files are supported as well. To use vcf files in any of the analysis options detailed in this documentation, you simply need to add two keyword options to the `ordinalgwas` function:
 * `geneticformat`: Choices are "VCF" or "PLINK". If you are using a VCF file, use `geneticformat = "VCF"`.
 * `vcftype`: Choices are :GT (for genotypes) or :DS (for dosages). This tells OrdinalGWAS which type of data to extract from the VCF file.
 
@@ -288,8 +345,8 @@ The following shows how to run an analysis with a VCF file using the dosage info
 
 
 ```julia
-ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv", datadir * "vcf_test"; geneticformat = "VCF",
-    vcftype = :DS)
+ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv", 
+    datadir * "vcf_test"; geneticformat = "VCF", vcftype = :DS)
 ```
 
 
@@ -328,12 +385,14 @@ run(`head ordinalgwas.pval.txt`);
     22,20000810,rs147349046,0.1741386270145462
 
 
-### BGEN Formatted Files
+## BGEN Formatted Files
 
 By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports BGEN Files. To use BGEN files in any of the analysis options detailed in this documentation, you simply need to add the following keyword option to the `ordinalgwas` function:
 * `geneticformat`: Choices are "VCF" or "PLINK" or "BGEN". If you are using a BGEN file, use `geneticformat = "BGEN"`.
 
 Using a BGEN File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages.
+
+Some features, such as SNP-set analyses, are only available currently when there's an indexing `.bgi` file available. 
 
 !!! note
 
@@ -343,7 +402,8 @@ The following shows how to run an analysis with a BGEN file using the dosage inf
 
 
 ```julia
-ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv", datadir * "bgen_test"; geneticformat = "BGEN")
+ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv", 
+    datadir * "bgen_test"; geneticformat = "BGEN")
 ```
 
 
@@ -381,61 +441,6 @@ run(`head ordinalgwas.pval.txt`);
     01,5000,RSID_5,SNPID_5,0.8349949740712312
     01,5001,RSID_105,SNPID_105,0.8347200986428936
 
-
-### Subsamples
-
-Use the keyword `covrowinds` to specify selected samples in the covarite file. Use the keyword `geneticrowinds` to specify selected samples in the Plink bed file or VCF File. For example, to use the first 300 samples in both covariate and bed file:
-```julia
-ordinalgwas(@formula(trait ~ sex), covfile, geneticfile, covrowinds=1:300, geneticrowinds=1:300)
-```
-!!! note
-
-    Users should always make sure that the selected samples in covariate file match exactly those in bed file. 
-
-### Input non-genetic data as DataFrame
-
-Internally `ordinalgwas` parses the covariate file as a DataFrame by `CSV.read(covfile)`. For covariate file of other formats, users can parse it as a DataFrame and then input the DataFrame to `ordinalgwas` directly.
-```julia
-ordinalgwas(@formula(trait ~ sex), df, geneticfile)
-```
-!!! note
-
-    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file/VCF File. 
-
-For example, following code checks that the first 2 columns of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
-
-
-```julia
-covdf = CSV.read(datadir * "covariate.txt")
-plkfam = CSV.read(datadir * "hapmap3.fam", header=0, delim=' ')
-all(covdf[!, 1] .== plkfam[!, 1]) && all(covdf[!, 2] .== plkfam[!, 2])
-```
-
-
-
-
-    true
-
-
-
-### Timing
-
-For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
-
-
-```julia
-@btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
-```
-
-      174.585 ms (500740 allocations: 46.36 MiB)
-
-
-
-```julia
-# clean up
-rm("ordinalgwas.null.txt", force=true)
-rm("ordinalgwas.pval.txt", force=true)
-```
 
 ## Link functions
 
@@ -845,8 +850,8 @@ In following example, we perform a SNP-set test on the 50th to 55th snps.
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "snpset",
-    pvalfile = "snpset.pval.txt", snpset = 50:55)
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; 
+    analysistype = "snpset", pvalfile = "snpset.pval.txt", snpset = 50:55)
 ```
 
 
@@ -904,8 +909,9 @@ run(`head ../data/hapmap_snpsetfile.txt`);
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "snpset",
-    pvalfile = "snpset.pval.txt", snpset = datadir * "/hapmap_snpsetfile.txt")
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3";
+    analysistype = "snpset", pvalfile = "snpset.pval.txt", 
+    snpset = datadir * "/hapmap_snpsetfile.txt")
 ```
 
 
@@ -955,8 +961,8 @@ In the following example we run a SNP-set test on every 15 SNPs.
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; analysistype = "snpset",
-    pvalfile = "snpset.pval.txt", snpset=15)
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3";
+    analysistype = "snpset", pvalfile = "snpset.pval.txt", snpset=15)
 ```
 
 
