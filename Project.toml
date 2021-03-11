@@ -19,6 +19,7 @@ VCFTools = "a620830f-fdd7-5ebc-8d26-3621ab35fbfe"
 
 [compat]
 DataFrames = ">=0.21.0"
+GeneticVariation = "0.4"
 OrdinalMultinomialModels = ">=0.3.0"
 SnpArrays = ">=0.3.3"
 StatsModels = ">=0.6.0"
