@@ -40,6 +40,13 @@ jobs:
             ${{ runner.os }}-${{ matrix.arch }}-test-
             ${{ runner.os }}-${{ matrix.arch }}-
             ${{ runner.os }}-
+      - run: | # add unregistered packages first
+          julia --project=docs -e '
+            using Pkg
+            pkg"add https://github.com/OpenMendel/SnpArrays.jl"
+            pkg"add https://github.com/OpenMendel/VCFTools.jl"
+            pkg"add https://github.com/OpenMendel/BGEN.jl"
+            pkg"add https://github.com/OpenMendel/OrdinalMultinomialModels.jl"'
       - uses: julia-actions/julia-buildpkg@latest
       - run: |
           git config --global user.name Tester
@@ -79,9 +86,9 @@ jobs:
             using Pkg
             pkg"add https://github.com/OpenMendel/SnpArrays.jl"
             pkg"add https://github.com/OpenMendel/VCFTools.jl"
-            pkg"add https://github.com/OpenMendel/BGEN.jl"'
+            pkg"add https://github.com/OpenMendel/BGEN.jl"
             pkg"add https://github.com/OpenMendel/OrdinalMultinomialModels.jl"
-            pkg"add https://github.com/OpenMendel/OrdinalGWAS.jl"
+            pkg"add https://github.com/OpenMendel/OrdinalGWAS.jl"'
       - run: |
           julia --project=docs -e '
             using Pkg
