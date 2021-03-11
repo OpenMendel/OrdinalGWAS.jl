@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.arch }}-
             ${{ runner.os }}-
       - run: | # add unregistered packages first
-          julia --project=docs -e '
+          julia -e '
             using Pkg
             pkg"add https://github.com/OpenMendel/SnpArrays.jl"
             pkg"add https://github.com/OpenMendel/VCFTools.jl"
