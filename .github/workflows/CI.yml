@@ -43,10 +43,12 @@ jobs:
       - run: | # add unregistered packages first
           julia -e '
             using Pkg
-            pkg"dev https://github.com/OpenMendel/SnpArrays.jl"
-            pkg"dev https://github.com/OpenMendel/VCFTools.jl"
-            pkg"dev https://github.com/OpenMendel/BGEN.jl"
-            pkg"dev https://github.com/OpenMendel/OrdinalMultinomialModels.jl"'
+            pkg"add https://github.com/OpenMendel/SnpArrays.jl"
+            pkg"add https://github.com/OpenMendel/VCFTools.jl"
+            pkg"add https://github.com/OpenMendel/BGEN.jl"
+            pkg"add https://github.com/OpenMendel/OrdinalMultinomialModels.jl"
+            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@v1
