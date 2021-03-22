@@ -2,8 +2,11 @@
 name: JuliaNightly
 # Nightly Scheduled Julia Nightly Run
 on:
-  schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC (8 PM CST)
+  # schedule: # remove nightly check for now, compatibility reqs don't work
+  #   - cron: '0 2 * * *'  # Daily at 2 AM UTC (8 PM CST)
+  push:
+    branches: [master] 
+    tags: ["*"]
 jobs:
   test:
     name: Julia Nightly - Ubuntu - x64
