@@ -353,7 +353,7 @@ function ordinalgwas(
                                 wts = fittednullmodel.model.wts)
                             copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
                             pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
-                            stderr = stderror(altmodel)[fittednullmodel.model.p + 1]
+                            stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
                         end
                         if snponly
                             println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$hwepval,",
@@ -717,7 +717,7 @@ function ordinalgwas(
                         wts = fittednullmodel.model.wts)
                     copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
                     pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
-                    stderr = stderror(altmodel)[fittednullmodel.model.p + 1]
+                    stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
                     if snponly
                         println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),$(γ̂[1]),$stderr,$pval")
                     else
@@ -1073,7 +1073,7 @@ function ordinalgwas(
                         wts = fittednullmodel.model.wts)
                     copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
                     pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
-                    stderr = stderror(altmodel)[fittednullmodel.model.p + 1]
+                    stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
                     if snponly
                         println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
                         "$(variant.varid),$(γ̂[1]),$stderr,$pval")
