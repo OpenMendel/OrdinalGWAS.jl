@@ -10,7 +10,7 @@ OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [
 
 ## Installation
 
-This package requires Julia v1.4 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
+This package requires Julia v1.5 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
 ```julia
 (@v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl
 (@v1.5) pkg> add https://github.com/OpenMendel/VCFTools.jl

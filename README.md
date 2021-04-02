@@ -7,10 +7,10 @@
 
 OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes. It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). It runs efficiently and scales well to very large datasets. The package currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format) (both dosage and genotype data) file formats, and [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) file formats. We plan to add [PGEN](https://www.cog-genomics.org/plink/2.0/formats#pgen) support in the future. 
 
-OrdinalGWAS.jl supports Julia v1.4 or later. See the [documentation](https://openmendel.github.io/OrdinalGWAS.jl/latest/) for usage.  
+OrdinalGWAS.jl supports Julia v1.5 or later. See the [documentation](https://openmendel.github.io/OrdinalGWAS.jl/latest/) for usage.  
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://OpenMendel.github.io/OrdinalGWAS.jl/stable) [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://OpenMendel.github.io/OrdinalGWAS.jl/latest)
 
-OrdinalGWAS.jl is not yet registered. It requires [SnpArrays.jl](https://github.com/OpenMendel/SnpArrays.jl), [VCFTools.jl](https://github.com/OpenMendel/VCFTools.jl), [BGEN.jl](https://github.com/OpenMendel/BGEN.jl), and [OrdinalMultinomialModels.jl](https://github.com/OpenMendel/OrdinalMultinomialModels.jl) which are also not yet registered, so it will require the following steps to install. 
+OrdinalGWAS.jl is not yet registered. It requires [SnpArrays.jl](https://github.com/OpenMendel/SnpArrays.jl), [VCFTools.jl](https://github.com/OpenMendel/VCFTools.jl), [BGEN.jl](https://github.com/OpenMendel/BGEN.jl), and [OrdinalMultinomialModels.jl](https://github.com/OpenMendel/OrdinalMultinomialModels.jl) which are also not yet registered, so it will require the following steps to install. Start julia and use the ] key to switch to the package manager REPL and run:
 
 ```{julia}
 pkg> add https://github.com/OpenMendel/SnpArrays.jl

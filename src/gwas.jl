@@ -571,9 +571,14 @@ function ordinalgwas(
                         copyto!(testvec, @view(Xaug[:, end]) .* envvar)
                         nm = polr(Xaug, fittednullmodel.model.Y, 
                             fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                        snpeffectnull = nm.β[end]
-                        ts = OrdinalMultinomialScoreTest(nm, testvec)
-                        pval = polrtest(ts)
+                        if Inf in nm.vcov #singular design matrix
+                            snpeffectnull = 0.0
+                            pval = 1.0
+                        else
+                            snpeffectnull = nm.β[end]
+                            ts = OrdinalMultinomialScoreTest(nm, testvec)
+                            pval = polrtest(ts)
+                        end
                     elseif test == :lrt 
                         copyto!(@view(Xaug[:, end]), @view(genomat[bedrowinds,
                             j]), impute=true, model=snpmodel)
@@ -582,14 +587,21 @@ function ordinalgwas(
                             envvar)
                         nm = polr(Xaug, fittednullmodel.model.Y, 
                         fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                        snpeffectnull = nm.β[end]
-                        nulldev = deviance(nm)
-                        altmodel = polr(Xaug2, fittednullmodel.model.Y, 
-                            fittednullmodel.model.link, solver, 
-                            wts = fittednullmodel.model.wts)
-                        γ̂ = altmodel.β[end]
-                        snpeffectfull = altmodel.β[end-1]
-                        pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                        if Inf in nm.vcov #singular design matrix
+                            snpeffectnull = 0.0
+                            snpeffectfull = 0.0
+                            γ̂ = 0.0
+                            pval = 1.0
+                        else
+                            snpeffectnull = nm.β[end]
+                            nulldev = deviance(nm)
+                            altmodel = polr(Xaug2, fittednullmodel.model.Y, 
+                                fittednullmodel.model.link, solver, 
+                                wts = fittednullmodel.model.wts)
+                            γ̂ = altmodel.β[end]
+                            snpeffectfull = altmodel.β[end-1]
+                            pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                        end
                     end
                     if test == :score
                         println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,",
@@ -940,9 +952,14 @@ function ordinalgwas(
                     copyto!(testvec, @view(Xaug[:, end]) .* envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                         fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    snpeffectnull = nm.β[end]
-                    ts = OrdinalMultinomialScoreTest(nm, testvec)
-                    pval = polrtest(ts)
+                    if Inf in nm.vcov #singular design matrix
+                        snpeffectnull = 0.0
+                        pval = 1.0
+                    else
+                        snpeffectnull = nm.β[end]
+                        ts = OrdinalMultinomialScoreTest(nm, testvec)
+                        pval = polrtest(ts)
+                    end
                     println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),$snpeffectnull,$pval")
                 elseif test == :lrt
                     γ̂ = 0.0 # effect size for columns being tested
@@ -951,14 +968,21 @@ function ordinalgwas(
                         envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                     fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    snpeffectnull = nm.β[end]
-                    nulldev = deviance(nm)
-                    altmodel = polr(Xaug2, fittednullmodel.model.Y, 
-                        fittednullmodel.model.link, solver, 
-                        wts = fittednullmodel.model.wts)
-                    γ̂ = altmodel.β[end]
-                    snpeffectfull = altmodel.β[end-1]
-                    pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                    if Inf in nm.vcov #singular design matrix
+                        snpeffectnull = 0.0
+                        snpeffectfull = 0.0
+                        γ̂ = 0.0
+                        pval = 1.0
+                    else
+                        snpeffectnull = nm.β[end]
+                        nulldev = deviance(nm)
+                        altmodel = polr(Xaug2, fittednullmodel.model.Y, 
+                            fittednullmodel.model.link, solver, 
+                            wts = fittednullmodel.model.wts)
+                        γ̂ = altmodel.β[end]
+                        snpeffectfull = altmodel.β[end-1]
+                        pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                    end
                     println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
                         "$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                 end
@@ -1287,9 +1311,14 @@ function ordinalgwas(
                     copyto!(testvec, @view(Xaug[:, end]) .* envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                         fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    snpeffectnull = nm.β[end]
-                    ts = OrdinalMultinomialScoreTest(nm, testvec)
-                    pval = polrtest(ts)
+                    if Inf in nm.vcov #singular design matrix
+                        snpeffectnull = 0.0
+                        pval = 1.0
+                    else
+                        snpeffectnull = nm.β[end]
+                        ts = OrdinalMultinomialScoreTest(nm, testvec)
+                        pval = polrtest(ts)
+                    end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
                     "$(variant.varid),$snpeffectnull,$pval")
                 elseif test == :lrt
@@ -1299,14 +1328,21 @@ function ordinalgwas(
                         envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                     fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    snpeffectnull = nm.β[end]
-                    nulldev = deviance(nm)
-                    altmodel = polr(Xaug2, fittednullmodel.model.Y, 
-                        fittednullmodel.model.link, solver, 
-                        wts = fittednullmodel.model.wts)
-                    γ̂ = altmodel.β[end]
-                    snpeffectfull = altmodel.β[end-1]
-                    pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                    if Inf in nm.vcov #singular design matrix
+                        snpeffectnull = 0.0
+                        snpeffectfull = 0.0
+                        γ̂ = 0.0
+                        pval = 1.0
+                    else
+                        snpeffectnull = nm.β[end]
+                        nulldev = deviance(nm)
+                        altmodel = polr(Xaug2, fittednullmodel.model.Y, 
+                            fittednullmodel.model.link, solver, 
+                            wts = fittednullmodel.model.wts)
+                        γ̂ = altmodel.β[end]
+                        snpeffectfull = altmodel.β[end-1]
+                        pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
+                    end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
                         "$(variant.varid),$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                 end

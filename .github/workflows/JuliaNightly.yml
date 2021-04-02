@@ -4,9 +4,9 @@ name: JuliaNightly
 on:
   # schedule: # remove nightly check for now, compatibility reqs don't work
   #   - cron: '0 2 * * *'  # Daily at 2 AM UTC (8 PM CST)
-  # push:
-  #   branches: [master] 
-  #   tags: ["*"]
+  push:
+    branches: [master] 
+    tags: ["*"]
 jobs:
   test:
     name: Julia Nightly - Ubuntu - x64
