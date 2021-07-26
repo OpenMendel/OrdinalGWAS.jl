@@ -18,11 +18,12 @@ VCFTools = "a620830f-fdd7-5ebc-8d26-3621ab35fbfe"
 VariantCallFormat = "28eba6e3-a997-4ad9-87c6-d933b8bca6c1"
 
 [compat]
-DataFrames = ">=0.21.0"
-OrdinalMultinomialModels = ">=0.3.0"
-SnpArrays = ">=0.3.3"
-StatsModels = ">=0.6.0"
-VCFTools = ">=0.2.0"
+BGEN = "0.1.2"
+DataFrames = "0.21.0 - 1"
+OrdinalMultinomialModels = "0.3"
+SnpArrays = "0.3.3"
+StatsModels = "0.6"
+VCFTools = "0.2.1"
 julia = "1.5"
 
 [extras]
