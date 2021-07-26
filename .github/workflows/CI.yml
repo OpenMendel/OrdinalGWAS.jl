@@ -52,7 +52,7 @@ jobs:
       - run: | # update packages
           julia --project=. -e '
             using Pkg
-            pkg"up"'
+            Pkg.update()'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
