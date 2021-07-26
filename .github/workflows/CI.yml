@@ -50,9 +50,9 @@ jobs:
             ${{ runner.os }}-${{ matrix.arch }}-
             ${{ runner.os }}-
       - run: | # update packages
-          julia --project=docs -e '
+          julia --project=. -e '
             using Pkg
-            pkg"up"     
+            pkg"up"'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
