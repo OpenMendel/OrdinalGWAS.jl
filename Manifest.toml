@@ -32,11 +32,11 @@ version = "0.8.0"
 
 [[BGEN]]
 deps = ["CodecZlib", "CodecZstd", "Printf", "SIMD", "SQLite", "SpecialFunctions", "Statistics", "Tables", "TranscodingStreams"]
-git-tree-sha1 = "ee6cf98c88e14936b613b23afa7c90e171ece024"
+git-tree-sha1 = "38dec323634c50e649b9c1b319e6c71236fed1d7"
 repo-rev = "main"
 repo-url = "https://github.com/OpenMendel/BGEN.jl"
 uuid = "6db4b851-9beb-4b83-9d64-eb1cfb37721d"
-version = "0.1.2"
+version = "0.1.3"
 
 [[BGZFStreams]]
 deps = ["CodecZlib", "Test"]
@@ -361,9 +361,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LoopVectorization]]
 deps = ["ArrayInterface", "DocStringExtensions", "IfElse", "LinearAlgebra", "OffsetArrays", "Polyester", "Requires", "SLEEFPirates", "Static", "StrideArraysCore", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "b844cb320457812f739fe75f216a481095daf5c2"
+git-tree-sha1 = "1578cc856a165170a9572602e885c8511d81da1e"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.55"
+version = "0.12.56"
 
 [[METIS_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -472,11 +472,11 @@ version = "1.4.1"
 
 [[OrdinalMultinomialModels]]
 deps = ["Distributions", "GLM", "Ipopt", "LinearAlgebra", "MathProgBase", "NLopt", "RDatasets", "Random", "Reexport", "StatsBase", "StatsModels"]
-git-tree-sha1 = "28f2d6345d21afe4c55873dc993ebafea2793f9d"
+git-tree-sha1 = "9cfe6b1598ea517241caff1869799ce24fba9d98"
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/OrdinalMultinomialModels.jl"
 uuid = "b51826c6-2bc1-4eb0-a3af-c080fd29f1d0"
-version = "0.3.3"
+version = "0.3.4"
 
 [[PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
@@ -634,11 +634,12 @@ version = "1.0.0"
 
 [[SnpArrays]]
 deps = ["Adapt", "CSV", "CodecBzip2", "CodecXz", "CodecZlib", "CodecZstd", "DataFrames", "DelimitedFiles", "Glob", "LinearAlgebra", "LoopVectorization", "Missings", "Mmap", "Printf", "Random", "Requires", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "Tables", "TranscodingStreams", "VariantCallFormat", "VectorizationBase"]
-git-tree-sha1 = "4d2211b0ff821d896ddad58f54e6eba3486462fc"
+git-tree-sha1 = "ecc17d27ee89dbedfedd1fd394bfc2bb8a9bdd73"
+
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/SNPArrays.jl"
 uuid = "4e780e97-f5bf-4111-9dc4-b70aaf691b06"
-version = "0.3.8"
+version = "0.3.9"
 
 [[Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -775,11 +776,11 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[VCFTools]]
 deps = ["CodecZlib", "Dates", "DelimitedFiles", "Distributions", "HypothesisTests", "ProgressMeter", "SpecialFunctions", "VariantCallFormat"]
-git-tree-sha1 = "0d99c5d4b672598d5a28f9944ab69de0ace04ac6"
+git-tree-sha1 = "54f0ac2be74f5ac461f4f87ef73148380f498fd6"
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/VCFTools.jl"
 uuid = "a620830f-fdd7-5ebc-8d26-3621ab35fbfe"
-version = "0.2.1"
+version = "0.2.2"
 
 [[VariantCallFormat]]
 deps = ["Automa", "BGZFStreams", "BioCore", "BufferedStreams"]

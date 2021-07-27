@@ -2,7 +2,7 @@ name = "OrdinalGWAS"
 uuid = "00428148-03d9-50ae-bfb7-4a690d5612f1"
 keywords = ["ordered multinomial model", "proportional odds model", "GWAS"]
 author = ["Hua Zhou <huazhou@ucla.edu>", "Chris German <germc3@ucla.edu>", "OpenMendel Team"]
-version = "0.5.2"
+version = "0.5.3"
 
 [deps]
 BGEN = "6db4b851-9beb-4b83-9d64-eb1cfb37721d"
