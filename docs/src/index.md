@@ -10,7 +10,7 @@ OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [
 
 ## Installation
 
-This package requires Julia v1.4 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
+This package requires Julia v1.5 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
 ```julia
 (@v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl
 (@v1.5) pkg> add https://github.com/OpenMendel/VCFTools.jl
@@ -40,8 +40,12 @@ versioninfo()
 
 ```julia
 # for use in this tutorial
-using BenchmarkTools, CSV, Glob, SnpArrays, OrdinalGWAS
+using BenchmarkTools, CSV, Glob, SnpArrays, OrdinalGWAS, DataFrames
 ```
+
+    ┌ Info: Precompiling OrdinalGWAS [00428148-03d9-50ae-bfb7-4a690d5612f1]
+    └ @ Base loading.jl:1278
+
 
 ## Example data sets
 
@@ -162,11 +166,13 @@ run(`head $(datadir)covariate.txt`);
 
 #### Genetic file(s)
 
-OrdinalGWAS supports PLINK files and VCF Files.
+OrdinalGWAS supports PLINK, VCF, and BGEN Files.
 
 - Genotype data is available as binary PLINK files.
 
 - OrdinalGWAS can use dosage or genotype data from VCF Files. 
+
+- OrdinalGWAS can use dosage data from BGEN files.   
 
 !!! note
 
@@ -599,13 +605,15 @@ rm("commonvariant.pval.txt", force=true)
 
 By default, `ordinalgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:lrt`. LRT is much slower but may be more powerful than score test.
 
+Because LRT fits the alternative model for each SNP, we also output the standard error and estimated effect size of the SNP. 
+
 
 ```julia
 @time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     27.974898 seconds (4.92 M allocations: 1.871 GiB, 1.42% gc time)
+     28.227825 seconds (5.02 M allocations: 1.882 GiB, 1.34% gc time)
 
 
 
@@ -627,23 +635,23 @@ By default, `ordinalgwas` calculates p-value for each SNP using score test. Scor
 
 
 
-Note the extra `effect` column in pvalfile, which is the effect size (regression coefficient) for each SNP. 
+Note the extra `effect` and `stder` columns in pvalfile, which is the effect size (regression coefficient) and standard errors for each SNP. `-1` is reported when there is no variation in the SNP (0 MAF).  
 
 
 ```julia
 run(`head lrt.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,hwepval,effect,pval
-    1,554484,rs10458597,0.0,1.0,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954433,0.0019185836579805327
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,5.8733847126869666e-6
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.3318136652577225,0.008081022577828709
-    1,1588771,rs35154105,0.0,1.0,0.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388700143,0.5169027130145593
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,-0.1358649923181975,0.2994640220091515
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,-0.2512075640440123,0.1615106909444108
+    chr,pos,snpid,maf,hwepval,effect,stder,pval
+    1,554484,rs10458597,0.0,1.0,0.0,-1.0,1.0
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954433,0.34080917686608564,0.0019185836579805327
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,0.15659100275284876,1.805050556976241e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,0.2177988861470316,5.8733847126869666e-6
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.3318136652577225,0.12697404813031177,0.008081022577828709
+    1,1588771,rs35154105,0.0,1.0,0.0,-1.0,1.0
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388700143,1.249528757123983,0.5169027130145593
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,-0.1358649923181975,0.1312347223249673,0.2994640220091515
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,-0.2512075640440123,0.17872139152979527,0.1615106909444108
 
 
 
@@ -667,7 +675,7 @@ For large data sets, a practical solution is to perform the score test first acr
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.208436 seconds (500.74 k allocations: 46.365 MiB, 6.69% gc time)
+      0.257450 seconds (500.64 k allocations: 46.361 MiB, 14.93% gc time)
 
 
 
@@ -691,7 +699,7 @@ run(`head score.pval.txt`);
 
 
 ```julia
-scorepvals = CSV.read("score.pval.txt")[!, 6] # p-values in 5th column
+scorepvals = CSV.read("score.pval.txt", DataFrame)[!, end] # p-values in last column
 tophits = sortperm(scorepvals)[1:10] # indices of 10 SNPs with smallest p-values
 scorepvals[tophits] # smallest 10 p-values
 ```
@@ -721,7 +729,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.432419 seconds (710.56 k allocations: 38.627 MiB, 4.06% gc time)
+      1.036577 seconds (1.02 M allocations: 55.289 MiB, 1.64% gc time)
 
 
 
@@ -729,17 +737,17 @@ scorepvals[tophits] # smallest 10 p-values
 run(`cat lrt.pval.txt`);
 ```
 
-    chr,pos,snpid,maf,hwepval,effect,pval
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,5.8733847126869666e-6
-    3,36821790,rs4678553,0.23456790123456794,0.1094668216324497,0.7424952268973513,1.1303825016263261e-5
-    4,11017683,rs16881446,0.27554179566563464,0.8942746118760274,-0.7870581482955528,1.1105427468798282e-5
-    5,3739190,rs12521166,0.0679012345679012,0.18613647746093887,1.1468852997925316,4.7812882296576845e-5
-    6,7574576,rs1885466,0.17746913580246915,0.7620687178987191,0.8750621092263029,7.272346896741059e-6
-    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858657,5.069394513906423e-5
-    7,41152376,rs28880,0.3379629629629629,0.8052368892744096,-0.814633902445351,9.180126530295469e-7
-    7,84223996,rs4128623,0.07870370370370372,0.0218347173467568,1.0022229316338584,6.587895464657512e-5
-    23,121048059,rs1937165,0.4380804953560371,3.959609737265113e-16,0.5392313636256602,1.9754643855524994e-5
+    chr,pos,snpid,maf,hwepval,effect,stder,pval
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,0.15659100275284876,1.805050556976241e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,0.2177988861470316,5.8733847126869666e-6
+    3,36821790,rs4678553,0.23456790123456794,0.1094668216324497,0.7424952268973513,0.17055414498937188,1.1303825016263261e-5
+    4,11017683,rs16881446,0.27554179566563464,0.8942746118760274,-0.7870581482955528,0.18729099511224406,1.1105427468798282e-5
+    5,3739190,rs12521166,0.0679012345679012,0.18613647746093887,1.1468852997925316,0.28093078615474576,4.7812882296576845e-5
+    6,7574576,rs1885466,0.17746913580246915,0.7620687178987191,0.8750621092263029,0.19417734621377886,7.272346896741059e-6
+    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858657,0.19764574359737555,5.069394513906423e-5
+    7,41152376,rs28880,0.3379629629629629,0.8052368892744096,-0.814633902445351,0.17471459882610024,9.180126530295469e-7
+    7,84223996,rs4128623,0.07870370370370372,0.0218347173467568,1.0022229316338584,0.2553436567319929,6.587895464657512e-5
+    23,121048059,rs1937165,0.4380804953560371,3.959609737265113e-16,0.5392313636256602,0.1280959604207795,1.9754643855524994e-5
 
 
 
