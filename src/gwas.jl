@@ -1018,7 +1018,9 @@ function ordinalgwas(
     bgen_iterator = iterator(bgendata)
 
     dosageholder = Vector{Float32}(undef, n_samples(bgendata))
-    decompressed = Vector{UInt8}(undef, 3 * n_samples(bgendata) + 10)
+    decompressed_length, _ = BGEN.check_decompressed_length(
+        bgendata.io, first(bgen_iterator), bgendata.header)
+    decompressed = Vector{UInt8}(undef, decompressed_length)
 
     # create SNP mask vector
     if snpinds == nothing

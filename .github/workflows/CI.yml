@@ -8,6 +8,8 @@ on:
     branches: [master]
     tags: ["*"]
   pull_request:
+    branches:
+      - master
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }}
@@ -49,6 +51,10 @@ jobs:
             ${{ runner.os }}-${{ matrix.arch }}-test-
             ${{ runner.os }}-${{ matrix.arch }}-
             ${{ runner.os }}-
+      - run: | # update packages
+          julia --project=. -e '
+            using Pkg
+            Pkg.update()'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
