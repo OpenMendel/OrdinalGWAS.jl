@@ -19,8 +19,11 @@ VariantCallFormat = "28eba6e3-a997-4ad9-87c6-d933b8bca6c1"
 
 [compat]
 BGEN = "0.1.2"
+CSV = "0.8"
 DataFrames = "0.21.0 - 1"
+Distributions = "0.22 - 0.25"
 OrdinalMultinomialModels = "0.3"
+Reexport = "1"
 SnpArrays = "0.3.3"
 StatsModels = "0.6"
 VCFTools = "0.2.1"
