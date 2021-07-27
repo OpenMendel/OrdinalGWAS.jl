@@ -17,9 +17,9 @@ uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 
 [[ArrayInterface]]
 deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
-git-tree-sha1 = "045ff5e1bc8c6fb1ecb28694abba0a0d55b5f4f5"
+git-tree-sha1 = "a71d224f61475b93c9e196e83c17c6ac4dedacfa"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "3.1.17"
+version = "3.1.18"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -32,7 +32,7 @@ version = "0.8.0"
 
 [[BGEN]]
 deps = ["CodecZlib", "CodecZstd", "Printf", "SIMD", "SQLite", "SpecialFunctions", "Statistics", "Tables", "TranscodingStreams"]
-git-tree-sha1 = "3809273134723bcb0474be661b4dd49752bc8e5e"
+git-tree-sha1 = "ee6cf98c88e14936b613b23afa7c90e171ece024"
 repo-rev = "main"
 repo-url = "https://github.com/OpenMendel/BGEN.jl"
 uuid = "6db4b851-9beb-4b83-9d64-eb1cfb37721d"
@@ -91,9 +91,9 @@ version = "0.10.0"
 
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "f53ca8d41e4753c41cdafa6ec5f7ce914b34be54"
+git-tree-sha1 = "ad613c934ec3a3aa0ff19b91f15a16d56ed404b5"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "0.10.13"
+version = "1.0.2"
 
 [[CodecBzip2]]
 deps = ["Bzip2_jll", "Libdl", "TranscodingStreams"]
@@ -211,10 +211,10 @@ uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 version = "1.10.1"
 
 [[FillArrays]]
-deps = ["LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "25b9cc23ba3303de0ad2eac03f840de9104c9253"
+deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
+git-tree-sha1 = "8c8eac2af06ce35973c3eadb4ab3243076a408e7"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.12.0"
+version = "0.12.1"
 
 [[Formatting]]
 deps = ["Printf"]
@@ -238,10 +238,10 @@ uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
 version = "1.3.0"
 
 [[HTTP]]
-deps = ["Base64", "Dates", "IniFile", "MbedTLS", "Sockets"]
-git-tree-sha1 = "c7ec02c4c6a039a98a15f955462cd7aea5df4508"
+deps = ["Base64", "Dates", "IniFile", "Logging", "MbedTLS", "NetworkOptions", "Sockets", "URIs"]
+git-tree-sha1 = "c6a1fff2fd4b1da29d3dccaffb1e1001244d844e"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "0.8.19"
+version = "0.9.12"
 
 [[Hwloc]]
 deps = ["Hwloc_jll"]
@@ -284,15 +284,15 @@ version = "1.0.0"
 
 [[Ipopt]]
 deps = ["BinaryProvider", "Ipopt_jll", "Libdl", "LinearAlgebra", "MathOptInterface", "MathProgBase"]
-git-tree-sha1 = "d0f3cc6fa341859910a8ee0fdd397862042af290"
+git-tree-sha1 = "380786b4929b8d18d76e909c6b2eca355b7c3bd6"
 uuid = "b6b21f68-93f8-5de0-b562-5493be1d77c9"
-version = "0.6.3"
+version = "0.7.0"
 
 [[Ipopt_jll]]
-deps = ["ASL_jll", "CompilerSupportLibraries_jll", "Libdl", "MUMPS_seq_jll", "OpenBLAS32_jll", "Pkg"]
-git-tree-sha1 = "4247bc93c3f0cb3d23a9d221e6d23d5449b4d90d"
+deps = ["ASL_jll", "Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "MUMPS_seq_jll", "OpenBLAS32_jll", "Pkg"]
+git-tree-sha1 = "82124f27743f2802c23fcb05febc517d0b15d86e"
 uuid = "9cc047cb-c261-5740-88fc-0cf96f7bdcc7"
-version = "3.13.1+1"
+version = "3.13.4+2"
 
 [[IteratorInterfaceExtensions]]
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
@@ -361,9 +361,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LoopVectorization]]
 deps = ["ArrayInterface", "DocStringExtensions", "IfElse", "LinearAlgebra", "OffsetArrays", "Polyester", "Requires", "SLEEFPirates", "Static", "StrideArraysCore", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "06c91d5495c32bca6b843551a1331c3cd2fb23d0"
+git-tree-sha1 = "b844cb320457812f739fe75f216a481095daf5c2"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.53"
+version = "0.12.55"
 
 [[METIS_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -373,9 +373,9 @@ version = "5.1.0+5"
 
 [[MUMPS_seq_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "METIS_jll", "OpenBLAS32_jll", "Pkg"]
-git-tree-sha1 = "a1d469a2a0acbfe219ef9bdfedae97daacac5a0e"
+git-tree-sha1 = "1a11a84b2af5feb5a62a820574804056cdc59c39"
 uuid = "d7ed1dd3-d0ae-5e8e-bfb4-87a502085b8d"
-version = "5.4.0+0"
+version = "5.2.1+4"
 
 [[ManualMemory]]
 git-tree-sha1 = "71c64ebe61a12bad0911f8fc4f91df8a448c604c"
@@ -472,7 +472,7 @@ version = "1.4.1"
 
 [[OrdinalMultinomialModels]]
 deps = ["Distributions", "GLM", "Ipopt", "LinearAlgebra", "MathProgBase", "NLopt", "RDatasets", "Random", "Reexport", "StatsBase", "StatsModels"]
-git-tree-sha1 = "636b99b00955b248dcc5f66c885263c87b2d311b"
+git-tree-sha1 = "28f2d6345d21afe4c55873dc993ebafea2793f9d"
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/OrdinalMultinomialModels.jl"
 uuid = "b51826c6-2bc1-4eb0-a3af-c080fd29f1d0"
@@ -496,9 +496,9 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[Polyester]]
 deps = ["ArrayInterface", "IfElse", "ManualMemory", "Requires", "Static", "StrideArraysCore", "ThreadingUtilities", "VectorizationBase"]
-git-tree-sha1 = "2a5e179a459867e0046d4e74e1a8cfc88a06ee4a"
+git-tree-sha1 = "4b692c8ce1912bae5cd3b90ba22d1b54eb581195"
 uuid = "f517fe37-dbe3-4b94-8317-1923a5111588"
-version = "0.3.6"
+version = "0.3.7"
 
 [[PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -598,9 +598,9 @@ version = "3.3.1"
 
 [[SLEEFPirates]]
 deps = ["IfElse", "Static", "VectorizationBase"]
-git-tree-sha1 = "da6d214ffc85b1292f300649ef86d3c4f9aaf25d"
+git-tree-sha1 = "bfdf9532c33db35d2ce9df4828330f0e92344a52"
 uuid = "476501e8-09a2-5ece-8869-fb82de89a1fa"
-version = "0.6.22"
+version = "0.6.25"
 
 [[SQLite]]
 deps = ["BinaryProvider", "DBInterface", "Dates", "Libdl", "Random", "SQLite_jll", "Serialization", "Tables", "Test", "WeakRefStrings"]
@@ -634,7 +634,7 @@ version = "1.0.0"
 
 [[SnpArrays]]
 deps = ["Adapt", "CSV", "CodecBzip2", "CodecXz", "CodecZlib", "CodecZstd", "DataFrames", "DelimitedFiles", "Glob", "LinearAlgebra", "LoopVectorization", "Missings", "Mmap", "Printf", "Random", "Requires", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "Tables", "TranscodingStreams", "VariantCallFormat", "VectorizationBase"]
-git-tree-sha1 = "9feadd65d7bf786ed7bb46ebf0c4e61ae6d897ed"
+git-tree-sha1 = "4d2211b0ff821d896ddad58f54e6eba3486462fc"
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/SNPArrays.jl"
 uuid = "4e780e97-f5bf-4111-9dc4-b70aaf691b06"
@@ -655,15 +655,15 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[SpecialFunctions]]
 deps = ["ChainRulesCore", "LogExpFunctions", "OpenSpecFun_jll"]
-git-tree-sha1 = "a50550fa3164a8c46747e62063b4d774ac1bcf49"
+git-tree-sha1 = "508822dca004bf62e210609148511ad03ce8f1d8"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
-version = "1.5.1"
+version = "1.6.0"
 
 [[Static]]
 deps = ["IfElse"]
-git-tree-sha1 = "2740ea27b66a41f9d213561a04573da5d3823d4b"
+git-tree-sha1 = "62701892d172a2fa41a1f829f66d2b0db94a9a63"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.2.5"
+version = "0.3.0"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -694,9 +694,9 @@ version = "0.6.23"
 
 [[StrideArraysCore]]
 deps = ["ArrayInterface", "ManualMemory", "Requires", "ThreadingUtilities", "VectorizationBase"]
-git-tree-sha1 = "2525850b6887e217c3cc149ab29eb2a7a6360d37"
+git-tree-sha1 = "e1c37dd3022ba6aaf536541dd607e8d5fb534377"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
-version = "0.1.16"
+version = "0.1.17"
 
 [[StringEncodings]]
 deps = ["Libiconv_jll"]
@@ -740,9 +740,9 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[ThreadingUtilities]]
 deps = ["ManualMemory"]
-git-tree-sha1 = "593009385e6536dc50baedc2c8bc1a3717ef358f"
+git-tree-sha1 = "03013c6ae7f1824131b2ae2fc1d49793b51e8394"
 uuid = "8290d209-cae3-49c0-8002-c8c24d57dab5"
-version = "0.4.5"
+version = "0.4.6"
 
 [[TimeZones]]
 deps = ["Dates", "Future", "LazyArtifacts", "Mocking", "Pkg", "Printf", "RecipesBase", "Serialization", "Unicode"]
@@ -755,6 +755,11 @@ deps = ["Random", "Test"]
 git-tree-sha1 = "7c53c35547de1c5b9d46a4797cf6d8253807108c"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.5"
+
+[[URIs]]
+git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
+uuid = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
+version = "1.3.0"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]
@@ -770,7 +775,7 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[VCFTools]]
 deps = ["CodecZlib", "Dates", "DelimitedFiles", "Distributions", "HypothesisTests", "ProgressMeter", "SpecialFunctions", "VariantCallFormat"]
-git-tree-sha1 = "8e42021ff8c380ce554212f58e7f87bff0a64168"
+git-tree-sha1 = "0d99c5d4b672598d5a28f9944ab69de0ace04ac6"
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/VCFTools.jl"
 uuid = "a620830f-fdd7-5ebc-8d26-3621ab35fbfe"
