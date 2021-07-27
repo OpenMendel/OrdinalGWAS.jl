@@ -635,7 +635,6 @@ version = "1.0.0"
 [[SnpArrays]]
 deps = ["Adapt", "CSV", "CodecBzip2", "CodecXz", "CodecZlib", "CodecZstd", "DataFrames", "DelimitedFiles", "Glob", "LinearAlgebra", "LoopVectorization", "Missings", "Mmap", "Printf", "Random", "Requires", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "Tables", "TranscodingStreams", "VariantCallFormat", "VectorizationBase"]
 git-tree-sha1 = "ecc17d27ee89dbedfedd1fd394bfc2bb8a9bdd73"
-
 repo-rev = "master"
 repo-url = "https://github.com/OpenMendel/SNPArrays.jl"
 uuid = "4e780e97-f5bf-4111-9dc4-b70aaf691b06"
