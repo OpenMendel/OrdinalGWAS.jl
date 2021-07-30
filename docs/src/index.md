@@ -10,13 +10,13 @@ OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [
 
 ## Installation
 
-This package requires Julia v1.5 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
+This package requires Julia v1.6 or later and four other unregistered packages SnpArrays.jl, VCFTools.jl, BGEN.jl, and OrdinalMultinomialModels.jl. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and run:
 ```julia
-(@v1.5) pkg> add https://github.com/OpenMendel/SnpArrays.jl
-(@v1.5) pkg> add https://github.com/OpenMendel/VCFTools.jl
-(@v1.5) pkg> add https://github.com/OpenMendel/BGEN.jl
-(@v1.5) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
-(@v1.5) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
+(@v1.6) pkg> add https://github.com/OpenMendel/SnpArrays.jl
+(@v1.6) pkg> add https://github.com/OpenMendel/VCFTools.jl
+(@v1.6) pkg> add https://github.com/OpenMendel/BGEN.jl
+(@v1.6) pkg> add https://github.com/OpenMendel/OrdinalMultinomialModels.jl
+(@v1.6) pkg> add https://github.com/OpenMendel/OrdinalGWAS.jl
 ```
 
 
@@ -25,14 +25,14 @@ This package requires Julia v1.5 or later and four other unregistered packages S
 versioninfo()
 ```
 
-    Julia Version 1.5.3
-    Commit 788b2c77c1 (2020-11-09 13:37 UTC)
+    Julia Version 1.6.0
+    Commit f9720dc2eb (2021-03-24 12:55 UTC)
     Platform Info:
-      OS: macOS (x86_64-apple-darwin18.7.0)
+      OS: macOS (x86_64-apple-darwin19.6.0)
       CPU: Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz
       WORD_SIZE: 64
       LIBM: libopenlibm
-      LLVM: libLLVM-9.0.1 (ORCJIT, haswell)
+      LLVM: libLLVM-11.0.1 (ORCJIT, haswell)
     Environment:
       JULIA_NUM_THREADS = 4
 
@@ -42,10 +42,6 @@ versioninfo()
 # for use in this tutorial
 using BenchmarkTools, CSV, Glob, SnpArrays, OrdinalGWAS, DataFrames
 ```
-
-    ┌ Info: Precompiling OrdinalGWAS [00428148-03d9-50ae-bfb7-4a690d5612f1]
-    └ @ Base loading.jl:1278
-
 
 ## Example data sets
 
@@ -73,7 +69,7 @@ readdir(glob"*.*", datadir)
 
 
 
-    18-element Array{String,1}:
+    16-element Vector{String}:
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_ex.csv"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_snpsetfile.txt"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/bgen_test.bgen"
@@ -84,8 +80,6 @@ readdir(glob"*.*", datadir)
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.map"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap_snpsetfile.txt"
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/ordinalgwas.null.txt"
-     "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/ordinalgwas.pval.txt"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait.jl"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait_bgen.jl"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/simtrait_vcf.jl"
@@ -114,7 +108,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -122,7 +116,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -186,7 +180,7 @@ readdir(glob"hapmap3.*", datadir)
 
 
 
-    4-element Array{String,1}:
+    4-element Vector{String}:
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
      "/Users/christophergerman/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
@@ -222,7 +216,7 @@ SnpArrays.ALLOWED_FORMAT
 
 
 
-    6-element Array{String,1}:
+    6-element Vector{String}:
      "gz"
      "zlib"
      "zz"
@@ -243,7 +237,7 @@ SnpArrays.ALLOWED_FORMAT
 run(`cat ordinalgwas.null.txt`);
 ```
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -251,7 +245,7 @@ run(`cat ordinalgwas.null.txt`);
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -266,14 +260,14 @@ run(`head ordinalgwas.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.0045653128395339235
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553067e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367651365e-5
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174567
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.004565312839534427
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553394e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367652875e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174538
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332529945
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.2997282957184678
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048358
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332531635
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.29972829571847
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048658
 
 
 Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
@@ -308,8 +302,8 @@ For example, following code checks that the first 2 columns of the `covariate.tx
 
 
 ```julia
-covdf = CSV.read(datadir * "covariate.txt")
-plkfam = CSV.read(datadir * "hapmap3.fam", header=0, delim=' ')
+covdf = CSV.read(datadir * "covariate.txt", DataFrame)
+plkfam = CSV.read(datadir * "hapmap3.fam", header=0, delim=' ',  DataFrame)
 all(covdf[!, 1] .== plkfam[!, 1]) && all(covdf[!, 2] .== plkfam[!, 2])
 ```
 
@@ -329,7 +323,7 @@ For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      174.585 ms (500740 allocations: 46.36 MiB)
+      181.958 ms (500934 allocations: 49.13 MiB)
 
 
 
@@ -345,7 +339,7 @@ By default, OrdinalGWAS.jl will assume you are using PLINK files. It also suppor
 * `geneticformat`: Choices are "VCF" or "PLINK". If you are using a VCF file, use `geneticformat = "VCF"`.
 * `vcftype`: Choices are :GT (for genotypes) or :DS (for dosages). This tells OrdinalGWAS which type of data to extract from the VCF file.
 
-Using a VCF File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages. 
+Using a VCF File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages and MAF/HWE calculations via VCFTools does not currently support dosage data. 
 
 The following shows how to run an analysis with a VCF file using the dosage information. 
 
@@ -358,7 +352,7 @@ ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv",
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     y ~ sex
     
@@ -366,7 +360,7 @@ ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv",
     ───────────────────────────────────────────────────────
                    Estimate  Std.Error    t value  Pr(>|t|)
     ───────────────────────────────────────────────────────
-    intercept1|2  -1.10106    0.205365  -5.36147     <1e-6
+    intercept1|2  -1.10106    0.205365  -5.36147     <1e-06
     intercept2|3   0.370894   0.188822   1.96425     0.0510
     intercept3|4   1.74736    0.232756   7.50726     <1e-11
     sex            0.22796    0.262237   0.869289    0.3858
@@ -380,14 +374,14 @@ run(`head ordinalgwas.pval.txt`);
 ```
 
     chr,pos,snpid,pval
-    22,20000086,rs138720731,0.6435068072069543
+    22,20000086,rs138720731,0.6435068072069544
     22,20000146,rs73387790,1.0
-    22,20000199,rs183293480,0.9378258278500582
-    22,20000291,rs185807825,0.21907288710091155
-    22,20000428,rs55902548,0.0027904024468849236
+    22,20000199,rs183293480,0.9378258278500581
+    22,20000291,rs185807825,0.21907288710091172
+    22,20000428,rs55902548,0.002790402446884929
     22,20000683,rs142720028,1.0
-    22,20000771,rs114690707,0.2303491015874968
-    22,20000793,rs189842693,0.15612228776953194
+    22,20000771,rs114690707,0.23034910158749672
+    22,20000793,rs189842693,0.15612228776953083
     22,20000810,rs147349046,0.1741386270145462
 
 
@@ -395,8 +389,6 @@ run(`head ordinalgwas.pval.txt`);
 
 By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports BGEN Files. To use BGEN files in any of the analysis options detailed in this documentation, you simply need to add the following keyword option to the `ordinalgwas` function:
 * `geneticformat`: Choices are "VCF" or "PLINK" or "BGEN". If you are using a BGEN file, use `geneticformat = "BGEN"`.
-
-Using a BGEN File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages.
 
 Some features, such as SNP-set analyses, are only available currently when there's an indexing `.bgi` file available. 
 
@@ -415,7 +407,7 @@ ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv",
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     y ~ sex
     
@@ -436,16 +428,16 @@ ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv",
 run(`head ordinalgwas.pval.txt`);
 ```
 
-    chr,pos,snpid,varid,pval
-    01,1001,RSID_101,SNPID_101,0.12449777715285536
-    01,2000,RSID_2,SNPID_2,0.0005572706985571726
-    01,2001,RSID_102,SNPID_102,0.000499698235061772
-    01,3000,RSID_3,SNPID_3,0.5866179001423883
-    01,3001,RSID_103,SNPID_103,0.5866179001423883
-    01,4000,RSID_4,SNPID_4,0.35228232701118806
-    01,4001,RSID_104,SNPID_104,0.352282327011188
-    01,5000,RSID_5,SNPID_5,0.8349949740712312
-    01,5001,RSID_105,SNPID_105,0.8347200986428936
+    chr,pos,snpid,varid,hwepval,maf,infoscore,pval
+    01,1001,RSID_101,SNPID_101,0.8627403,0.4169765,0.9846387832074154,0.12449779722495302
+    01,2000,RSID_2,SNPID_2,0.1921813,0.19750981,9.0,0.0005572706473664153
+    01,2001,RSID_102,SNPID_102,0.18440013,0.19766665,0.72730855295163,0.0004996980174197107
+    01,3000,RSID_3,SNPID_3,0.9653543,0.48339605,0.955355323674357,0.5866179557677313
+    01,3001,RSID_103,SNPID_103,0.9653536,0.4833961,0.9553553468765227,0.5866179209956529
+    01,4000,RSID_4,SNPID_4,0.37192723,0.21670982,0.9917677420119885,0.3522822949083392
+    01,4001,RSID_104,SNPID_104,0.37192774,0.2167098,0.99176792776617,0.352282358433822
+    01,5000,RSID_5,SNPID_5,0.5870128,0.38808233,0.9682577646241436,0.8349949433297403
+    01,5001,RSID_105,SNPID_105,0.5867037,0.3880863,0.9682302221772928,0.8347201604324492
 
 
 ## Link functions
@@ -467,7 +459,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,ProbitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, ProbitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -475,7 +467,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -0.866156   0.210677  -4.11129    <1e-4
+    intercept1|2  -0.866156   0.210677  -4.11129    <1e-04
     intercept2|3  -0.359878   0.205817  -1.74854    0.0813
     intercept3|4   0.247054   0.205382   1.2029     0.2299
     sex            0.251058   0.128225   1.95795    0.0511
@@ -492,14 +484,14 @@ run(`head opm.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.010076916742300138
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,2.6272564941853933e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.089748485107844e-5
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.005102883990438149
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.010076916742301864
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,2.627256494185544e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.0897484851079486e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.005102883990438183
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.48653776297859236
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.33231290090455434
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.2591551397719743
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.4865377629787354
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.33231290090455495
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.25915513977197546
 
 
 
@@ -540,13 +532,13 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      0.556833 seconds (1.09 M allocations: 75.565 MiB, 9.02% gc time)
+      1.020753 seconds (2.08 M allocations: 139.971 MiB, 2.75% gc time, 82.91% compilation time)
 
 
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -554,7 +546,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -568,15 +560,15 @@ run(`head commonvariant.pval.txt`);
 ```
 
     chr,pos,snpid,maf,hwepval,pval
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.0045653128395339235
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553067e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367651365e-5
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174567
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.2997282957184678
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048358
-    1,2396747,rs13376356,0.1448598130841121,0.9053079215078139,0.5320416198875121
-    1,2823603,rs1563468,0.4830246913580247,4.23065537243926e-9,0.2251913917835687
-    1,3025087,rs6690373,0.2538699690402477,9.238641887192776e-8,0.7018469417717329
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.004565312839534427
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553394e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367652875e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174538
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.29972829571847
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048658
+    1,2396747,rs13376356,0.1448598130841121,0.9053079215078139,0.5320416198875042
+    1,2823603,rs1563468,0.4830246913580247,4.23065537243926e-9,0.2251913917835673
+    1,3025087,rs6690373,0.2538699690402477,9.238641887192776e-8,0.7018469417717376
 
 
 
@@ -613,13 +605,13 @@ Because LRT fits the alternative model for each SNP, we also output the standard
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     28.227825 seconds (5.02 M allocations: 1.882 GiB, 1.34% gc time)
+     21.394877 seconds (5.64 M allocations: 1.925 GiB, 1.97% gc time, 1.64% compilation time)
 
 
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -627,7 +619,7 @@ Because LRT fits the alternative model for each SNP, we also output the standard
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -644,14 +636,14 @@ run(`head lrt.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,effect,stder,pval
     1,554484,rs10458597,0.0,1.0,0.0,-1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954433,0.34080917686608564,0.0019185836579805327
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,0.15659100275284876,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,0.2177988861470316,5.8733847126869666e-6
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.3318136652577225,0.12697404813031177,0.008081022577828709
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954432,0.340809176866079,0.0019185836579800582
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.6488560566291871,0.15659100275284887,1.8050505569757006e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357882,0.21779888614702939,5.873384712685568e-6
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.33181366525772477,0.12697404813031313,0.008081022577830249
     1,1588771,rs35154105,0.0,1.0,0.0,-1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388700143,1.249528757123983,0.5169027130145593
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,-0.1358649923181975,0.1312347223249673,0.2994640220091515
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,-0.2512075640440123,0.17872139152979527,0.1615106909444108
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,-0.7338026388699317,1.2495287571243678,0.5169027130143892
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,-0.13586499231819746,0.13123472232496755,0.2994640220089984
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,-0.25120756404401384,0.17872139152979497,0.16151069094436224
 
 
 
@@ -675,7 +667,7 @@ For large data sets, a practical solution is to perform the score test first acr
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.257450 seconds (500.64 k allocations: 46.361 MiB, 14.93% gc time)
+      0.243332 seconds (500.93 k allocations: 49.133 MiB)
 
 
 
@@ -685,14 +677,14 @@ run(`head score.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.0045653128395339235
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553067e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367651365e-5
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174567
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.004565312839534427
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553394e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367652875e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174538
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332529945
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.2997282957184678
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048358
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332531635
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.29972829571847
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458048658
 
 
 **Step 2**: Sort score test p-values and find top 10 SNPs.
@@ -707,17 +699,17 @@ scorepvals[tophits] # smallest 10 p-values
 
 
 
-    10-element Array{Float64,1}:
-     1.3080149099170256e-6
-     6.536722765044632e-6
-     9.66474218566254e-6
-     1.2168672367651365e-5
-     1.802746001831697e-5
-     2.098954228420851e-5
-     2.6844521269924864e-5
-     3.108283828553067e-5
-     4.101091287505281e-5
-     4.296626513829614e-5
+    10-element Vector{Float64}:
+     1.3080149099171313e-6
+     6.536722765044222e-6
+     9.664742185663007e-6
+     1.2168672367652875e-5
+     1.8027460018318087e-5
+     2.0989542284208642e-5
+     2.6844521269928002e-5
+     3.108283828553394e-5
+     4.10109128750568e-5
+     4.29662651383141e-5
 
 
 
@@ -729,7 +721,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      1.036577 seconds (1.02 M allocations: 55.289 MiB, 1.64% gc time)
+      0.924724 seconds (1.69 M allocations: 100.122 MiB, 3.46% gc time, 95.83% compilation time)
 
 
 
@@ -738,16 +730,16 @@ run(`cat lrt.pval.txt`);
 ```
 
     chr,pos,snpid,maf,hwepval,effect,stder,pval
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,0.15659100275284876,1.805050556976241e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,0.2177988861470316,5.8733847126869666e-6
-    3,36821790,rs4678553,0.23456790123456794,0.1094668216324497,0.7424952268973513,0.17055414498937188,1.1303825016263261e-5
-    4,11017683,rs16881446,0.27554179566563464,0.8942746118760274,-0.7870581482955528,0.18729099511224406,1.1105427468798282e-5
-    5,3739190,rs12521166,0.0679012345679012,0.18613647746093887,1.1468852997925316,0.28093078615474576,4.7812882296576845e-5
-    6,7574576,rs1885466,0.17746913580246915,0.7620687178987191,0.8750621092263029,0.19417734621377886,7.272346896741059e-6
-    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858657,0.19764574359737555,5.069394513906423e-5
-    7,41152376,rs28880,0.3379629629629629,0.8052368892744096,-0.814633902445351,0.17471459882610024,9.180126530295469e-7
-    7,84223996,rs4128623,0.07870370370370372,0.0218347173467568,1.0022229316338584,0.2553436567319929,6.587895464657512e-5
-    23,121048059,rs1937165,0.4380804953560371,3.959609737265113e-16,0.5392313636256602,0.1280959604207795,1.9754643855524994e-5
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.6488560566291871,0.15659100275284887,1.8050505569757006e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357882,0.21779888614702939,5.873384712685568e-6
+    3,36821790,rs4678553,0.23456790123456794,0.1094668216324497,0.7424952268973516,0.17055414498937288,1.1303825016258549e-5
+    4,11017683,rs16881446,0.27554179566563464,0.8942746118760274,-0.7870581482955511,0.18729099511224248,1.1105427468797635e-5
+    5,3739190,rs12521166,0.0679012345679012,0.18613647746093887,1.1468852997925312,0.28093078615476413,4.781288229656825e-5
+    6,7574576,rs1885466,0.17746913580246915,0.7620687178987191,0.8750621092263033,0.19417734621377952,7.272346896739337e-6
+    6,52474721,rs2073183,0.1826625386996904,0.5077765730476698,0.7790794914858661,0.19764574359737203,5.069394513905205e-5
+    7,41152376,rs28880,0.3379629629629629,0.8052368892744096,-0.814633902445351,0.1747145988261005,9.180126530293314e-7
+    7,84223996,rs4128623,0.07870370370370372,0.0218347173467568,1.002222931633856,0.2553436567319915,6.587895464655924e-5
+    23,121048059,rs1937165,0.4380804953560371,3.959609737265113e-16,0.5392313636256604,0.12809596042077964,1.975464385552384e-5
 
 
 
@@ -779,14 +771,14 @@ run(`head GxE.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.01744601041224166
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,0.00016670732394878798
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,4.763762457892512e-5
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.029138471242989357
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.017446010412241458
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,0.0001667073239488084
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,4.763762457892097e-5
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.029138471242989888
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.29643631147339955
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.3792458047933984
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.32558226993239914
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.29643631147329347
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.3792458047934197
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.3255822699323852
 
 
 
@@ -810,7 +802,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -818,7 +810,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -833,10 +825,10 @@ run(`head gxe_snp.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,snpeffectnull,pval
     1,554484,rs10458597,0.0,1.0,0.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954433,0.6377422425978654
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.648856056629187,0.9667114197304877
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357901,0.26352674694101197
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.3318136652577225,0.7811133315580838
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,-1.005783371954432,0.6377422425980203
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,-0.6488560566291871,0.9667114197304969
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,-0.9157225669357882,0.2635267469409816
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,-0.33181366525772477,0.7811133315582421
 
 
 
@@ -865,7 +857,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -873,7 +865,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -886,7 +878,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 run(`head snpset.pval.txt`);
 ```
 
-    The joint pvalue of snps indexed at 50:55 is 0.3647126536663951
+    The joint pvalue of snps indexed at 50:55 is 0.36471265366639005
 
 
 
@@ -925,7 +917,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -933,7 +925,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -947,15 +939,15 @@ run(`head snpset.pval.txt`);
 ```
 
     snpsetid,nsnps,pval
-    gene1,93,1.7213394698772864e-5
-    gene2,93,0.03692497684155587
-    gene3,93,0.747854937139295
-    gene4,92,0.027650798223454214
-    gene5,93,0.6119581594570236
-    gene6,93,0.029184642230087553
-    gene7,93,0.3916007348852898
-    gene8,93,0.12539574109850588
-    gene9,93,0.7085635621607916
+    gene1,93,1.7213394698762626e-5
+    gene2,93,0.036924976841444614
+    gene3,93,0.7478549371392366
+    gene4,92,0.027650798223418142
+    gene5,93,0.611958159457124
+    gene6,93,0.02918464223002788
+    gene7,93,0.39160073488483627
+    gene8,93,0.12539574109851914
+    gene9,93,0.7085635621607977
 
 
 
@@ -976,7 +968,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64,Float64,LogitLink},Array{Float64,2}}
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
     trait ~ sex
     
@@ -984,7 +976,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
     ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-4
+    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
     intercept2|3  -0.569479   0.341044  -1.66981    0.0959
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
@@ -998,15 +990,15 @@ run(`head snpset.pval.txt`);
 ```
 
     startchr,startpos,startsnpid,endchr,endpos,endsnpid,pval
-    1,554484,rs10458597,1,3431124,rs12093117,1.9394189465435142e-13
-    1,3633945,rs10910017,1,6514524,rs932112,0.11077869162800538
-    1,6715827,rs441515,1,9534606,rs4926480,0.2742450817956197
-    1,9737551,rs12047054,1,12559747,rs4845907,0.4934611365046796
-    1,12760427,rs848577,1,16021797,rs6679870,0.15447358658245436
-    1,16228774,rs1972359,1,19100349,rs9426794,0.15442329170231675
-    1,19301516,rs4912046,1,22122176,rs9426785,0.4749873349462109
-    1,22323074,rs2235529,1,25166528,rs4648890,0.41246096621458994
-    1,25368553,rs7527379,1,28208168,rs12140070,0.16458135278649874
+    1,554484,rs10458597,1,3431124,rs12093117,1.9394189465410537e-13
+    1,3633945,rs10910017,1,6514524,rs932112,0.11077869162798873
+    1,6715827,rs441515,1,9534606,rs4926480,0.2742450817956301
+    1,9737551,rs12047054,1,12559747,rs4845907,0.49346113650468176
+    1,12760427,rs848577,1,16021797,rs6679870,0.1544735865824627
+    1,16228774,rs1972359,1,19100349,rs9426794,0.15442329170231966
+    1,19301516,rs4912046,1,22122176,rs9426785,0.4749873349462162
+    1,22323074,rs2235529,1,25166528,rs4648890,0.4124609662145714
+    1,25368553,rs7527379,1,28208168,rs12140070,0.16458135278651795
 
 
 

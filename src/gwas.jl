@@ -473,8 +473,8 @@ function ordinalgwas(
                     γ̂ = Vector{Float64}(undef, q)
                     Xaug = [fittednullmodel.model.X Z]
                     if all(@view(mafs[snpinds]) .== 0) # all mono-allelic, unlikely but just in case
-                        pval = 1.0
                         l2normeffect = 0.0
+                        pval = 1.0
                         test == :score ? println(io, "$(snpset_id),$q,$pval") : 
                         println(io, "$(snpset_id),$q,$l2normeffect,$pval")
                     elseif test == :score
@@ -502,8 +502,8 @@ function ordinalgwas(
             snpset = eltype(snpset) == Bool ? findall(snpset) : snpset 
             SnpArrays.makestream(pvalfile, "w") do io
                 if all(@view(mafs[snpset]) .== 0) # all mono-allelic, unlikely but just in case
-                    pval = 1.0
                     l2normeffect = 0.0
+                    pval = 1.0
                     test == :score ? println(io, "The joint pvalue of snps indexed",
                     " at $(snpset) is $pval") : println(io, "The l2norm of the effect size vector",
                     " is $l2normeffect and joint pvalue of snps indexed", 
@@ -640,6 +640,8 @@ function ordinalgwas(
 
     # get number of SNPs in file
     nsnps = nrecords(vcffile)
+    # these are currently only based on genotype data -- not dosage. Comment out.
+    # nsnps, _, _, _, _, mafs, _, hwes = gtstats(vcffile) 
 
     # for VCFTools, snpmodel is coded differently 
     snpmodel = modelingdict[snpmodel]
@@ -714,8 +716,14 @@ function ordinalgwas(
                         copyto!(testdf[!, :snp], @view(gholder[vcfrowinds]))
                         ts.Z[:] = modelmatrix(testformula, testdf)
                     end
-                    pval = polrtest(ts)
-                    println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),$pval")
+                    if var(@view(gholder[vcfrowinds])) == 0.0 #mafs[j] == 0.0
+                        pval = 1.0
+                    else
+                        pval = polrtest(ts)
+                    end
+                    println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                    # "$(mafs[j]),$(hwes[j]),"
+                    "$pval")
                 elseif test == :lrt 
                     if snponly
                         copyto!(@view(Xaug[:, fittednullmodel.model.p+1]), 
@@ -724,16 +732,25 @@ function ordinalgwas(
                         copyto!(testdf[!, :snp], @view(gholder[vcfrowinds]))
                         Xaug[:, fittednullmodel.model.p+1:end] = modelmatrix(testformula, testdf)
                     end
-                    altmodel = polr(Xaug, fittednullmodel.model.Y, 
-                        fittednullmodel.model.link, solver, 
-                        wts = fittednullmodel.model.wts)
-                    copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
-                    pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
-                    stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
-                    if snponly
-                        println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),$(γ̂[1]),$stderr,$pval")
+                    if var(@view(gholder[vcfrowinds])) == 0.0 # mafs[j] == 0.0
+                        pval = 1.0
+                        stderr = NaN
                     else
-                        print(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),")
+                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                            fittednullmodel.model.link, solver, 
+                            wts = fittednullmodel.model.wts)
+                        copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
+                        pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
+                    end
+                    if snponly
+                        println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                        # "$(mafs[j]),$(hwes[j]),",
+                        "$(γ̂[1]),$stderr,$pval")
+                    else
+                        print(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                        # "$(mafs[j]),$(hwes[j]),"
+                        )
                         for j in 1:q
                             print(io, "$(γ̂[j]),")
                         end
@@ -779,7 +796,8 @@ function ordinalgwas(
             q = setlength
             SnpArrays.makestream(pvalfile, "w") do io
                 if test == :score
-                    println(io, "startchr,startpos,startsnpid,endchr,endpos,endsnpid,pval")
+                    println(io, "startchr,startpos,startsnpid,endchr,",
+                    "endpos,endsnpid,pval")
                     ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
                 elseif test == :lrt 
                     println(io, "startchr,startpos,startsnpid,endchr,",
@@ -814,21 +832,33 @@ function ordinalgwas(
                         record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
                     end
                     if test == :score
-                        copyto!(ts.Z, @view(gholder[vcfrowinds, :]))
-                        pval = polrtest(ts)
+                        # if all(@view(mafs[j:endj]) .== 0) # all mono-allelic, unlikely but just in case
+                        if all(var(@view(gholder[vcfrowinds, :]), dims = [1]) == 0.0)
+                            pval = 1.0
+                        else
+                            copyto!(ts.Z, @view(gholder[vcfrowinds, :]))
+                            pval = polrtest(ts)
+                        end
                         println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
                         "$(rec_chr[end]),$(rec_pos[end]),$(rec_ids[end][end]),$pval")
                     elseif test == :lrt 
-                        copyto!(@view(Xaug[:, (fittednullmodel.model.p+1):end]), 
-                        @view(gholder[vcfrowinds]))
-                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
-                        fittednullmodel.model.link, solver, 
-                        wts = fittednullmodel.model.wts)
-                        copyto!(γ̂, @view(altmodel.β[(fittednullmodel.model.p+1):end]))#, fittednullmodel.model.p + 1, setlength)
-                        l2normeffect = norm(γ̂)
-                        pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        # if all(@view(mafs[j:endj]) .== 0) # all mono-allelic, unlikely but just in case
+                        if all(var(@view(gholder[vcfrowinds, :]), dims = [1]) == 0.0)
+                            l2normeffect = 0.0
+                            pval = 1.0
+                        else
+                            copyto!(@view(Xaug[:, (fittednullmodel.model.p+1):end]), 
+                            @view(gholder[vcfrowinds]))
+                            altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                            fittednullmodel.model.link, solver, 
+                            wts = fittednullmodel.model.wts)
+                            copyto!(γ̂, @view(altmodel.β[(fittednullmodel.model.p+1):end]))#, fittednullmodel.model.p + 1, setlength)
+                            l2normeffect = norm(γ̂)
+                            pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        end
                         println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
-                        "$(rec_chr[end]),$(rec_pos[end]),$(rec_ids[end][end]),$l2normeffect,$pval")
+                        "$(rec_chr[end]),$(rec_pos[end]),$(rec_ids[end][end]),",
+                        "$l2normeffect,$pval")
                     end
                 end
             end
@@ -852,22 +882,33 @@ function ordinalgwas(
                     q = length(snpinds)
                     Z = zeros(size(fittednullmodel.mm, 1), q)
                     if test == :score
-                        ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
-                        copyto!(ts.Z, @view(genomat[vcfrowinds, snpinds]))
-                        pval = polrtest(ts)
+                        # if all(@view(mafs[snpinds]) .== 0)
+                        if all(var(@view(genomat[vcfrowinds, snpinds]), dims = [1]) == 0.0)
+                            pval = 1.0
+                        else
+                            ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
+                            copyto!(ts.Z, @view(genomat[vcfrowinds, snpinds]))
+                            pval = polrtest(ts)
+                        end
                         println(io, "$(snpset_id),$q,$pval")
                     elseif test == :lrt
-                        γ̂ = Vector{Float64}(undef, q)
-                        Xaug = [fittednullmodel.model.X Z]
-                        nulldev = deviance(fittednullmodel.model)
-                        copyto!(@view(Xaug[:, fittednullmodel.model.p+1:end]), 
-                                @view(genomat[vcfrowinds, snpinds]))
-                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
-                            fittednullmodel.model.link, solver, 
-                            wts = fittednullmodel.model.wts)
-                        copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
-                        l2normeffect = norm(γ̂)
-                        pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        # if all(@view(mafs[snpinds]) .== 0)
+                        if all(var(@view(genomat[vcfrowinds, snpinds]), dims = [1]) == 0.0)
+                            l2normeffect = 0.0
+                            pval = 1.0
+                        else
+                            γ̂ = Vector{Float64}(undef, q)
+                            Xaug = [fittednullmodel.model.X Z]
+                            nulldev = deviance(fittednullmodel.model)
+                            copyto!(@view(Xaug[:, fittednullmodel.model.p+1:end]), 
+                                    @view(genomat[vcfrowinds, snpinds]))
+                            altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                                fittednullmodel.model.link, solver, 
+                                wts = fittednullmodel.model.wts)
+                            copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
+                            l2normeffect = norm(γ̂)
+                            pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        end
                         println(io, "$(snpset_id),$q,$l2normeffect,$pval")
                     end
                 end
@@ -888,7 +929,9 @@ function ordinalgwas(
                 q = length(snpset)
                 γ̂ = Vector{Float64}(undef, q)
                 Z = zeros(size(fittednullmodel.mm, 1), q)
-                if test == :score
+                if all(@view(genomat[vcfrowinds, snpset]) .== 0)
+                    println(io, "All SNPs had 0 variation. No results to report.")
+                elseif test == :score
                     ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
                     copyto!(ts.Z, @view(genomat[vcfrowinds, snpset]))
                     pval = polrtest(ts)
@@ -931,7 +974,8 @@ function ordinalgwas(
             if test == :score 
                 println(io, "chr,pos,snpid,snpeffectnull,pval")
             else 
-                println(io, "chr,pos,snpid,snpeffectnull,snpeffectfull,GxEeffect,pval")
+                println(io, "chr,pos,snpid,snpeffectnull,",
+                "snpeffectfull,GxEeffect,pval")
             end
             for j in eachindex(snpmask)
                 if !snpmask[j] #skip snp, must read marker still. 
@@ -947,12 +991,12 @@ function ordinalgwas(
                     record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
                 end
                 copyto!(@view(Xaug[:, end]), @view(gholder[vcfrowinds]))
-    
+                zeromaf = var(@view(gholder[vcfrowinds])) == 0
                 if test == :score
                     copyto!(testvec, @view(Xaug[:, end]) .* envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                         fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    if Inf in nm.vcov #singular design matrix
+                    if (Inf in nm.vcov) || zeromaf #(mafs[j] == 0.0) #singular design matrix
                         snpeffectnull = 0.0
                         pval = 1.0
                     else
@@ -960,7 +1004,9 @@ function ordinalgwas(
                         ts = OrdinalMultinomialScoreTest(nm, testvec)
                         pval = polrtest(ts)
                     end
-                    println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),$snpeffectnull,$pval")
+                    println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                    # "$(mafs[j]),$(hwes[j]),",
+                    "$snpeffectnull,$pval")
                 elseif test == :lrt
                     γ̂ = 0.0 # effect size for columns being tested
                     copyto!(@view(Xaug2[:, end - 1]), @view(Xaug[:, end]))
@@ -968,7 +1014,7 @@ function ordinalgwas(
                         envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                     fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    if Inf in nm.vcov #singular design matrix
+                    if (Inf in nm.vcov) || zeromaf #(mafs[j] == 0.0) #singular design matrix
                         snpeffectnull = 0.0
                         snpeffectfull = 0.0
                         γ̂ = 0.0
@@ -984,6 +1030,7 @@ function ordinalgwas(
                         pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
                     end
                     println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                        #"$(mafs[j]),$(hwes[j]),",
                         "$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                 end
             end
@@ -1021,6 +1068,8 @@ function ordinalgwas(
     decompressed_length, _ = BGEN.check_decompressed_length(
         bgendata.io, first(bgen_iterator), bgendata.header)
     decompressed = Vector{UInt8}(undef, decompressed_length)
+    bgenrowmask_UInt16 = zeros(UInt16, n_samples(bgendata))
+    bgenrowmask_UInt16[bgenrowinds] .= 1 
 
     # create SNP mask vector
     if snpinds == nothing
@@ -1051,7 +1100,7 @@ function ordinalgwas(
         snponly = testformula.rhs == Term(:snp)
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,varid,pval")
+                println(io, "chr,pos,snpid,varid,hwepval,maf,infoscore,pval")
                 ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
             else 
                 nulldev = deviance(fittednullmodel.model)
@@ -1059,9 +1108,10 @@ function ordinalgwas(
                 q = size(Z, 2)
                 γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
                 if snponly
-                    println(io, "chr,pos,snpid,varid,effect,stder,pval")
+                    println(io, "chr,pos,snpid,varid,hwepval,maf,",
+                    "infoscore,effect,stder,pval")
                 else
-                    print(io, "chr,pos,snpid,varid,")
+                    print(io, "chr,pos,snpid,varid,hwepval,maf,infoscore,")
                     for j in 1:q
                         print(io, "effect$j,")
                     end
@@ -1076,6 +1126,21 @@ function ordinalgwas(
                     T = Float64, mean_impute = true, data = dosageholder, 
                     decompressed = decompressed)
                 @views copyto!(snpholder, dosageholder[bgenrowinds])
+                hwepval = 9.0
+                maf = 9.0
+                infoscore = 9.0
+                try
+                    hwepval = BGEN.hwe(bgendata, variant; rmask = bgenrowmask_UInt16)
+                catch nothing
+                end
+                try
+                    maf = BGEN.maf(bgendata, variant; rmask = bgenrowmask_UInt16)
+                catch nothing
+                end
+                try
+                    infoscore = BGEN.info_score(bgendata, variant; rmask = bgenrowmask_UInt16)
+                catch nothing
+                end
                 if test == :score
                     if snponly
                         copyto!(ts.Z, snpholder)
@@ -1083,9 +1148,14 @@ function ordinalgwas(
                         copyto!(testdf[!, :snp], snpholder)
                         ts.Z[:] = modelmatrix(testformula, testdf)
                     end
-                    pval = polrtest(ts)
+                    if maf == 0.0
+                        pval = 1.0
+                    else
+                        pval = polrtest(ts)
+                    end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                    "$(variant.varid),$pval")
+                    "$(variant.varid),$(hwepval),$(maf),$(infoscore),",
+                    "$pval")
                 elseif test == :lrt 
                     if snponly
                         copyto!(@view(Xaug[:, fittednullmodel.model.p+1]), 
@@ -1094,18 +1164,24 @@ function ordinalgwas(
                         copyto!(testdf[!, :snp], snpholder)
                         Xaug[:, fittednullmodel.model.p+1:end] = modelmatrix(testformula, testdf)
                     end
-                    altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                    if maf == 0.0
+                        pval = 1.0
+                        stderr = NaN
+                    else
+                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
                         fittednullmodel.model.link, solver, 
                         wts = fittednullmodel.model.wts)
-                    copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
-                    pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
-                    stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
+                        copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
+                        pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
+                    end
                     if snponly
                         println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                        "$(variant.varid),$(γ̂[1]),$stderr,$pval")
+                        "$(variant.varid),$(hwepval),$(maf),$(infoscore),",
+                        "$(γ̂[1]),$stderr,$pval")
                     else
                         print(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                        "$(variant.varid),")
+                        "$(variant.varid),$(hwepval),$(maf),$(infoscore),")
                         for j in 1:q
                             print(io, "$(γ̂[j]),")
                         end
@@ -1197,19 +1273,28 @@ function ordinalgwas(
                         end
                     end
                     if test == :score
-                        copyto!(ts.Z, snpholder)
-                        pval = polrtest(ts)
+                        if all(var(snpholder, dims = [1]) .== 0)
+                            pval = 1.0
+                        else
+                            copyto!(ts.Z, snpholder)
+                            pval = polrtest(ts)
+                        end
                         println(io, "$chrstart,$posstart,$rsidstart,$varidstart,",
-                        "$chrend,$posend,$rsidend,$varidend,$pval")
+                            "$chrend,$posend,$rsidend,$varidend,$pval")
                     elseif test == :lrt 
-                        copyto!(@view(Xaug[:, (fittednullmodel.model.p+1):end]), 
-                        snpholder)
-                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
-                        fittednullmodel.model.link, solver, 
-                        wts = fittednullmodel.model.wts)
-                        copyto!(γ̂, @view(altmodel.β[(fittednullmodel.model.p+1):end]))#, fittednullmodel.model.p + 1, setlength)
-                        l2normeffect = norm(γ̂)
-                        pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        if all(var(snpholder, dims = [1]) .== 0)
+                            l2normeffect = 0.0
+                            pval = 1.0
+                        else
+                            copyto!(@view(Xaug[:, (fittednullmodel.model.p+1):end]), 
+                            snpholder)
+                            altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                            fittednullmodel.model.link, solver, 
+                            wts = fittednullmodel.model.wts)
+                            copyto!(γ̂, @view(altmodel.β[(fittednullmodel.model.p+1):end]))#, fittednullmodel.model.p + 1, setlength)
+                            l2normeffect = norm(γ̂)
+                            pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        end
                         println(io, "$chrstart,$posstart,$rsidstart,$varidstart,",
                         "$chrend,$posend,$rsidend,$varidend,$l2normeffect,$pval")
                     end
@@ -1232,19 +1317,28 @@ function ordinalgwas(
                         @views copyto!(Z[:, i], dosageholder[bgenrowinds])
                     end
                     if test == :score
-                        ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
-                        pval = polrtest(ts)
+                        if all(var(Z, dims = [1]) .== 0)
+                            pval = 1.0
+                        else
+                            ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
+                            pval = polrtest(ts)
+                        end
                         println(io, "$(snpset_id),$q,$pval")
                     elseif test == :lrt
-                        γ̂ = Vector{Float64}(undef, q)
-                        Xaug = [fittednullmodel.model.X Z]
-                        nulldev = deviance(fittednullmodel.model)
-                        altmodel = polr(Xaug, fittednullmodel.model.Y, 
-                            fittednullmodel.model.link, solver, 
-                            wts = fittednullmodel.model.wts)
-                        copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
-                        l2normeffect = norm(γ̂)
-                        pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        if all(var(Z, dims = [1]) .== 0)
+                            l2normeffect = 0.0
+                            pval = 1.0
+                        else
+                            γ̂ = Vector{Float64}(undef, q)
+                            Xaug = [fittednullmodel.model.X Z]
+                            nulldev = deviance(fittednullmodel.model)
+                            altmodel = polr(Xaug, fittednullmodel.model.Y, 
+                                fittednullmodel.model.link, solver, 
+                                wts = fittednullmodel.model.wts)
+                            copyto!(γ̂, 1, altmodel.β, fittednullmodel.model.p + 1, q)
+                            l2normeffect = norm(γ̂)
+                            pval = ccdf(Chisq(q), nulldev - deviance(altmodel))
+                        end
                         println(io, "$(snpset_id),$q,$l2normeffect,$pval")
                     end
                 end
@@ -1262,7 +1356,9 @@ function ordinalgwas(
                 @views copyto!(Z[:, i], dosageholder[bgenrowinds])
             end
             SnpArrays.makestream(pvalfile, "w") do io
-                if test == :score
+                if all(var(Z, dims = [1]) .== 0)
+                    println(io, "All SNPs had 0 variation. No results to report.")
+                elseif test == :score
                     ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
                     pval = polrtest(ts)
                     println(io, "The joint pvalue of snps indexed",
@@ -1296,9 +1392,10 @@ function ordinalgwas(
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,varid,snpeffectnull,pval")
+                println(io, "chr,pos,snpid,varid,hwepval,maf,infoscore,snpeffectnull,pval")
             else 
-                println(io, "chr,pos,snpid,varid,snpeffectnull,snpeffectfull,GxEeffect,pval")
+                println(io, "chr,pos,snpid,varid,hwepval,maf,infoscore,",
+                    "snpeffectnull,snpeffectfull,GxEeffect,pval")
             end
             for (j, variant) in enumerate(bgen_iterator)
                 if !snpmask[j] #skip snp, must read marker still. 
@@ -1308,12 +1405,26 @@ function ordinalgwas(
                     T = Float64, mean_impute = true, data = dosageholder, 
                     decompressed = decompressed)
                 copyto!(@view(Xaug[:, end]), dosageholder[bgenrowinds])
-    
+                hwepval = 9.0
+                maf = 9.0
+                infoscore = 9.0
+                try
+                    hwepval = BGEN.hwe(bgendata, variant; rmask = bgenrowmask_UInt16)
+                catch nothing
+                end
+                try
+                    maf = BGEN.maf(bgendata, variant; rmask = bgenrowmask_UInt16)
+                catch nothing
+                end
+                try
+                    infoscore = BGEN.info_score(bgendata, variant; rmask = bgenrowmask_UInt16)
+                catch nothing
+                end
                 if test == :score
                     copyto!(testvec, @view(Xaug[:, end]) .* envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                         fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    if Inf in nm.vcov #singular design matrix
+                    if (Inf in nm.vcov) || (maf == 0.0) #singular design matrix or 0 MAF
                         snpeffectnull = 0.0
                         pval = 1.0
                     else
@@ -1322,7 +1433,8 @@ function ordinalgwas(
                         pval = polrtest(ts)
                     end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                    "$(variant.varid),$snpeffectnull,$pval")
+                    "$(variant.varid),$(hwepval),$(maf),$(infoscore),",
+                    "$snpeffectnull,$pval")
                 elseif test == :lrt
                     γ̂ = 0.0 # effect size for columns being tested
                     copyto!(@view(Xaug2[:, end - 1]), @view(Xaug[:, end]))
@@ -1330,7 +1442,7 @@ function ordinalgwas(
                         envvar)
                     nm = polr(Xaug, fittednullmodel.model.Y, 
                     fittednullmodel.model.link, solver, wts = fittednullmodel.model.wts)
-                    if Inf in nm.vcov #singular design matrix
+                    if (Inf in nm.vcov) || (maf == 0.0) #singular design matrix
                         snpeffectnull = 0.0
                         snpeffectfull = 0.0
                         γ̂ = 0.0
@@ -1346,7 +1458,8 @@ function ordinalgwas(
                         pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
                     end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                        "$(variant.varid),$snpeffectnull,$snpeffectfull,$γ̂,$pval")
+                        "$(variant.varid),$(hwepval),$(maf),$(infoscore),",
+                        "$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                 end
             end
         end
