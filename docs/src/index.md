@@ -323,7 +323,7 @@ For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      181.958 ms (500934 allocations: 49.13 MiB)
+      179.764 ms (500934 allocations: 49.13 MiB)
 
 
 
@@ -428,16 +428,16 @@ ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv",
 run(`head ordinalgwas.pval.txt`);
 ```
 
-    chr,pos,snpid,varid,hwepval,maf,infoscore,pval
-    01,1001,RSID_101,SNPID_101,0.8627403,0.4169765,0.9846387832074154,0.12449779722495302
-    01,2000,RSID_2,SNPID_2,0.1921813,0.19750981,9.0,0.0005572706473664153
-    01,2001,RSID_102,SNPID_102,0.18440013,0.19766665,0.72730855295163,0.0004996980174197107
-    01,3000,RSID_3,SNPID_3,0.9653543,0.48339605,0.955355323674357,0.5866179557677313
-    01,3001,RSID_103,SNPID_103,0.9653536,0.4833961,0.9553553468765227,0.5866179209956529
-    01,4000,RSID_4,SNPID_4,0.37192723,0.21670982,0.9917677420119885,0.3522822949083392
-    01,4001,RSID_104,SNPID_104,0.37192774,0.2167098,0.99176792776617,0.352282358433822
-    01,5000,RSID_5,SNPID_5,0.5870128,0.38808233,0.9682577646241436,0.8349949433297403
-    01,5001,RSID_105,SNPID_105,0.5867037,0.3880863,0.9682302221772928,0.8347201604324492
+    chr,pos,snpid,varid,maf,hwepval,infoscore,pval
+    01,1001,RSID_101,SNPID_101,0.4169765,0.8627403,0.9846387832074154,0.12449779722495302
+    01,2000,RSID_2,SNPID_2,0.19750981,0.1921813,9.0,0.0005572706473664153
+    01,2001,RSID_102,SNPID_102,0.19766665,0.18440013,0.72730855295163,0.0004996980174197107
+    01,3000,RSID_3,SNPID_3,0.48339605,0.9653543,0.955355323674357,0.5866179557677313
+    01,3001,RSID_103,SNPID_103,0.4833961,0.9653536,0.9553553468765227,0.5866179209956529
+    01,4000,RSID_4,SNPID_4,0.21670982,0.37192723,0.9917677420119885,0.3522822949083392
+    01,4001,RSID_104,SNPID_104,0.2167098,0.37192774,0.99176792776617,0.352282358433822
+    01,5000,RSID_5,SNPID_5,0.38808233,0.5870128,0.9682577646241436,0.8349949433297403
+    01,5001,RSID_105,SNPID_105,0.3880863,0.5867037,0.9682302221772928,0.8347201604324492
 
 
 ## Link functions
@@ -532,7 +532,7 @@ snpinds = maf(SnpArray("../data/hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      1.020753 seconds (2.08 M allocations: 139.971 MiB, 2.75% gc time, 82.91% compilation time)
+      1.083456 seconds (2.08 M allocations: 139.969 MiB, 8.20% gc time, 81.72% compilation time)
 
 
 
@@ -605,7 +605,7 @@ Because LRT fits the alternative model for each SNP, we also output the standard
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     21.394877 seconds (5.64 M allocations: 1.925 GiB, 1.97% gc time, 1.64% compilation time)
+     21.395919 seconds (5.64 M allocations: 1.925 GiB, 1.99% gc time, 1.69% compilation time)
 
 
 
@@ -667,7 +667,7 @@ For large data sets, a practical solution is to perform the score test first acr
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.243332 seconds (500.93 k allocations: 49.133 MiB)
+      0.242265 seconds (500.93 k allocations: 49.133 MiB)
 
 
 
@@ -721,7 +721,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      0.924724 seconds (1.69 M allocations: 100.122 MiB, 3.46% gc time, 95.83% compilation time)
+      0.930548 seconds (1.69 M allocations: 100.121 MiB, 3.90% gc time, 96.54% compilation time)
 
 
 
