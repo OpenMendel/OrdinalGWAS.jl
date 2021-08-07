@@ -14,7 +14,6 @@ OrdinalGWAS.jl is not yet registered. It will require the following steps to ins
 
 ```{julia}
 using Pkg
-pkg"add SnpArrays VCFTools BGEN OrdinalMultinomialModels"
 pkg"add https://github.com/OpeMendel/OrdinalGWAS.jl"
 ```
 
