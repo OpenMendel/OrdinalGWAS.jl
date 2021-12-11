@@ -26,7 +26,7 @@ const bgensnpsetfile = datadir * "/bgen_snpsetfile.txt"
         vcftype = :DS, geneticrowinds = 1:190, snpinds = [86; 656], 
     test = :score, covrowinds = 1:190)
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.00762272, 0.000668338], rtol=1e-4)
+    @test isapprox(scorepvals, [0.00762272, 0.000668338], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -34,7 +34,7 @@ const bgensnpsetfile = datadir * "/bgen_snpsetfile.txt"
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         test = :score)
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.12449778, 0.00055727], rtol=1e-4)
+    @test isapprox(scorepvals, [0.12449778, 0.00055727], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -52,7 +52,7 @@ end
     ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
         vcftype = :GT, snpinds = [86; 656], test = :LRT)
     lrtpvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(lrtpvals, [0.00955468405473856, 0.0007086063489553798], rtol=1e-4)
+    @test isapprox(lrtpvals, [0.00955468405473856, 0.0007086063489553798], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -60,7 +60,7 @@ end
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         snpinds = [3, 25], test = :LRT)
         lrtpvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(lrtpvals, [0.000445619, 1.660631e-6], rtol=1e-4)
+    @test isapprox(lrtpvals, [0.000445619, 1.660631e-6], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -71,7 +71,7 @@ end
     @test isfile("ordinalgwas.null.txt")
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:5]
-    @test isapprox(scorepvals, [1.0, 0.14295, 0.000471942, 0.00555348, 0.000652844], rtol=1e-4)
+    @test isapprox(scorepvals, [1.0, 0.14295, 0.000471942, 0.00555348, 0.000652844], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
     # recessive model 
@@ -79,7 +79,7 @@ end
     @test isfile("ordinalgwas.null.txt")
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:5]
-    @test isapprox(scorepvals, [1.0, 0.00673612, 0.000279908, 4.15322e-5, 0.167642], rtol=1e-4)
+    @test isapprox(scorepvals, [1.0, 0.00673612, 0.000279908, 4.15322e-5, 0.167642], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -89,7 +89,7 @@ end
     @test isfile("ordinalgwas.null.txt")
     @test isfile("opm.pval.txt")
     scorepvals = CSV.read("opm.pval.txt", DataFrame)[!, end][1:5]
-    @test isapprox(scorepvals, [1.0, 1.00769167e-2, 2.62725649e-5, 1.08974849e-5, 5.10288399e-3], rtol=1e-4)
+    @test isapprox(scorepvals, [1.0, 1.00769167e-2, 2.62725649e-5, 1.08974849e-5, 5.10288399e-3], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("opm.pval.txt", force=true)
 end
@@ -100,7 +100,7 @@ end
     @test isfile("first5snps.pval.txt")
     @test countlines("first5snps.pval.txt") == 6
     scorepvals = CSV.read("first5snps.pval.txt", DataFrame)[!, end]
-    @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)
+    @test isapprox(scorepvals, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("first5snps.pval.txt", force=true)
 end
@@ -111,7 +111,7 @@ end
     @test isfile("ordinalgwas.null.txt")
     @test isfile("ordinalgwas.pval.txt")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:5]
-    @test isapprox(scorepvals, [1.0, 0.00355969, 0.000123604, 5.2213e-6, 0.00758234], rtol=1e-4)
+    @test isapprox(scorepvals, [1.0, 0.00355969, 0.000123604, 5.2213e-6, 0.00758234], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -123,7 +123,7 @@ end
     @test isfile("ordinalgwas.null.txt")
     @test isfile("GxE.pval.txt")
     scorepvals = CSV.read("GxE.pval.txt", DataFrame)[!, end][1:5]
-    @test isapprox(scorepvals, [1.0, 1.74460104e-2, 1.66707324e-4, 4.76376246e-5, 2.91384712e-2], rtol=1e-4)
+    @test isapprox(scorepvals, [1.0, 1.74460104e-2, 1.66707324e-4, 4.76376246e-5, 2.91384712e-2], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("GxE.pval.txt", force=true)
     # LRT, only first 5 SNPs
@@ -140,7 +140,7 @@ end
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         snpinds = [3, 25], test = :LRT, testformula = @formula(trait ~ snp + snp & sex))
     lrtpvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(lrtpvals, [0.002084, 8.135205e-6], rtol = 1e-4)
+    @test isapprox(lrtpvals, [0.002084, 8.135205e-6], rtol = 1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -163,7 +163,7 @@ end
     @test isfile("snpset.pval.txt")
     lrtpvals = CSV.read("snpset.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(lrtpvals, [2.1817554071810948e-13, 0.2865769729670889, 0.32507802233937966,
-    0.3344823237332578, 0.42948375949508427], rtol=1e-4)
+    0.3344823237332578, 0.42948375949508427], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -176,7 +176,7 @@ end
     scorepvals = CSV.read("snpset.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(scorepvals, [0.4278366599084349, 
     0.42781616067453476, 0.4519573757701432, 
-    0.4278763804444088, 0.4345883185481474], rtol=1e-4)
+    0.4278763804444088, 0.4345883185481474], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -188,7 +188,7 @@ end
     0.9999996378252629
     1.0
     0.9999999999996334
-    0.9999999976994737], rtol=1e-4)
+    0.9999999976994737], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -196,14 +196,14 @@ end
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         test = :score, snpset = 8, analysistype = "snpset")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.00767237, 0.5512827], rtol = 1e-4)
+    @test isapprox(scorepvals, [0.00767237, 0.5512827], rtol = 1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         test = :LRT, snpset = 8, analysistype = "snpset")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.05257402, 0.5706598], rtol = 1e-4)
+    @test isapprox(scorepvals, [0.05257402, 0.5706598], rtol = 1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -215,7 +215,7 @@ end
     @test isfile("snpset.pval.txt")
     scorepvals = CSV.read("snpset.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(scorepvals, [1.72134e-5, 0.036925, 0.747855,
-     0.0276508, 0.611958], rtol=1e-4)
+     0.0276508, 0.611958], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
     #lrt 
@@ -225,7 +225,7 @@ end
     @test isfile("snpset.pval.txt")
     lrtpvals = CSV.read("snpset.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(lrtpvals, [6.75377e-13, 0.000256566, 0.359382,
-     0.000163268, 0.0867508], rtol=1e-4)
+     0.000163268, 0.0867508], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -237,7 +237,7 @@ end
     @test isfile("snpset.pval.txt")
     scorepvals = CSV.read("snpset.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(scorepvals, [0.06814002639277685, 0.5566664123188036, 
-    0.520381855174413, 0.07557764137466122, 0.5620803022597403], rtol=1e-4)
+    0.520381855174413, 0.07557764137466122, 0.5620803022597403], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -248,7 +248,7 @@ end
     @test isfile("snpset.pval.txt")
     lrtpvals = CSV.read("snpset.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(lrtpvals, [0.09069975735216675, 0.6465153355309161, 
-    0.6307411986741357, 0.06275888993714969, 0.50252192003468], rtol=1e-4)
+    0.6307411986741357, 0.06275888993714969, 0.50252192003468], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -256,7 +256,7 @@ end
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         test = :score, snpset = bgensnpsetfile, analysistype = "snpset")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.013317595, 0.454769036], rtol = 1e-4)
+    @test isapprox(scorepvals, [0.013317595, 0.454769036], rtol = 1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -264,7 +264,7 @@ end
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         test = :lrt, snpset = bgensnpsetfile, analysistype = "snpset")
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.08986309, 0.4688198], rtol = 1e-4)
+    @test isapprox(scorepvals, [0.08986309, 0.4688198], rtol = 1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -277,7 +277,7 @@ end
     scorepvals = open("snpset.pval.txt")
     scorepval = split(readline(scorepvals))[end]
     close(scorepvals)
-    @test isapprox(parse(Float64, scorepval), 0.3647126536663949, rtol=1e-4)
+    @test isapprox(parse(Float64, scorepval), 0.3647126536663949, rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
     #lrt 
@@ -288,7 +288,7 @@ end
     lrtpvals = open("snpset.pval.txt")
     lrtpval = split(readline(lrtpvals))[end]
     close(lrtpvals)
-    @test isapprox(parse(Float64, lrtpval), 7.525696044086955e-15, rtol=1e-4)
+    @test isapprox(parse(Float64, lrtpval), 7.525696044086955e-15, rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -301,7 +301,7 @@ end
     scorepvals = open("snpset.pval.txt")
     scorepval = split(readline(scorepvals))[end]
     close(scorepvals)
-    @test isapprox(parse(Float64, scorepval), 0.0965927460813927, rtol=1e-4)
+    @test isapprox(parse(Float64, scorepval), 0.0965927460813927, rtol=1e-2)
 
     ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile; geneticformat = "VCF", 
         vcftype = :DS, pvalfile = "snpset.pval.txt",
@@ -309,7 +309,7 @@ end
     lrtpvals = open("snpset.pval.txt")
     lrtpval = split(readline(lrtpvals))[end]
     close(lrtpvals)
-    @test isapprox(parse(Float64, lrtpval), 0.0732485446883825, rtol=1e-4)
+    @test isapprox(parse(Float64, lrtpval), 0.0732485446883825, rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("snpset.pval.txt", force=true)
 
@@ -319,7 +319,7 @@ end
     scorepvals = open("ordinalgwas.pval.txt")
     scorepval = split(readline(scorepvals))[end]
     close(scorepvals)
-    @test isapprox(parse(Float64, scorepval), 4.422683e-8, rtol=1e-4)
+    @test isapprox(parse(Float64, scorepval), 4.422683e-8, rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -328,7 +328,7 @@ end
     scorepvals = open("ordinalgwas.pval.txt")
     scorepval = split(readline(scorepvals))[end]
     close(scorepvals)
-    @test isapprox(parse(Float64, scorepval), 2.853246e-8, rtol=1e-4)
+    @test isapprox(parse(Float64, scorepval), 2.853246e-8, rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -339,7 +339,7 @@ end
     @test isfile("gxe_snp.pval.txt")
     scorepvals = CSV.read("gxe_snp.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(scorepvals, [1.0, 0.637742242597749, 0.9667114198051628,
-    0.26352674694121003, 0.7811133315582837], rtol=1e-4)
+    0.26352674694121003, 0.7811133315582837], rtol=1e-2)
     rm("gxe_snp.pval.txt", force=true)
 
     ordinalgwas(@formula(trait ~ sex), covfile, plkfile, e = "sex", pvalfile = "gxe_snp.pval.txt",
@@ -347,7 +347,7 @@ end
     @test isfile("gxe_snp.pval.txt")
     lrtpvals = CSV.read("gxe_snp.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(lrtpvals, [1.0, 0.6279730133445315, 0.9671662821946985,
-    0.26693502209463904, 0.7810214899265426], rtol=1e-4)
+    0.26693502209463904, 0.7810214899265426], rtol=1e-2)
     rm("gxe_snp.pval.txt", force=true)
 
     # VCF
@@ -356,7 +356,7 @@ end
         snpinds=1:5, test=:score, analysistype = "gxe")
     scorepvals = CSV.read("gxe_snp.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(scorepvals, [0.45861769035708144, 1.0, 0.03804677528312195,
-     0.18254151103030725, 0.34454453512541156], rtol=1e-4)
+     0.18254151103030725, 0.34454453512541156], rtol=1e-2)
     rm("gxe_snp.pval.txt", force=true)
 
     ordinalgwas(@formula(y ~ sex), vcfcovfile, vcffile, e = :sex; geneticformat = "VCF", 
@@ -365,7 +365,7 @@ end
     @test isfile("gxe_snp.pval.txt")
     lrtpvals = CSV.read("gxe_snp.pval.txt", DataFrame)[!, end][1:5]
     @test isapprox(lrtpvals, [0.526667096902957, 1.0, 0.008073040021982156, 
-    0.10590569987122991, 0.3557829099471382], rtol=1e-4)
+    0.10590569987122991, 0.3557829099471382], rtol=1e-2)
     rm("gxe_snp.pval.txt", force=true)
 
     # BGEN
@@ -376,7 +376,7 @@ end
         0.92019145
         0.8975205
         0.4947529
-        0.4947529], rtol=1e-4)
+        0.4947529], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -387,7 +387,7 @@ end
         0.9207400
         0.8981011
         0.4947914
-        0.4947914], rtol=1e-4)
+        0.4947914], rtol=1e-2)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end
@@ -414,7 +414,7 @@ end
         @test isfile(pvalfile)
         if chr == 1
             pvals_chr1 = CSV.read(pvalfile, DataFrame)[!, end][1:5]
-            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
+            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-2)    
         end
         rm(plinkfile * ".pval.txt", force=true)
     end
@@ -426,7 +426,7 @@ end
         @test isfile(pvalfile)
         if chr == 1
             pvals_chr1 = CSV.read(pvalfile, DataFrame)[!, end][1:5]
-            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
+            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-2)    
         end
         rm(pvalfile, force=true)
     end
@@ -439,7 +439,7 @@ end
         @test isfile(pvalfile)
         if chr == 1
             pvals_chr1 = CSV.read(pvalfile, DataFrame)[!, end][1:5]
-            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-4)    
+            @test isapprox(pvals_chr1, [1.0, 4.56531284e-3, 3.10828383e-5, 1.21686724e-5, 8.20686005e-3], rtol=1e-2)    
         end
         rm(pvalfile, force=true)
     end

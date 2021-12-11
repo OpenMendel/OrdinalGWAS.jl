@@ -1,3 +1,9 @@
+const default_solver = NLopt.Optimizer()
+MOI.set(default_solver, 
+    MOI.RawOptimizerAttribute("algorithm"), :LD_SLSQP)
+MOI.set(default_solver, 
+    MOI.RawOptimizerAttribute("max_iter"), 4000)
+
 """
     ordinalgwas(nullformula, covfile, geneticfile; kwargs...)
     ordinalgwas(nullformula, df, geneticfile; kwargs...)
@@ -42,9 +48,9 @@
 - `snpmodel`: `ADDITIVE_MODEL` (default), `DOMINANT_MODEL`, or `RECESSIVE_MODEL`.
 - `snpinds::Union{Nothing,AbstractVector{<:Integer}}`: SNP indices for bed/vcf file.
 - `geneticrowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for bed/vcf file.
-- `solver`: an optimization solver supported by MathProgBase. Default is 
-    `NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000)`. Another common choice is 
-    `IpoptSolver(print_level=0)`.
+- `solver`: an optimizer supported by MathOptInterface. Default is 
+    `NLopt.Optimizer()` with `algorithm=:LD_SLSQP` and `maxeval=4000`. Another common choice is 
+    `Ipopt.Optimizer()`.
 - `verbose::Bool`: default is `false`.
 - `snpset::Union{Nothing, Integer, AbstractString, AbstractVector{<:Integer}}`: Only include 
     if you are conducting a snpset analysis. An integer indicates a window of SNPs 
@@ -87,7 +93,6 @@ The following is an example of GxE GWAS testing the interaction effect:
 ordinalgwas(@formula(trait ~ sex), covfile, plkfile;
     analysistype = "gxe", e = :sex)
 ```
-
 """
 function ordinalgwas(
     # positional arguments
@@ -102,7 +107,7 @@ function ordinalgwas(
     covdf = SnpArrays.makestream(covfile) do io
         CSV.read(io, DataFrame; types=covtype)
     end
-    ordinalgwas(nullformula, covrowinds == nothing ? covdf : covdf[covrowinds, :], 
+    ordinalgwas(nullformula, covrowinds === nothing ? covdf : covdf[covrowinds, :], 
         geneticfile; kwargs...)
 end
 
@@ -112,7 +117,7 @@ function ordinalgwas(
     geneticfile::Union{Nothing, AbstractString} = nothing;
     nullfile::Union{AbstractString, IOStream} = "ordinalgwas.null.txt",
     link::GLM.Link = LogitLink(),
-    solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
+    solver::MOI.AbstractOptimizer = default_solver,
     verbose::Bool = false,
     kwargs...
     )
@@ -122,7 +127,7 @@ function ordinalgwas(
     SnpArrays.makestream(nullfile, "w") do io
         show(io, nm)
     end
-    geneticfile == nothing && (return nm)
+    geneticfile === nothing && (return nm)
     ordinalgwas(nm, geneticfile; solver=solver, verbose=verbose, kwargs...)
 end
 
@@ -140,7 +145,7 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     geneticrowinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
-    solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
+    solver::MOI.AbstractOptimizer = default_solver,
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
@@ -155,7 +160,7 @@ function ordinalgwas(
             bedfile = geneticfile * ".bed"
         else
             fmt = findfirst(isfile, geneticfile * ".bed." .* SnpArrays.ALLOWED_FORMAT)
-            fmt == nothing && throw(ArgumentError("bed file not found"))
+            fmt === nothing && throw(ArgumentError("bed file not found"))
             bedfile = geneticfile * ".bed." * SnpArrays.ALLOWED_FORMAT[fmt]
         end
         famfile = replace(bedfile, ".bed" => ".fam")
@@ -170,7 +175,7 @@ function ordinalgwas(
             vcffile = geneticfile * ".vcf"
         else
             fmt = findfirst(isfile, geneticfile * ".vcf." .* SnpArrays.ALLOWED_FORMAT)
-            fmt == nothing && throw(ArgumentError("VCF file not found"))
+            fmt === nothing && throw(ArgumentError("VCF file not found"))
             vcffile = geneticfile * ".vcf." * SnpArrays.ALLOWED_FORMAT[fmt]
         end
         bedn = VCFTools.nsamples(vcffile)
@@ -179,13 +184,13 @@ function ordinalgwas(
             bgenfile = geneticfile * ".bgen"
         else
             fmt = findfirst(isfile, geneticfile * ".bgen." .* SnpArrays.ALLOWED_FORMAT)
-            fmt == nothing && throw(ArgumentError("BGEN file not found"))
+            fmt === nothing && throw(ArgumentError("BGEN file not found"))
             bgenfile = geneticfile * ".bgen." * SnpArrays.ALLOWED_FORMAT[fmt]
         end
         b = Bgen(bgenfile)
         bedn = n_samples(b)
     end
-    if geneticrowinds == nothing
+    if geneticrowinds === nothing
         nbedrows = bedn
         rowinds = 1:bedn
     else
@@ -256,7 +261,7 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     bedrowinds::AbstractVector{<:Integer} = 1:bedn, # row indices for SnpArray
-    solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
+    solver::MOI.AbstractOptimizer = default_solver,
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
@@ -268,7 +273,7 @@ function ordinalgwas(
     mafs = SnpArrays.maf(genomat)
 
     # create SNP mask vector
-    if snpinds == nothing
+    if snpinds === nothing
         snpmask = trues(SnpArrays.makestream(countlines, bimfile))
     elseif eltype(snpinds) == Bool
         snpmask = snpinds
@@ -631,7 +636,7 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     vcfrowinds::AbstractVector{<:Integer} = 1:nsamples, # row indices for VCF array
-    solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
+    solver::MOI.AbstractOptimizer = default_solver,
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
@@ -647,7 +652,7 @@ function ordinalgwas(
     snpmodel = modelingdict[snpmodel]
 
     # create SNP mask vector
-    if snpinds == nothing
+    if snpinds === nothing
         snpmask = trues(nsnps)
     elseif eltype(snpinds) == Bool
         snpmask = snpinds
@@ -1052,7 +1057,7 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     bgenrowinds::AbstractVector{<:Integer} = 1:nsamples, # row indices for VCF array
-    solver = NLoptSolver(algorithm=:LD_SLSQP, maxeval=4000),
+    solver::MOI.AbstractOptimizer = default_solver,
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
@@ -1072,7 +1077,7 @@ function ordinalgwas(
     bgenrowmask_UInt16[bgenrowinds] .= 1 
 
     # create SNP mask vector
-    if snpinds == nothing
+    if snpinds === nothing
         snpmask = trues(nsnps)
     elseif eltype(snpinds) == Bool
         snpmask = snpinds
