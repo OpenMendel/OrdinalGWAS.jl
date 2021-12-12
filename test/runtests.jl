@@ -26,7 +26,7 @@ const bgensnpsetfile = datadir * "/bgen_snpsetfile.txt"
         vcftype = :DS, geneticrowinds = 1:190, snpinds = [86; 656], 
     test = :score, covrowinds = 1:190)
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.00762272, 0.000668338], rtol=1e-2)
+    @test isapprox(scorepvals, [0.00762272, 0.000668338], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 
@@ -34,7 +34,7 @@ const bgensnpsetfile = datadir * "/bgen_snpsetfile.txt"
     ordinalgwas(@formula(y ~ sex), bgencovfile, bgenfile; geneticformat = "BGEN",  
         test = :score)
     scorepvals = CSV.read("ordinalgwas.pval.txt", DataFrame)[!, end][1:2]
-    @test isapprox(scorepvals, [0.12449778, 0.00055727], rtol=1e-2)
+    @test isapprox(scorepvals, [0.12449778, 0.00055727], rtol=1e-4)
     rm("ordinalgwas.null.txt", force=true)
     rm("ordinalgwas.pval.txt", force=true)
 end

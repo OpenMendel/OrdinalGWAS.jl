@@ -1,8 +1,10 @@
-const default_solver = NLopt.Optimizer()
-MOI.set(default_solver, 
-    MOI.RawOptimizerAttribute("algorithm"), :LD_SLSQP)
-MOI.set(default_solver, 
-    MOI.RawOptimizerAttribute("max_iter"), 4000)
+function config_solver(solver::MathOptInterface.AbstractOptimizer,
+    solver_config::Dict)
+    for (k, v) in solver_config
+        MOI.set(solver, 
+            MOI.RawOptimizerAttribute(k), v)
+    end
+end
 
 """
     ordinalgwas(nullformula, covfile, geneticfile; kwargs...)
@@ -117,7 +119,8 @@ function ordinalgwas(
     geneticfile::Union{Nothing, AbstractString} = nothing;
     nullfile::Union{AbstractString, IOStream} = "ordinalgwas.null.txt",
     link::GLM.Link = LogitLink(),
-    solver::MOI.AbstractOptimizer = default_solver,
+    solver::MOI.AbstractOptimizer = NLopt.Optimizer(),
+    solver_config = Dict("algorithm" => :LD_SLSQP, "max_iter" => 4000),
     verbose::Bool = false,
     kwargs...
     )
@@ -128,7 +131,8 @@ function ordinalgwas(
         show(io, nm)
     end
     geneticfile === nothing && (return nm)
-    ordinalgwas(nm, geneticfile; solver=solver, verbose=verbose, kwargs...)
+    ordinalgwas(nm, geneticfile; solver=solver, 
+        solver_config=solver_config, verbose=verbose, kwargs...)
 end
 
 function ordinalgwas(
@@ -145,13 +149,13 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     geneticrowinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
-    solver::MOI.AbstractOptimizer = default_solver,
+    solver::MOI.AbstractOptimizer = NLopt.Optimizer(),
+    solver_config = Dict("algorithm" => :LD_SLSQP, "max_iter" => 4000),
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
     e::Union{Nothing, AbstractString, Symbol} = nothing # for GxE analysis
     )
-
     # locate plink bed, fam, bim files or VCF file
     lowercase(geneticformat) in ["plink", "vcf", "bgen"] || error("`geneticformat` $geneticformat not valid. Please use 'VCF' or 'PLINK'.")
     isplink = "plink" == lowercase(geneticformat)
@@ -215,7 +219,8 @@ function ordinalgwas(
             snpmodel = snpmodel, 
             snpinds = snpinds, 
             bedrowinds = rowinds, 
-            solver = solver, 
+            solver = solver,
+            solver_config = solver_config, 
             verbose = verbose,
             snpset = snpset,
             e = e)
@@ -229,6 +234,7 @@ function ordinalgwas(
             snpinds = snpinds, 
             vcfrowinds = rowinds, 
             solver = solver, 
+            solver_config = solver_config,
             verbose = verbose,
             snpset = snpset,
             e = e)
@@ -242,6 +248,7 @@ function ordinalgwas(
             snpinds = snpinds, 
             bgenrowinds = rowinds, 
             solver = solver, 
+            solver_config = solver_config,
             verbose = verbose,
             snpset = snpset,
             e = e)
@@ -261,12 +268,14 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     bedrowinds::AbstractVector{<:Integer} = 1:bedn, # row indices for SnpArray
-    solver::MOI.AbstractOptimizer = default_solver,
+    solver::MOI.AbstractOptimizer = NLopt.Optimizer(),
+    solver_config = Dict("algorithm" => :LD_SLSQP, "max_iter" => 4000),
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
     e::Union{Nothing, AbstractString, Symbol} = nothing # for GxE analysis
     )
+    config_solver(solver, solver_config)
     # create SnpArray
     genomat = SnpArrays.SnpArray(bedfile, bedn)
     cc = SnpArrays.counts(genomat, dims=1) # column counts of genomat
@@ -636,13 +645,14 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     vcfrowinds::AbstractVector{<:Integer} = 1:nsamples, # row indices for VCF array
-    solver::MOI.AbstractOptimizer = default_solver,
+    solver::MOI.AbstractOptimizer = NLopt.Optimizer(),
+    solver_config = Dict("algorithm" => :LD_SLSQP, "max_iter" => 4000),
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
     e::Union{Nothing, AbstractString, Symbol} = nothing # for GxE analysis
     )
-
+    config_solver(solver, solver_config)
     # get number of SNPs in file
     nsnps = nrecords(vcffile)
     # these are currently only based on genotype data -- not dosage. Comment out.
@@ -1057,13 +1067,14 @@ function ordinalgwas(
     snpmodel::Union{Val{1}, Val{2}, Val{3}} = ADDITIVE_MODEL,
     snpinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     bgenrowinds::AbstractVector{<:Integer} = 1:nsamples, # row indices for VCF array
-    solver::MOI.AbstractOptimizer = default_solver,
+    solver::MOI.AbstractOptimizer = NLopt.Optimizer(),
+    solver_config = Dict("algorithm" => :LD_SLSQP, "max_iter" => 4000),
     verbose::Bool = false,
     snpset::Union{Nothing, Integer, AbstractString, #for snpset analysis
         AbstractVector{<:Integer}} = nothing,
     e::Union{Nothing, AbstractString, Symbol} = nothing # for GxE analysis
     )
-
+    config_solver(solver, solver_config)
     # open BGEN file and get number of SNPs in file
     bgendata = Bgen(bgenfile)
     nsnps = n_variants(bgendata)
