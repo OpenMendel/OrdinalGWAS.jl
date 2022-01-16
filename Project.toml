@@ -20,7 +20,7 @@ VariantCallFormat = "28eba6e3-a997-4ad9-87c6-d933b8bca6c1"
 
 [compat]
 BGEN = "0.1.2"
-CSV = "0.8, 0.9"
+CSV = "0.8, 0.9, 0.10"
 DataFrames = "0.21, 0.22, 1"
 Distributions = "0.22 - 0.25"
 MathOptInterface = "0.10"
