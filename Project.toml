@@ -2,7 +2,7 @@ name = "OrdinalGWAS"
 uuid = "00428148-03d9-50ae-bfb7-4a690d5612f1"
 keywords = ["ordered multinomial model", "proportional odds model", "GWAS"]
 author = ["Hua Zhou <huazhou@ucla.edu>", "Chris German <germc3@ucla.edu>", "OpenMendel Team"]
-version = "0.6.0"
+version = "0.6.1"
 
 [deps]
 BGEN = "6db4b851-9beb-4b83-9d64-eb1cfb37721d"
@@ -20,10 +20,10 @@ VariantCallFormat = "28eba6e3-a997-4ad9-87c6-d933b8bca6c1"
 
 [compat]
 BGEN = "0.1.2"
-CSV = "0.8, 0.9"
+CSV = "0.8, 0.9, 0.10"
 DataFrames = "0.21, 0.22, 1"
 Distributions = "0.22 - 0.25"
-MathOptInterface = "0.10"
+MathOptInterface = "0.10, 1"
 OrdinalMultinomialModels = "0.4.1"
 Reexport = "1"
 SnpArrays = "0.3.3"
