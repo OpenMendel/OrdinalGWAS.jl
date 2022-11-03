@@ -22,14 +22,14 @@ Pkg.add("OrdinalGWAS")
 versioninfo()
 ```
 
-    Julia Version 1.6.2
-    Commit 1b93d53fc4 (2021-07-14 15:36 UTC)
+    Julia Version 1.7.1
+    Commit ac5cc99908 (2021-12-22 19:35 UTC)
     Platform Info:
-      OS: macOS (x86_64-apple-darwin18.7.0)
+      OS: macOS (x86_64-apple-darwin19.5.0)
       CPU: Intel(R) Core(TM) i7-7820HQ CPU @ 2.90GHz
       WORD_SIZE: 64
       LIBM: libopenlibm
-      LLVM: libLLVM-11.0.1 (ORCJIT, skylake)
+      LLVM: libLLVM-12.0.1 (ORCJIT, skylake)
 
 
 
@@ -37,6 +37,17 @@ versioninfo()
 # for use in this tutorial
 using BenchmarkTools, CSV, Glob, SnpArrays, OrdinalGWAS, DataFrames
 ```
+
+    ┌ Info: Precompiling BenchmarkTools [6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf]
+    └ @ Base loading.jl:1423
+    ┌ Info: Precompiling CSV [336ed68f-0bac-5ca0-87d4-7b16caf5d00b]
+    └ @ Base loading.jl:1423
+    ┌ Info: Precompiling SnpArrays [4e780e97-f5bf-4111-9dc4-b70aaf691b06]
+    └ @ Base loading.jl:1423
+    [36m[1m[ [22m[39m[36m[1mInfo: [22m[39mCompiling VCF parser...
+    ┌ Info: Precompiling OrdinalGWAS [00428148-03d9-50ae-bfb7-4a690d5612f1]
+    └ @ Base loading.jl:1423
+
 
 ## Example data sets
 
@@ -51,7 +62,7 @@ const datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
 
 
 
-    "/Users/xyz/.julia/dev/OrdinalGWAS/data/"
+    "/Users/kose/.julia/dev/OrdinalGWAS/data/"
 
 
 
@@ -65,22 +76,22 @@ readdir(glob"*.*", datadir)
 
 
     16-element Vector{String}:
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/bgen_ex.csv"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/bgen_snpsetfile.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/bgen_test.bgen"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/bgen_test.bgen.bgi"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/covariate.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.map"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap_snpsetfile.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/simtrait.jl"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/simtrait_bgen.jl"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/simtrait_vcf.jl"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/snpsetfile_vcf.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/vcf_example.csv"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/vcf_test.vcf.gz"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/bgen_ex.csv"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/bgen_snpsetfile.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/bgen_test.bgen"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/bgen_test.bgen.bgi"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/covariate.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.map"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap_snpsetfile.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/simtrait.jl"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/simtrait_bgen.jl"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/simtrait_vcf.jl"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/snpsetfile_vcf.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/vcf_example.csv"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/vcf_test.vcf.gz"
 
 
 
@@ -116,6 +127,31 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
     intercept3|4   0.429815   0.339642   1.26549    0.2066
     sex            0.424656   0.213914   1.98517    0.0480
     ──────────────────────────────────────────────────────
+
+
+
+If you do not have any other covariates, you can specify the right-hand side of the formula as `0`. For example:
+
+
+```julia
+ordinalgwas(@formula(trait ~ 0), datadir * "covariate.txt", datadir * "hapmap3")
+```
+
+
+
+
+    StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
+    
+    trait ~ 0
+    
+    Coefficients:
+    ───────────────────────────────────────────────────────
+                   Estimate  Std.Error    t value  Pr(>|t|)
+    ───────────────────────────────────────────────────────
+    intercept1|2  -2.1112     0.178982  -11.7956     <1e-26
+    intercept2|3  -1.2        0.131718   -9.11035    <1e-17
+    intercept3|4  -0.210729   0.111728   -1.88609    0.0602
+    ───────────────────────────────────────────────────────
 
 
 
@@ -176,10 +212,10 @@ readdir(glob"hapmap3.*", datadir)
 
 
     4-element Vector{String}:
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.map"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.map"
 
 
 
@@ -234,17 +270,16 @@ run(`cat ordinalgwas.null.txt`);
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
     
-    trait ~ sex
+    trait ~ 0
     
     Coefficients:
-    ──────────────────────────────────────────────────────
-                   Estimate  Std.Error   t value  Pr(>|t|)
-    ──────────────────────────────────────────────────────
-    intercept1|2  -1.48564    0.358891  -4.13952    <1e-04
-    intercept2|3  -0.569479   0.341044  -1.66981    0.0959
-    intercept3|4   0.429815   0.339642   1.26549    0.2066
-    sex            0.424656   0.213914   1.98517    0.0480
-    ──────────────────────────────────────────────────────
+    ───────────────────────────────────────────────────────
+                   Estimate  Std.Error    t value  Pr(>|t|)
+    ───────────────────────────────────────────────────────
+    intercept1|2  -2.1112     0.178982  -11.7956     <1e-26
+    intercept2|3  -1.2        0.131718   -9.11035    <1e-17
+    intercept3|4  -0.210729   0.111728   -1.88609    0.0602
+    ───────────────────────────────────────────────────────
 
 * `ordinalgwas.pval.txt` tallies the SNPs and their pvalues. 
 
@@ -255,14 +290,14 @@ run(`head ordinalgwas.pval.txt`);
 
     chr,pos,snpid,maf,hwepval,pval
     1,554484,rs10458597,0.0,1.0,1.0
-    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.004565312839535881
-    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,3.108283828553597e-5
-    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,1.2168672367654906e-5
-    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.008206860046174836
+    1,758311,rs12562034,0.07763975155279501,0.4098763332666681,0.004918111393760363
+    1,967643,rs2710875,0.32407407407407407,4.076249100705747e-7,2.873976267701535e-5
+    1,1168108,rs11260566,0.19158878504672894,0.1285682279446898,8.839965152336459e-6
+    1,1375074,rs1312568,0.441358024691358,2.5376019650614977e-19,0.010123141132845563
     1,1588771,rs35154105,0.0,1.0,1.0
-    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5111981332534471
-    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.29972829571847304
-    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.17133312458049288
+    1,1789051,rs16824508,0.00462962962962965,0.9332783156468178,0.5146026416188009
+    1,1990452,rs2678939,0.4537037037037037,5.07695957708431e-11,0.22505726090414777
+    1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.18590541524018153
 
 
 Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
@@ -318,7 +353,7 @@ For this moderate-sized data set, `ordinalgwas` takes around 0.2 seconds.
 @btime(ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"));
 ```
 
-      201.823 ms (500794 allocations: 49.17 MiB)
+      167.401 ms (486629 allocations: 44.74 MiB)
 
 
 
@@ -527,7 +562,7 @@ snpinds = maf(SnpArray(datadir * "hapmap3.bed")) .≥ 0.05
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
-      1.578096 seconds (3.07 M allocations: 198.051 MiB, 8.05% gc time, 86.59% compilation time)
+      1.080135 seconds (2.39 M allocations: 147.498 MiB, 8.99% gc time, 82.17% compilation time)
 
 
 
@@ -600,7 +635,7 @@ Because LRT fits the alternative model for each SNP, we also output the standard
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
-     21.716944 seconds (5.51 M allocations: 1.911 GiB, 1.72% gc time, 1.84% compilation time)
+     20.684400 seconds (5.69 M allocations: 1.857 GiB, 1.82% gc time, 1.31% compilation time)
 
 
 
@@ -662,7 +697,7 @@ For large data sets, a practical solution is to perform the score test first acr
     test=:score, pvalfile="score.pval.txt");
 ```
 
-      0.328529 seconds (500.80 k allocations: 49.171 MiB)
+      0.276010 seconds (486.63 k allocations: 44.736 MiB, 20.01% gc time)
 
 
 
@@ -716,7 +751,7 @@ scorepvals[tophits] # smallest 10 p-values
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
-      1.321790 seconds (1.91 M allocations: 114.008 MiB, 3.17% gc time, 95.63% compilation time)
+      0.882847 seconds (2.01 M allocations: 111.597 MiB, 3.12% gc time, 96.29% compilation time)
 
 
 
@@ -934,15 +969,15 @@ run(`head snpset.pval.txt`);
 ```
 
     snpsetid,nsnps,pval
-    gene1,93,1.7213394698790313e-5
-    gene2,93,0.03692497684163047
-    gene3,93,0.7478549371392569
-    gene4,92,0.02765079822347653
-    gene5,93,0.6119581594573154
-    gene6,93,0.029184642230066303
-    gene7,93,0.39160073488514746
-    gene8,93,0.12539574109853385
-    gene9,93,0.7085635621607591
+    gene1,93,1.721339469879094e-5
+    gene2,93,0.03692497684163164
+    gene3,93,0.7478549371392493
+    gene4,92,0.02765079822347538
+    gene5,93,0.6119581594572997
+    gene6,93,0.02918464223006533
+    gene7,93,0.3916007348851458
+    gene8,93,0.12539574109853738
+    gene9,93,0.708563562160767
 
 
 
@@ -1053,32 +1088,32 @@ readdir(glob"hapmap3.chr.*", datadir)
 
 
     75-element Vector{String}:
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.bed"
      ⋮
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.fam"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bed"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bim"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.fam"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bed"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.bim"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.fam"
 
 
 
@@ -1130,29 +1165,29 @@ readdir(glob"*.pval.txt", datadir)
 
 
     23-element Vector{String}:
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.14.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.15.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.16.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.17.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.18.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.19.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.2.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.20.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.21.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.22.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.23.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.3.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.4.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.5.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.pval.txt"
-     "/Users/xyz/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.1.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.10.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.11.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.12.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.13.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.14.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.15.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.16.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.17.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.18.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.19.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.2.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.20.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.21.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.22.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.23.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.3.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.4.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.5.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.6.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.7.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.8.pval.txt"
+     "/Users/kose/.julia/dev/OrdinalGWAS/data/hapmap3.chr.9.pval.txt"
 
 
 
