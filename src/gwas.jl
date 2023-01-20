@@ -1136,7 +1136,7 @@ function ordinalgwas(
         snponly = testformula.rhs == Term(:snp)
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,pval")
+                println(io, "chr,pos,snpid,varid,allele1,allele2,maf,hwepval,infoscore,pval")
                 ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
             else 
                 nulldev = deviance(fittednullmodel.model)
@@ -1144,10 +1144,10 @@ function ordinalgwas(
                 q = size(Z, 2)
                 γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
                 if snponly
-                    println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,",
+                    println(io, "chr,pos,snpid,varid,allele1,allele2,maf,hwepval,",
                     "infoscore,effect,stder,pval")
                 else
-                    print(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,")
+                    print(io, "chr,pos,snpid,varid,allele1,allele2,maf,hwepval,infoscore,")
                     for j in 1:q
                         print(io, "effect$j,")
                     end
@@ -1431,9 +1431,9 @@ function ordinalgwas(
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,snpeffectnull,pval")
+                println(io, "chr,pos,snpid,varid,allele1,allele2,maf,hwepval,infoscore,snpeffectnull,pval")
             else 
-                println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,",
+                println(io, "chr,pos,snpid,varid,allele1,allele2,maf,hwepval,infoscore,",
                     "snpeffectnull,snpeffectfull,GxEeffect,pval")
             end
             for (j, variant) in enumerate(bgen_iterator)
