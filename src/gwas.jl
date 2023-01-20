@@ -310,7 +310,7 @@ function ordinalgwas(
         Z = similar(modelmatrix(testformula, testdf))
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score
-                println(io, "chr,pos,snpid,maf,hwepval,pval")
+                println(io, "chr,pos,snpid,allele1,allele2,maf,hwepval,pval")
                 ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
             else # lrt 
                 nulldev = deviance(fittednullmodel.model)
@@ -318,9 +318,9 @@ function ordinalgwas(
                 q = size(Z, 2)
                 γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
                 if snponly
-                    println(io, "chr,pos,snpid,maf,hwepval,effect,stder,pval")
+                    println(io, "chr,pos,snpid,allele1,allele2,maf,hwepval,effect,stder,pval")
                 else
-                    print(io, "chr,pos,snpid,maf,hwepval,")
+                    print(io, "chr,pos,snpid,allele1,allele2,maf,hwepval,")
                     for j in 1:q
                         print(io, "effect$j,")
                     end
@@ -349,6 +349,7 @@ function ordinalgwas(
                             pval = polrtest(ts)
                         end
                         println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),",
+                            "$(snpj[5]),$(snpj[6]),",
                             "$maf,$hwepval,$pval")
                     elseif test == :lrt
                         if maf == 0 # mono-allelic
@@ -373,10 +374,10 @@ function ordinalgwas(
                             stderr = stderror(altmodel)[fittednullmodel.model.npar + 1]
                         end
                         if snponly
-                            println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$hwepval,",
+                            println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(snpj[5]),$(snpj[6]),$maf,$hwepval,",
                                 "$(γ̂[1]),$stderr,$pval")
                         else
-                            print(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,$hwepval,")
+                            print(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(snpj[5]),$(snpj[6]),$maf,$hwepval,")
                             for j in 1:q
                                 print(io, "$(γ̂[j]),")
                             end
@@ -565,10 +566,10 @@ function ordinalgwas(
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,maf,hwepval,snpeffectnull,pval")
+                println(io, "chr,pos,snpid,allele1,allele2,maf,hwepval,snpeffectnull,pval")
             else 
                 γ̂ = 0.0 # effect size for columns being tested
-                println(io, "chr,pos,snpid,maf,hwepval,snpeffectnull,snpeffectfull,GxEeffect,pval")
+                println(io, "chr,pos,snpid,allele1,allele2,maf,hwepval,snpeffectnull,snpeffectfull,GxEeffect,pval")
             end
             SnpArrays.makestream(bimfile) do bimio
                 for j in eachindex(snpmask)
@@ -621,11 +622,11 @@ function ordinalgwas(
                         end
                     end
                     if test == :score
-                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,",
-                        "$hwepval,$snpeffectnull,$pval")
+                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(snpj[5]),$(snpj[6]),",
+                        "$maf,$hwepval,$snpeffectnull,$pval")
                     else
-                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$maf,",
-                        "$hwepval,$snpeffectnull,$snpeffectfull,$γ̂,$pval")
+                        println(io, "$(snpj[1]),$(snpj[4]),$(snpj[2]),$(snpj[5]),$(snpj[6]),",
+                        "$maf,$hwepval,$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                     end
                 end
             end
@@ -691,13 +692,15 @@ function ordinalgwas(
         rec_chr = Array{Any, 1}(undef, 1)
         rec_pos = Array{Any, 1}(undef, 1)
         rec_ids = Array{Any, 1}(undef, 1)
+        rec_ref = Array{Any, 1}(undef, 1)
+        rec_alt = Array{Any, 1}(undef, 1)
         gholder = zeros(Union{Missing, Float64}, nsamples)
 
         # carry out score or LRT test SNP by SNP
         snponly = testformula.rhs == Term(:snp)
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,pval")
+                println(io, "chr,pos,snpid,ref,alt,pval")
                 ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
             else 
                 nulldev = deviance(fittednullmodel.model)
@@ -705,9 +708,9 @@ function ordinalgwas(
                 q = size(Z, 2)
                 γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
                 if snponly
-                    println(io, "chr,pos,snpid,effect,stder,pval")
+                    println(io, "chr,pos,snpid,ref,alt,effect,stder,pval")
                 else
-                    print(io, "chr,pos,snpid,")
+                    print(io, "chr,pos,snpid,ref,alt,")
                     for j in 1:q
                         print(io, "effect$j,")
                     end
@@ -717,15 +720,18 @@ function ordinalgwas(
             for j in eachindex(snpmask)
                 if !snpmask[j] #skip snp, must read marker still. 
                     copy_gt!(gholder, reader; model = snpmodel, impute = true,
-                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
+                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids,
+                    record_ref = rec_ref, record_alt = rec_alt)
                     continue
                 end
                 if vcftype == :GT #genotype 
                     copy_gt!(gholder, reader; model = snpmodel, impute = true,
-                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
+                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids,
+                    record_ref = rec_ref, record_alt = rec_alt)
                 else #dosage
                     copy_ds!(gholder, reader; model = snpmodel, impute = true,
-                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
+                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids,
+                    record_ref = rec_ref, record_alt = rec_alt)
                 end
                 if test == :score
                     if snponly
@@ -740,6 +746,7 @@ function ordinalgwas(
                         pval = polrtest(ts)
                     end
                     println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                    "$(rec_ref[1]),$(rec_alt[1][1]),",
                     # "$(mafs[j]),$(hwes[j]),"
                     "$pval")
                 elseif test == :lrt 
@@ -763,10 +770,12 @@ function ordinalgwas(
                     end
                     if snponly
                         println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                        "$(rec_ref[1]),$(rec_alt[1][1]),",
                         # "$(mafs[j]),$(hwes[j]),",
                         "$(γ̂[1]),$stderr,$pval")
                     else
                         print(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                        "$(rec_ref[1]),$(rec_alt[1][1]),",
                         # "$(mafs[j]),$(hwes[j]),"
                         )
                         for j in 1:q
@@ -979,6 +988,8 @@ function ordinalgwas(
         rec_chr = Array{Any, 1}(undef, 1)
         rec_pos = Array{Any, 1}(undef, 1)
         rec_ids = Array{Any, 1}(undef, 1)
+        rec_ref = Array{Any, 1}(undef, 1)
+        rec_alt = Array{Any, 1}(undef, 1)
         gholder = zeros(Union{Missing, Float64}, nsamples)
         Xaug = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1))]
         Xaug2 = [fittednullmodel.model.X zeros(size(fittednullmodel.mm, 1), 2)] #or get Xaug to point to part of it
@@ -990,23 +1001,26 @@ function ordinalgwas(
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,snpeffectnull,pval")
+                println(io, "chr,pos,snpid,ref,alt,snpeffectnull,pval")
             else 
-                println(io, "chr,pos,snpid,snpeffectnull,",
+                println(io, "chr,pos,snpid,ref,alt,snpeffectnull,",
                 "snpeffectfull,GxEeffect,pval")
             end
             for j in eachindex(snpmask)
                 if !snpmask[j] #skip snp, must read marker still. 
                     copy_gt!(gholder, reader; model = snpmodel, impute = true,
-                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
+                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids,
+                    record_ref = rec_ref, record_alt = rec_alt)
                     continue
                 end
                 if vcftype == :GT #genotype 
                     copy_gt!(gholder, reader; model = snpmodel, impute = true,
-                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
+                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids,
+                    record_ref = rec_ref, record_alt = rec_alt)
                 else #dosage
                     copy_ds!(gholder, reader; model = snpmodel, impute = true,
-                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids)
+                    record_chr = rec_chr, record_pos = rec_pos, record_ids = rec_ids,
+                    record_ref = rec_ref, record_alt = rec_alt)
                 end
                 copyto!(@view(Xaug[:, end]), @view(gholder[vcfrowinds]))
                 zeromaf = var(@view(gholder[vcfrowinds])) == 0
@@ -1023,6 +1037,7 @@ function ordinalgwas(
                         pval = polrtest(ts)
                     end
                     println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                    "$(rec_ref[1]),$(rec_alt[1][1]),",
                     # "$(mafs[j]),$(hwes[j]),",
                     "$snpeffectnull,$pval")
                 elseif test == :lrt
@@ -1048,6 +1063,7 @@ function ordinalgwas(
                         pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
                     end
                     println(io, "$(rec_chr[1]),$(rec_pos[1]),$(rec_ids[1][1]),",
+                    "$(rec_ref[1]),$(rec_alt[1][1]),",
                         #"$(mafs[j]),$(hwes[j]),",
                         "$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                 end
@@ -1120,7 +1136,7 @@ function ordinalgwas(
         snponly = testformula.rhs == Term(:snp)
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,varid,maf,hwepval,infoscore,pval")
+                println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,pval")
                 ts = OrdinalMultinomialScoreTest(fittednullmodel.model, Z)
             else 
                 nulldev = deviance(fittednullmodel.model)
@@ -1128,10 +1144,10 @@ function ordinalgwas(
                 q = size(Z, 2)
                 γ̂ = Vector{Float64}(undef, q) # effect size for columns being tested
                 if snponly
-                    println(io, "chr,pos,snpid,varid,maf,hwepval,",
+                    println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,",
                     "infoscore,effect,stder,pval")
                 else
-                    print(io, "chr,pos,snpid,varid,maf,hwepval,infoscore,")
+                    print(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,")
                     for j in 1:q
                         print(io, "effect$j,")
                     end
@@ -1174,7 +1190,8 @@ function ordinalgwas(
                         pval = polrtest(ts)
                     end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                    "$(variant.varid),$(maf),$(hwepval),$(infoscore),",
+                    "$(variant.varid),$(variant.alleles[1]),$(variant.alleles[2]),",
+                    "$(maf),$(hwepval),$(infoscore),",
                     "$pval")
                 elseif test == :lrt 
                     if snponly
@@ -1197,11 +1214,13 @@ function ordinalgwas(
                     end
                     if snponly
                         println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                        "$(variant.varid),$(maf),$(hwepval),$(infoscore),",
+                        "$(variant.varid),$(variant.alleles[1]),$(variant.alleles[2]),",
+                        "$(maf),$(hwepval),$(infoscore),",
                         "$(γ̂[1]),$stderr,$pval")
                     else
                         print(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                        "$(variant.varid),$(maf),$(hwepval),$(infoscore),")
+                        "$(variant.varid),$(variant.alleles[1]),$(variant.alleles[2]),",
+                        "$(maf),$(hwepval),$(infoscore),")
                         for j in 1:q
                             print(io, "$(γ̂[j]),")
                         end
@@ -1412,9 +1431,9 @@ function ordinalgwas(
         snpeffectnull = 0.0
         SnpArrays.makestream(pvalfile, "w") do io
             if test == :score 
-                println(io, "chr,pos,snpid,varid,maf,hwepval,infoscore,snpeffectnull,pval")
+                println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,snpeffectnull,pval")
             else 
-                println(io, "chr,pos,snpid,varid,maf,hwepval,infoscore,",
+                println(io, "chr,pos,snpid,allele1,allele2,varid,maf,hwepval,infoscore,",
                     "snpeffectnull,snpeffectfull,GxEeffect,pval")
             end
             for (j, variant) in enumerate(bgen_iterator)
@@ -1453,7 +1472,8 @@ function ordinalgwas(
                         pval = polrtest(ts)
                     end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                    "$(variant.varid),$(maf),$(hwepval),$(infoscore),",
+                    "$(variant.varid),$(variant.alleles[1]),$(variant.alleles[2]),",
+                    "$(maf),$(hwepval),$(infoscore),",
                     "$snpeffectnull,$pval")
                 elseif test == :lrt
                     γ̂ = 0.0 # effect size for columns being tested
@@ -1478,7 +1498,8 @@ function ordinalgwas(
                         pval = ccdf(Chisq(1), nulldev - deviance(altmodel))
                     end
                     println(io, "$(variant.chrom),$(variant.pos),$(variant.rsid),",
-                        "$(variant.varid),$(maf),$(hwepval),$(infoscore),",
+                        "$(variant.varid),$(variant.alleles[1]),$(variant.alleles[2]),",
+                        "$(maf),$(hwepval),$(infoscore),",
                         "$snpeffectnull,$snpeffectfull,$γ̂,$pval")
                 end
             end
