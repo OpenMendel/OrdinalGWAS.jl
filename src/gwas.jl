@@ -50,6 +50,7 @@ end
 - `snpmodel`: `ADDITIVE_MODEL` (default), `DOMINANT_MODEL`, or `RECESSIVE_MODEL`.
 - `snpinds::Union{Nothing,AbstractVector{<:Integer}}`: SNP indices for bed/vcf file.
 - `geneticrowinds::Union{Nothing,AbstractVector{<:Integer}}`: sample indices for bed/vcf file.
+- `samplepath::Union{Nothing, AbstractString}`: path for BGEN sample file if it's not encoded in the BGEN file.
 - `solver`: an optimizer supported by MathOptInterface. Default is 
     `NLopt.Optimizer()` with `algorithm=:LD_SLSQP` and `maxeval=4000`. Another common choice is 
     `Ipopt.Optimizer()`.
@@ -143,6 +144,7 @@ function ordinalgwas(
     analysistype::AbstractString = "singlesnp",
     geneticformat::AbstractString = "PLINK",
     vcftype::Union{Symbol, Nothing} = nothing,
+    samplepath::Union{AbstractString, Nothing} = nothing,
     testformula::FormulaTerm = fittednullmodel.mf.f.lhs ~ Term(:snp),
     test::Symbol = :score,
     pvalfile::Union{AbstractString, IOStream} = "ordinalgwas.pval.txt",
@@ -191,7 +193,7 @@ function ordinalgwas(
             fmt === nothing && throw(ArgumentError("BGEN file not found"))
             bgenfile = geneticfile * ".bgen." * SnpArrays.ALLOWED_FORMAT[fmt]
         end
-        b = Bgen(bgenfile)
+        b = Bgen(bgenfile; sample_path=samplepath)
         bedn = n_samples(b)
     end
     if geneticrowinds === nothing
@@ -240,6 +242,7 @@ function ordinalgwas(
             e = e)
     else #bgen
         ordinalgwas(fittednullmodel, bgenfile, bedn; 
+            samplepath = samplepath,
             analysistype = analysistype,
             testformula = testformula, 
             test = test, 
@@ -1060,6 +1063,7 @@ function ordinalgwas(
     fittednullmodel::StatsModels.TableRegressionModel,
     bgenfile::Union{AbstractString, IOStream}, # full path and bgen file name
     nsamples::Integer;          # number of samples in bed file
+    samplepath::Union{AbstractString, Nothing} = nothing,
     analysistype::AbstractString = "singlesnp",
     testformula::FormulaTerm = fittednullmodel.mf.f.lhs ~ Term(:snp),
     test::Symbol = :score,
@@ -1076,7 +1080,7 @@ function ordinalgwas(
     )
     config_solver(solver, solver_config)
     # open BGEN file and get number of SNPs in file
-    bgendata = Bgen(bgenfile)
+    bgendata = Bgen(bgenfile; sample_path=samplepath)
     nsnps = n_variants(bgendata)
     bgen_iterator = iterator(bgendata)
 
