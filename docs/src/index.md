@@ -1,12 +1,12 @@
 # OrdinalGWAS.jl
 
-OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordred Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe). 
+OrdinalGWAS.jl is a Julia package for performing genome-wide association studies (GWAS) for ordered categorical phenotypes using [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) or [ordered Probit model](https://en.wikipedia.org/wiki/Ordered_probit). It is useful when the phenotype takes ordered discrete values, e.g., disease status (undiagnosed, pre-disease, mild, moderate, severe).
 
 The methods and applications of this software package are detailed in the following publication:
 
 *German CA, Sinsheimer JS, Klimentidis YC, Zhou H, Zhou JJ. (2020) Ordered multinomial regression for genetic association analysis of ordinal phenotypes at Biobank scale. Genetic Epidemiology. 44:248-260. [https://doi.org/10.1002/gepi.22276](https://doi.org/10.1002/gepi.22276)*
 
-OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format) (both dosage and genotype data) file formats, and [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) file formats. We plan to add [PGEN](https://www.cog-genomics.org/plink/2.0/formats#pgen) support in the future. 
+OrdinalGWAS.jl currently supports [PLINK](https://zzz.bwh.harvard.edu/plink/), [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format) (both dosage and genotype data) file formats, and [BGEN](https://www.well.ox.ac.uk/~gav/bgen_format/) file formats. We plan to add [PGEN](https://www.cog-genomics.org/plink/2.0/formats#pgen) support in the future.
 
 ## Installation
 
@@ -95,16 +95,16 @@ readdir(glob"*.*", datadir)
 
 
 
-The `hapmap3` files `covariate.txt` file correspond to data examples using PLINK formatted files (.bed, .bim, .fam). 
+The `hapmap3` files `covariate.txt` file correspond to data examples using PLINK formatted files (.bed, .bim, .fam).
 
-The `vcf_test.vcf.gz` and `vcf_example.csv` files are for an example analysis using VCF formatted files. 
+The `vcf_test.vcf.gz` and `vcf_example.csv` files are for an example analysis using VCF formatted files.
 
 
 ## Basic usage
 
 The following command performs GWAS using the [proportional odds model](https://en.wikipedia.org/wiki/Ordered_logit) for the hapmap3 PLINK files. The output is the fitted null model.
 
-The default type of GWAS performed is a single-snp significance genome-wide scan, this can be changed by the keyword `analysistype` (default is "singlesnp"). Other types of analyses are gone over later. 
+The default type of GWAS performed is a single-snp significance genome-wide scan, this can be changed by the keyword `analysistype` (default is "singlesnp"). Other types of analyses are gone over later.
 
 
 ```julia
@@ -115,9 +115,9 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -141,9 +141,9 @@ ordinalgwas(@formula(trait ~ 0), datadir * "covariate.txt", datadir * "hapmap3")
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ 0
-    
+
     Coefficients:
     ───────────────────────────────────────────────────────
                    Estimate  Std.Error    t value  Pr(>|t|)
@@ -195,13 +195,13 @@ OrdinalGWAS supports PLINK, VCF, and BGEN Files.
 
 - Genotype data is available as binary PLINK files.
 
-- OrdinalGWAS can use dosage or genotype data from VCF Files. 
+- OrdinalGWAS can use dosage or genotype data from VCF Files.
 
-- OrdinalGWAS can use dosage data from BGEN files.   
+- OrdinalGWAS can use dosage data from BGEN files.
 
 !!! note
 
-    By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later). Similarly, BGEN must be specified as the `geneticformat` if using a BGEN file. 
+    By default, OrdinalGWAS assumes a set of PLINK files will be used. When using a VCF File, VCF file and type of data (dosage, genotype) must be specified by the `geneticformat` and `vcftype` options (as shown later). Similarly, BGEN must be specified as the `geneticformat` if using a BGEN file.
 
 
 ```julia
@@ -259,9 +259,9 @@ SnpArrays.ALLOWED_FORMAT
 
 ### Output files
 
-`ordinalgwas` outputs two files: `ordinalgwas.null.txt` and `ordinalgwas.pval.txt`. 
+`ordinalgwas` outputs two files: `ordinalgwas.null.txt` and `ordinalgwas.pval.txt`.
 
-* `ordinalgwas.null.txt` lists the estimated null model (without SNPs). 
+* `ordinalgwas.null.txt` lists the estimated null model (without SNPs).
 
 
 ```julia
@@ -269,9 +269,9 @@ run(`cat ordinalgwas.null.txt`);
 ```
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ 0
-    
+
     Coefficients:
     ───────────────────────────────────────────────────────
                    Estimate  Std.Error    t value  Pr(>|t|)
@@ -281,7 +281,7 @@ run(`cat ordinalgwas.null.txt`);
     intercept3|4  -0.210729   0.111728   -1.88609    0.0602
     ───────────────────────────────────────────────────────
 
-* `ordinalgwas.pval.txt` tallies the SNPs and their pvalues. 
+* `ordinalgwas.pval.txt` tallies the SNPs and their pvalues.
 
 
 ```julia
@@ -300,7 +300,7 @@ run(`head ordinalgwas.pval.txt`);
     1,2194615,rs7553178,0.22685185185185186,0.17056143157457776,0.18590541524018153
 
 
-Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example, 
+Output file names can be changed by the `nullfile` and `pvalfile` keywords respectively. For example,
 ```julia
 ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     pvalfile="ordinalgwas.pval.txt.gz")
@@ -311,12 +311,12 @@ will output the p-value file in compressed gz format.
 
 Use the keyword `covrowinds` to specify selected samples in the covarite file. Use the keyword `geneticrowinds` to specify selected samples in the Plink bed file or VCF File. For example, to use the first 300 samples in both covariate and bed file:
 ```julia
-ordinalgwas(@formula(trait ~ sex), covfile, geneticfile, 
+ordinalgwas(@formula(trait ~ sex), covfile, geneticfile,
     covrowinds=1:300, geneticrowinds=1:300)
 ```
 !!! note
 
-    Users should always make sure that the selected samples in covariate file match exactly those in bed file. 
+    Users should always make sure that the selected samples in covariate file match exactly those in bed file.
 
 ### Input non-genetic data as DataFrame
 
@@ -326,7 +326,7 @@ ordinalgwas(@formula(trait ~ sex), df, geneticfile)
 ```
 !!! note
 
-    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file/VCF File/BGEN file. 
+    Users should always make sure that individuals in covariate file or DataFrame match those in Plink fam file/VCF File/BGEN file.
 
 For example, following code checks that the first 2 columns of the `covariate.txt` file match the first 2 columns of the `hapmap3.fam` file exactly.
 
@@ -369,13 +369,13 @@ By default, OrdinalGWAS.jl will assume you are using PLINK files. It also suppor
 * `geneticformat`: Choices are "VCF" or "PLINK". If you are using a VCF file, use `geneticformat = "VCF"`.
 * `vcftype`: Choices are :GT (for genotypes) or :DS (for dosages). This tells OrdinalGWAS which type of data to extract from the VCF file.
 
-Using a VCF File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages and MAF/HWE calculations via VCFTools does not currently support dosage data. 
+Using a VCF File does not output minor allele frequency or hardy weinberg equillibrium p-values for each SNP tested since they may be dosages and MAF/HWE calculations via VCFTools does not currently support dosage data.
 
-The following shows how to run an analysis with a VCF file using the dosage information. 
+The following shows how to run an analysis with a VCF file using the dosage information.
 
 
 ```julia
-ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv", 
+ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv",
     datadir * "vcf_test"; geneticformat = "VCF", vcftype = :DS)
 ```
 
@@ -383,9 +383,9 @@ ordinalgwas(@formula(y ~ sex), datadir * "vcf_example.csv",
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     y ~ sex
-    
+
     Coefficients:
     ───────────────────────────────────────────────────────
                    Estimate  Std.Error    t value  Pr(>|t|)
@@ -420,17 +420,17 @@ run(`head ordinalgwas.pval.txt`);
 By default, OrdinalGWAS.jl will assume you are using PLINK files. It also supports BGEN Files. To use BGEN files in any of the analysis options detailed in this documentation, you simply need to add the following keyword option to the `ordinalgwas` function:
 * `geneticformat`: Choices are "VCF" or "PLINK" or "BGEN". If you are using a BGEN file, use `geneticformat = "BGEN"`.
 
-Some features, such as SNP-set analyses, are only available currently when there's an indexing `.bgi` file available. 
+Some features, such as SNP-set analyses, are only available currently when there's an indexing `.bgi` file available.
 
 !!! note
 
-    BGEN files can contain an optional index file (`.bgi` file) that allows the variants to be specified in order of position. OrdinalGWAS will automatically look for a file in the same directory as the `BGENFILENAME` with the name `BGENFILENAME.bgi`. The BGEN file is read either in the `.bgi` file order if `BGENFILENAME.bgi` is supplied in the same directory as the BGEN file, otherwise it will use the order in the BGEN file. This is important in analyses specifying `snpinds` as well as annotation groupings. You must make sure this matches the way the BGEN file will be read in. 
+    BGEN files can contain an optional index file (`.bgi` file) that allows the variants to be specified in order of position. OrdinalGWAS will automatically look for a file in the same directory as the `BGENFILENAME` with the name `BGENFILENAME.bgi`. The BGEN file is read either in the `.bgi` file order if `BGENFILENAME.bgi` is supplied in the same directory as the BGEN file, otherwise it will use the order in the BGEN file. This is important in analyses specifying `snpinds` as well as annotation groupings. You must make sure this matches the way the BGEN file will be read in.
 
-The following shows how to run an analysis with a BGEN file using the dosage information. 
+The following shows how to run an analysis with a BGEN file using the dosage information.
 
 
 ```julia
-ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv", 
+ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv",
     datadir * "bgen_test"; geneticformat = "BGEN")
 ```
 
@@ -438,9 +438,9 @@ ordinalgwas(@formula(y ~ sex), datadir * "bgen_ex.csv",
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     y ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -472,17 +472,17 @@ run(`head ordinalgwas.pval.txt`);
 
 ## Link functions
 
-The `link` keyword argument of `ordinalgwas` can take value:  
-- `LogitLink()`, proportional odds model (default),  
-- `ProbitLink()`, ordred Probit model,  
-- `CloglogLink()`, proportional hazards model, or 
+The `link` keyword argument of `ordinalgwas` can take value:
+- `LogitLink()`, proportional odds model (default),
+- `ProbitLink()`, ordered Probit model,
+- `CloglogLink()`, proportional hazards model, or
 - `CauchyLink()`.
 
-For example, to perform GWAS using the ordred Probit model
+For example, to perform GWAS using the ordered Probit model
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     link=ProbitLink(), nullfile="opm.null.txt", pvalfile="opm.pval.txt")
 ```
 
@@ -490,9 +490,9 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, ProbitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -505,7 +505,7 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
 
-The estimates in null model and p-values are slightly different from those in proportional odds moodel.
+The estimates in null model and p-values are slightly different from those in proportional odds model.
 
 
 ```julia
@@ -534,22 +534,22 @@ rm("opm.pval.txt", force=true)
 
 Genotypes are translated into numeric values according to different genetic model, which is specified by the `snpmodel` keyword. Default is `ADDITIVE_MODEL`.
 
-| Genotype | `SnpArray` | `ADDITIVE_MODEL` | `DOMINANT_MODEL` | `RECESSIVE_MODEL` |    
-|:---:|:---:|:---:|:---:|:---:|  
-| A1,A1 | 0x00 | 0 | 0 | 0 |  
+| Genotype | `SnpArray` | `ADDITIVE_MODEL` | `DOMINANT_MODEL` | `RECESSIVE_MODEL` |
+|:---:|:---:|:---:|:---:|:---:|
+| A1,A1 | 0x00 | 0 | 0 | 0 |
 | missing | 0x01 | NaN | NaN | NaN |
-| A1,A2 | 0x02 | 1 | 1 | 0 |  
-| A2,A2 | 0x03 | 2 | 1 | 1 |  
+| A1,A2 | 0x02 | 1 | 1 | 0 |
+| A2,A2 | 0x03 | 2 | 1 | 1 |
 
 !!! note
 
-    `ordinalgwas` imputes missing genotypes according to minor allele frequencies. 
-    
+    `ordinalgwas` imputes missing genotypes according to minor allele frequencies.
+
 Users are advised to impute genotypes using more sophiscated methods before GWAS.
 
 ## SNP and/or sample masks
 
-In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `snpinds`, `covrowinds` and `geneticrowinds` keywords of `ordinalgwas` function. 
+In practice, we often perform GWAS on selected SNPs and/or selected samples. They can be specified by the `snpinds`, `covrowinds` and `geneticrowinds` keywords of `ordinalgwas` function.
 
 For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.05
 
@@ -558,7 +558,7 @@ For example, to perform GWAS on SNPs with minor allele frequency (MAF) above 0.0
 # create SNP mask
 snpinds = maf(SnpArray(datadir * "hapmap3.bed")) .≥ 0.05
 # GWAS on selected SNPs
-@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     snpinds=snpinds, nullfile="commonvariant.null.txt", pvalfile="commonvariant.pval.txt")
 ```
 
@@ -569,9 +569,9 @@ snpinds = maf(SnpArray(datadir * "hapmap3.bed")) .≥ 0.05
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -627,11 +627,11 @@ rm("commonvariant.pval.txt", force=true)
 
 By default, `ordinalgwas` calculates p-value for each SNP using score test. Score test is fast because it doesn't require fitting alternative model for each SNP. User can request likelihood ratio test (LRT) using keyword `test=:lrt`. LRT is much slower but may be more powerful than score test.
 
-Because LRT fits the alternative model for each SNP, we also output the standard error and estimated effect size of the SNP. 
+Because LRT fits the alternative model for each SNP, we also output the standard error and estimated effect size of the SNP.
 
 
 ```julia
-@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     test=:LRT, nullfile="lrt.null.txt", pvalfile="lrt.pval.txt")
 ```
 
@@ -642,9 +642,9 @@ Because LRT fits the alternative model for each SNP, we also output the standard
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -657,7 +657,7 @@ Because LRT fits the alternative model for each SNP, we also output the standard
 
 
 
-Note the extra `effect` and `stder` columns in pvalfile, which is the effect size (regression coefficient) and standard errors for each SNP. `-1` is reported when there is no variation in the SNP (0 MAF).  
+Note the extra `effect` and `stder` columns in pvalfile, which is the effect size (regression coefficient) and standard errors for each SNP. `-1` is reported when there is no variation in the SNP (0 MAF).
 
 
 ```julia
@@ -683,9 +683,9 @@ rm("lrt.pval.txt", force=true)
 rm("lrt.null.txt", force=true)
 ```
 
-In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes over 20 seconds. Over 100 fold difference in run time. 
+In this example, GWAS by score test takes less than 0.2 second, while GWAS by LRT takes over 20 seconds. Over 100 fold difference in run time.
 
-## Score test for screening, LRT for power 
+## Score test for screening, LRT for power
 
 For large data sets, a practical solution is to perform the score test first across all SNPs, then re-do LRT for the most promising SNPs according to score test p-values.
 
@@ -693,7 +693,7 @@ For large data sets, a practical solution is to perform the score test first acr
 
 
 ```julia
-@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     test=:score, pvalfile="score.pval.txt");
 ```
 
@@ -747,7 +747,7 @@ scorepvals[tophits] # smallest 10 p-values
 
 
 ```julia
-@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+@time ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     snpinds=tophits, test=:LRT, pvalfile="lrt.pval.txt");
 ```
 
@@ -782,15 +782,15 @@ rm("lrt.pval.txt", force=true)
 
 ## GxE or other interactions
 
-### Testing jointly G + GxE 
+### Testing jointly G + GxE
 
-In many applications, we want to test SNP effect and/or its interaction with other terms. `testformula` keyword specifies the test unit **besides** the covariates in `nullformula`. 
+In many applications, we want to test SNP effect and/or its interaction with other terms. `testformula` keyword specifies the test unit **besides** the covariates in `nullformula`.
 
 In following example, keyword `testformula=@formula(trait ~ snp + snp & sex)` instructs `ordinalgwas` to test joint effect of `snp` and `snp & sex` interaction.
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3", 
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3",
     pvalfile="GxE.pval.txt", testformula=@formula(trait ~ snp + snp & sex));
 ```
 
@@ -821,7 +821,7 @@ rm("GxE.pval.txt")
 ### Testing only GxE interaction term
 
 For some applications, the user may want to simply test the GxE interaction effect. This requires fitting the SNP in the null model and is much slower, but the command `ordinalgwas()` with keyword `analysistype = "gxe"` can be used test the interaction effect.
-The environmental variable must be specified in the command using the keyword argument `e`, either as a symbol, such as `:age` or as a string `"age"`. 
+The environmental variable must be specified in the command using the keyword argument `e`, either as a symbol, such as `:age` or as a string `"age"`.
 
 
 ```julia
@@ -833,9 +833,9 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -869,18 +869,18 @@ rm("gxe_snp.pval.txt", force=true)
 
 ## SNP-set testing
 
-In many applications, we want to test a SNP-set. The function with keyword `analysistype = "snpset"` can be used to do this. To specify the type of snpset test, use the `snpset` keyword argument. 
+In many applications, we want to test a SNP-set. The function with keyword `analysistype = "snpset"` can be used to do this. To specify the type of snpset test, use the `snpset` keyword argument.
 
 The snpset can be specified as either:
 - a window (test every X snps) => `snpset = X`
 - an annotated file.  This requires `snpset = filename` where filename is an input file, with no header and two columns separated by a space. The first column must contain the snpset ID and the second column must contain the snpid's (rsid) identical to the bimfile, or in the case of a BGEN format, the order the data will be read (see BGEN above for more details).
-- a joint test on only a specific set of snps. `snpset = AbstractVector` where the vector specifies the snps you want to perform one joint snpset test for. The vector can either be a vector of integers where the elements are the indicies of the SNPs to test, a vector of booleans, where true represents that you want to select that SNP index, or a range indicating the indicies of the SNPs to test. 
+- a joint test on only a specific set of snps. `snpset = AbstractVector` where the vector specifies the snps you want to perform one joint snpset test for. The vector can either be a vector of integers where the elements are the indicies of the SNPs to test, a vector of booleans, where true represents that you want to select that SNP index, or a range indicating the indicies of the SNPs to test.
 
-In following example, we perform a SNP-set test on the 50th to 55th snps. 
+In following example, we perform a SNP-set test on the 50th to 55th snps.
 
 
 ```julia
-ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3"; 
+ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3";
     analysistype = "snpset", pvalfile = "snpset.pval.txt", snpset = 50:55)
 ```
 
@@ -888,9 +888,9 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -940,7 +940,7 @@ run(`head $datadir/hapmap_snpsetfile.txt`);
 
 ```julia
 ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3";
-    analysistype = "snpset", pvalfile = "snpset.pval.txt", 
+    analysistype = "snpset", pvalfile = "snpset.pval.txt",
     snpset = datadir * "/hapmap_snpsetfile.txt")
 ```
 
@@ -948,9 +948,9 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -999,9 +999,9 @@ ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", datadir * "hapmap3
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -1064,10 +1064,10 @@ docker build -t ordinalgwas-app ../docker/
 docker run -v /path/to/data:/data -t ordinalgwas-app julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", nullfile="/data/ordinalgwas.null.txt", pvalfile="/data/ordinalgwas");'
 ```
 
-Here  
-- `-t ordinalgwas-app` creates a container using the `ordinalgwas-app` image build in step 2.  
-- `-v /path/to/data:/data` maps the `/path/to/data` folder on host machine to the `/data` folder within the container. 
-- `julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", nullfile="/data/ordinalgwas.null.txt", pvalfile="/data/ordinalgwas");` calls Julia and runs `ordinalgwas` function. 
+Here
+- `-t ordinalgwas-app` creates a container using the `ordinalgwas-app` image build in step 2.
+- `-v /path/to/data:/data` maps the `/path/to/data` folder on host machine to the `/data` folder within the container.
+- `julia -e 'using OrdinalGWAS; ordinalgwas(@formula(trait ~ sex), "/data/covariate.txt", "/data/hapmap3", nullfile="/data/ordinalgwas.null.txt", pvalfile="/data/ordinalgwas");` calls Julia and runs `ordinalgwas` function.
 
 The output files are written in `/path/to/data` directory.
 
@@ -1128,9 +1128,9 @@ nm = ordinalgwas(@formula(trait ~ sex), datadir * "covariate.txt", nothing)
 
 
     StatsModels.TableRegressionModel{OrdinalMultinomialModel{Int64, Float64, LogitLink}, Matrix{Float64}}
-    
+
     trait ~ sex
-    
+
     Coefficients:
     ──────────────────────────────────────────────────────
                    Estimate  Std.Error   t value  Pr(>|t|)
@@ -1150,7 +1150,7 @@ Step 2: GWAS for each chromosome.
 # this part can be submitted as separate jobs
 for chr in 1:23
     plinkfile = datadir * "hapmap3.chr." * string(chr)
-    pvalfile = plinkfile * ".pval.txt" 
+    pvalfile = plinkfile * ".pval.txt"
     ordinalgwas(nm, plinkfile, pvalfile=pvalfile)
 end
 ```
@@ -1191,7 +1191,7 @@ readdir(glob"*.pval.txt", datadir)
 
 
 
-In the rare situations where the multiple sets of Plink files lack the `fam` file or the corresponding bed and bim files have different filenames, users can explicitly supply bed filename, bim file name, and number of individuals. Replace Step 2 by 
+In the rare situations where the multiple sets of Plink files lack the `fam` file or the corresponding bed and bim files have different filenames, users can explicitly supply bed filename, bim file name, and number of individuals. Replace Step 2 by
 
 Step 2': GWAS for each chromosome.
 
@@ -1240,7 +1240,7 @@ run(`cat $datadir/../docs/cluster_preparedata.jl`);
 
     #!/usr/local/bin/julia
     #
-    # This script prepares a data set in current folder. 
+    # This script prepares a data set in current folder.
     # For each of chromosome 1-23, there is a set gzipped Plink files:
     # hapmap3.chr.1.bed.gz, hapmap3.chr.1.bim.gz, hapmap3.chr.1.fam.gz
     # hapmap3.chr.2.bed.gz, hapmap3.chr.2.bim.gz, hapmap3.chr.2.fam.gz
@@ -1248,7 +1248,7 @@ run(`cat $datadir/../docs/cluster_preparedata.jl`);
     # hapmap3.chr.23.bed.gz, hapmap3.chr.23.bim.gz, hapmap3.chr.23.fam.gz
     # There is also a csv file "covariate.txt" that contains trait and covariates.
     #
-    
+
     # install and load Julia packages
     using Pkg
     if haskey(Pkg.installed(), "SnpArrays")
@@ -1267,7 +1267,7 @@ run(`cat $datadir/../docs/cluster_preparedata.jl`);
         Pkg.add(PackageSpec(url="https://github.com/OpenMendel/OrdinalGWAS.jl.git"))
     end
     using OrdinalMultinomialModels, OrdinalGWAS, SnpArrays
-    
+
     # split hapmap3 data according to chromosome
     datadir = normpath(joinpath(dirname(pathof(OrdinalGWAS)), "../data/"))
     SnpArrays.split_plink(datadir * "hapmap3", :chromosome; prefix = "hapmap3.chr.")
@@ -1304,15 +1304,15 @@ run(`cat $datadir/../docs/cluster_run.jl`);
     # Plink files on UCLA Hoffman2 cluster. It assumes that a demo data is available by
     # running `julia cluster_preparedata.jl` at current folder.
     #
-    
+
     using OrdinalGWAS, Serialization
-    
+
     # Step 1: fit null model and save result to file `fittednullmodel.jls`
     nm = ordinalgwas(@formula(trait ~ sex), "covariate.txt", nothing)
     open("fittednullmodel.jls", "w") do io
         Serialization.serialize(io, nm)
     end
-    
+
     # Step 2: GWAS for each chromosome
     for chr in 1:23
         println("submit job for chromosome=$chr")
@@ -1352,6 +1352,6 @@ run(`cat $datadir/../docs/cluster_run.jl`);
 
 The ordered multinomial model used in this package is a cumulative logit model where one effect size is estimated for each covariate. Using the logit link yields the commonly used proportional odds model which assumes the proportional odds assumption holds for your data/model. The proportional odds assumption assumes that the effect of a covariate $\boldsymbol{\beta}$ is constant across different groupings of the ordinal outcome i.e.
 
-The SNP's effect (on the odds ratio) is the same for the odds ratio of mild vs {medium, severe} as it is for the odds ratio of {mild, medium} vs severe. 
+The SNP's effect (on the odds ratio) is the same for the odds ratio of mild vs {medium, severe} as it is for the odds ratio of {mild, medium} vs severe.
 
-The consequences/neccesity of this assumption has been thoroughly discussed, as an example see [this blog post](https://www.fharrell.com/post/po/). In simualtions, we did not find violation of this to increase type I error. As stated in the post, when the assumption is violated (meaning there are different effect sizes for different groupings), the estimated effect size is like a weighted average of the different effect sizes. Formal tests for proportional odds are likely to reject the assumption for large n (see p. 306, Categorical Data Analysis 3rd edition by Agresti). Violation of this assumption means the effect size $\boldsymbol{\beta}$ differs across outcome strata, but should not imply a significant finding is not significant.
+The consequences/neccesity of this assumption has been thoroughly discussed, as an example see [this blog post](https://www.fharrell.com/post/po/). In simulations, we did not find violation of this to increase type I error. As stated in the post, when the assumption is violated (meaning there are different effect sizes for different groupings), the estimated effect size is like a weighted average of the different effect sizes. Formal tests for proportional odds are likely to reject the assumption for large n (see p. 306, Categorical Data Analysis 3rd edition by Agresti). Violation of this assumption means the effect size $\boldsymbol{\beta}$ differs across outcome strata, but should not imply a significant finding is not significant.
